@@ -1,9 +1,11 @@
-var express = require('express');
-var router = express.Router();
+var express = require('express'),
+    router = express.Router(),
+    mongoose = require('mongoose'),
+    owner = mongoose.model('owner');
 
-/* GET users listing. */
+/* Owner routes */
 router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
+  res.send('Respond with owner stuff');
 });
 
 module.exports = router;

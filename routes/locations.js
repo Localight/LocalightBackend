@@ -1,9 +1,11 @@
-var express = require('express');
-var router = express.Router();
+var express = require('express'),
+    router = express.Router(),
+    mongoose = require('mongoose'),
+    location = mongoose.model('location');
 
-/* GET users listing. */
+/* Location routes */
 router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
+  res.send('Respond with location stuff');
 });
 
 module.exports = router;
