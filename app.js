@@ -7,6 +7,18 @@ var bodyParser = require('body-parser');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
+var owners = require('./routes/owners');
+var locations = require('./routes/locations');
+var giftcards = require('./routes/giftcards');
+
+//Database
+var mongo = require('mongodb');
+var db = require('./models/db');
+var users = require('./models/users');
+var giftcards = require('./models/giftcards');
+var locations = require('./models/locations');
+var owners = require('./models/owners');
+var sessions = require('./models/sessions');
 
 var app = express();
 
@@ -24,6 +36,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/users', users);
+app.use('/locations', locations);
+app.use('/owners', owners);
+app.use('/giftcards', giftcards);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
