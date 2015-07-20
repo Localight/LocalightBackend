@@ -7,16 +7,9 @@ var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
 var UserSchema = new Schema({
-    
-   firstName:{
-     type: String,
-     trim: true,
-     default: '',
-   },
-   lastName:{
+   name:{
      type:String,
-     trime:true,
-     default:''
+     require:'please enter a name for the user.'
    },
    email:{
      type:String,
@@ -38,7 +31,7 @@ var UserSchema = new Schema({
   salt:{
    type:String
    },
-  create:{
+  created:{
     type:Date,
     default:Date.now
   }
