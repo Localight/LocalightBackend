@@ -3,6 +3,7 @@
  *  Module Dependices
  */
 var express = require('express'),
+    errorHandler = require('../services/errHandler'),
     router = express.Router(),
     mongoose = require('mongoose'),
     GiftCard = mongoose.model('GiftCard');
@@ -23,10 +24,12 @@ router.post('/giftcards', function(req, res, next) {
    giftcard.save(function(err){
       if(err){
          return res.status(400).send({
-
-         })
+            message: errorHandler.getErrorMessage(err)
+         });
+      } else{
+         res.json(giftcard);
       }
-   })
+   });
 
   res.send('Respond with giftcard stuff');
 });
