@@ -35,5 +35,7 @@ var UserSchema = new Schema({
     type:Date,
     default:Date.now
   }
+  updated:{
+    type:Date
 });
 mongoose.model('User', UserSchema);
