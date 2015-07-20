@@ -1,3 +1,5 @@
+'use strict';
+
 var mongoose = require('mongoose');
 var location = new mongoose.Schema({
     //schema data
