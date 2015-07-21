@@ -3,22 +3,22 @@ var express = require('express'),
     mongoose = require('mongoose'),
     user = mongoose.model('user');
 
-/* Join a user */
+/* User Join */
 router.post('/join', function(req, res, next) {
   //Logic goes here
 });
 
-/* login a user */
+/* User Login */
 router.post('/login', function(req, res, next) {
   //Logic goes here
 });
 
-/* signup a user through twilio */
+/* User Join Through Twilio */
 router.post('/twilio', function(req, res, next) {
   //Logic goes here
 });
 
-/* reset a user */
+/* Reset Password */
 router.post('/reset', function(req, res, next) {
   //Logic goes here
 });
@@ -28,12 +28,12 @@ router.get('/:id', function(req, res, next) {
   //Logic goes here
 });
 
-/* update a user */
+/* Update a user */
 router.put('/:id', function(req, res, next) {
   //Logic goes here
 });
 
-/* remove a user */
+/* Delete a user */
 router.delete('/:id', function(req, res, next) {
   //Logic goes here
 });
