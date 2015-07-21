@@ -3,9 +3,19 @@ var express = require('express'),
     mongoose = require('mongoose'),
     giftcard = mongoose.model('giftcard');
 
-/* Giftcard routes. */
+/* Create a giftcard */
+router.post('/', function(req, res, next) {
+  //Logic goes here
+});
+
+/* Get a giftcard */
 router.get('/', function(req, res, next) {
-  res.send('Respond with giftcard stuff');
+  //Logic goes here
+});
+
+/* Update a giftcard */
+router.put('/:id', function(req, res, next) {
+  //Logic goes here
 });
 
 module.exports = router;
