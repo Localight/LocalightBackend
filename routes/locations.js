@@ -4,32 +4,32 @@ var express = require('express'),
     location = mongoose.model('location');
 
 /* Create a Location */
-router.post('/locations', function(req, res, next) {
+router.post('/', function(req, res, next) {
   //Logic goes here
 });
 
 /* Update a Location */
-router.put('/locations', function(req, res, next) {
+router.put('/', function(req, res, next) {
   //Logic goes here
 });
 
 /* Get a Location */
-router.get('/locations', function(req, res, next) {
+router.get('/', function(req, res, next) {
   //Logic goes here
 });
 
 /* Delete a Location */
-router.delete('/locations', function(req, res, next) {
+router.delete('/', function(req, res, next) {
   //Logic goes here
 });
 
 /* Get a Location by id */
-router.get('/locations/:id', function(req, res, next) {
+router.get('/:id', function(req, res, next) {
   //Logic goes here
 });
 
 /* Make a purchase at a location */
-router.post('/locations/spend', function(req, res, next) {
+router.post('/spend', function(req, res, next) {
   //Logic goes here
 });
 
