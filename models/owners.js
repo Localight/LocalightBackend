@@ -21,8 +21,8 @@ var owner = new mongoose.Schema({
         require: 'Please provde the salt for the owner'
     },
     created: {
-        type:Date,
-        default:Date.now
+        type: Date,
+        default: Date.now
     },
     updated: {
         type: Date,
