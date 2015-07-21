@@ -39,3 +39,4 @@ var locationsSchema = new Schema({
   //NOTE: for business to be more precise later on consider added in geo location, around here somewhere.
 });
 
+mongoose.model('location', location);
