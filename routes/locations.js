@@ -8,18 +8,8 @@ router.post('/', function(req, res, next) {
   //Logic goes here
 });
 
-/* Update a Location */
-router.put('/', function(req, res, next) {
-  //Logic goes here
-});
-
-/* Get a Location */
+/* Get all Locations */
 router.get('/', function(req, res, next) {
-  //Logic goes here
-});
-
-/* Delete a Location */
-router.delete('/', function(req, res, next) {
   //Logic goes here
 });
 
@@ -28,8 +18,18 @@ router.get('/:id', function(req, res, next) {
   //Logic goes here
 });
 
+/* Update a Location */
+router.put('/:id', function(req, res, next) {
+  //Logic goes here
+});
+
+/* Delete a Location */
+router.delete('/:id', function(req, res, next) {
+  //Logic goes here
+});
+
 /* Make a purchase at a location */
-router.post('/spend', function(req, res, next) {
+router.post('/:id/spend', function(req, res, next) {
   //Logic goes here
 });
 
