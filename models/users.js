@@ -1,12 +1,6 @@
 'use strict';
-
-/**
- * Module Dependencies
- */
-var mongoose = require('mongoose'),
-    Schema = mongoose.Schema;
-
-var User = new Schema({
+var mongoose = require('mongoose');
+var User = new mongoose.Schema({
    name:{
      type:String,
      require:'please enter a name for the user.'
