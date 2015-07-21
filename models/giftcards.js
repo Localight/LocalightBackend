@@ -9,7 +9,7 @@ var mongoose = require('mongoose'),
 /**
  * GiftCard Schema
  */
-var GiftCardSchema = new Schema({
+var Giftcard = new Schema({
    amount: {
       type:Number,
       min: 0,
@@ -43,4 +43,4 @@ var GiftCardSchema = new Schema({
    },
 });
 
-mongoose.model('GiftCard', GiftCardSchema);
+mongoose.model('Giftcard', Giftcard);

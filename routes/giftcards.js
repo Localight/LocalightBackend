@@ -1,7 +1,7 @@
 var express = require('express'),
     router = express.Router(),
     mongoose = require('mongoose'),
-    giftcard = mongoose.model('giftcard');
+    Giftcard = mongoose.model('Giftcard');
 
 /* Create a giftcard */
 router.post('/', function(req, res, next) {

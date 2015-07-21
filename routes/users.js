@@ -1,7 +1,7 @@
 var express = require('express'),
     router = express.Router(),
     mongoose = require('mongoose'),
-    user = mongoose.model('user');
+    User = mongoose.model('User');
 
 /* User Join */
 router.post('/join', function(req, res, next) {

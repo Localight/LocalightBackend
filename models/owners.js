@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var owner = new mongoose.Schema({
+var Owner = new mongoose.Schema({
     name: {
         type: String,
         require: 'Please provide the name of the owner'
@@ -29,4 +29,4 @@ var owner = new mongoose.Schema({
     }
 });
 
-mongoose.model('owner', owner);
+mongoose.model('Owner', Owner);

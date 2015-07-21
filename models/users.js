@@ -6,7 +6,7 @@
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
-var UserSchema = new Schema({
+var User = new Schema({
    name:{
      type:String,
      require:'please enter a name for the user.'
@@ -38,4 +38,4 @@ var UserSchema = new Schema({
   updated:{
     type:Date
 });
-mongoose.model('User', UserSchema);
+mongoose.model('User', User);
