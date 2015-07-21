@@ -3,9 +3,34 @@ var express = require('express'),
     mongoose = require('mongoose'),
     owner = mongoose.model('owner');
 
-/* Owner routes */
-router.get('/', function(req, res, next) {
-  res.send('Respond with owner stuff');
+/* Owner Join */
+router.post('/join', function(req, res, next) {
+  //Logic goes here
+});
+
+/* Owner Login */
+router.post('/login', function(req, res, next) {
+  //Logic goes here
+});
+
+/* Reset Password */
+router.post('/reset', function(req, res, next) {
+  //Logic goes here
+});
+
+/* Get an Owner */
+router.get('/:id', function(req, res, next) {
+  //Logic goes here
+});
+
+/* Update an Owner */
+router.put('/:id', function(req, res, next) {
+  //Logic goes here
+});
+
+/* Remove an Owner */
+router.delete('/:id', function(req, res, next) {
+  //Logic goes here
 });
 
 module.exports = router;
