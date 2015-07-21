@@ -3,33 +3,33 @@ var express = require('express'),
     mongoose = require('mongoose'),
     owner = mongoose.model('owner');
 
-/* Join an Owner */
+/* Owner Join */
 router.post('/join', function(req, res, next) {
   //Logic goes here
 });
 
-/* Login an Owner */
+/* Owner Login */
 router.post('/login', function(req, res, next) {
   //Logic goes here
 });
 
-/* reset an Owner */
+/* Reset Password */
 router.post('/reset', function(req, res, next) {
   //Logic goes here
 });
 
 /* Get an Owner */
-router.get('/', function(req, res, next) {
+router.get('/:id', function(req, res, next) {
   //Logic goes here
 });
 
 /* Update an Owner */
-router.put('/', function(req, res, next) {
+router.put('/:id', function(req, res, next) {
   //Logic goes here
 });
 
 /* Remove an Owner */
-router.delete('/', function(req, res, next) {
+router.delete('/:id', function(req, res, next) {
   //Logic goes here
 });
 
