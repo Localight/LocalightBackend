@@ -1,15 +1,6 @@
 'use strict';
-/**
- * Module Dependencies
- */
-
-var mongoose = require('mongoose'),
-    Schema = mongoose.Schema;
-
-/**
- * GiftCard Schema
- */
-var Giftcard = new Schema({
+var mongoose = require('mongoose');
+var Giftcard = new mongoose.Schema({
    amount: {
       type:Number,
       min: 0,
