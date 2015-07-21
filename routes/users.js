@@ -24,17 +24,17 @@ router.post('/reset', function(req, res, next) {
 });
 
 /* Get a user */
-router.get('/', function(req, res, next) {
+router.get('/:id', function(req, res, next) {
   //Logic goes here
 });
 
 /* update a user */
-router.put('/', function(req, res, next) {
+router.put('/:id', function(req, res, next) {
   //Logic goes here
 });
 
 /* remove a user */
-router.delete('/', function(req, res, next) {
+router.delete('/:id', function(req, res, next) {
   //Logic goes here
 });
 
