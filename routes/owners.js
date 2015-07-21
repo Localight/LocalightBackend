@@ -4,32 +4,32 @@ var express = require('express'),
     owner = mongoose.model('owner');
 
 /* Join an Owner */
-router.post('/owners/join', function(req, res, next) {
+router.post('/join', function(req, res, next) {
   //Logic goes here
 });
 
 /* Login an Owner */
-router.post('/owners/login', function(req, res, next) {
+router.post('/login', function(req, res, next) {
   //Logic goes here
 });
 
 /* reset an Owner */
-router.post('/owners/reset', function(req, res, next) {
+router.post('/reset', function(req, res, next) {
   //Logic goes here
 });
 
 /* Get an Owner */
-router.get('/owners', function(req, res, next) {
+router.get('/', function(req, res, next) {
   //Logic goes here
 });
 
 /* Update an Owner */
-router.put('/owners', function(req, res, next) {
+router.put('/', function(req, res, next) {
   //Logic goes here
 });
 
 /* Remove an Owner */
-router.delete('/owners', function(req, res, next) {
+router.delete('/', function(req, res, next) {
   //Logic goes here
 });
 
