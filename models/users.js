@@ -28,8 +28,9 @@ var User = new mongoose.Schema({
   created:{
     type:Date,
     default:Date.now
-  }
+  },
   updated:{
     type:Date
+  }
 });
 mongoose.model('User', User);
