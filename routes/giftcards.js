@@ -74,8 +74,8 @@ router.post('/', function(req, res, next) {
             res.json({msg: "Error saving token to DB!",
                     errorid: "667", rawerr: err});
         } else {
-            //All good, give the user their token
-            res.json();
+            //All good, give basic response
+            res.json({msg: "Success!"});
         }
     });
 
