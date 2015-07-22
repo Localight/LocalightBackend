@@ -8,7 +8,7 @@ var express = require('express'),
 /* Create a giftcard */
 router.post('/', function(req, res, next) {
 
-    //Find a user with the username requested. Select salt and password
+    //Find a session with the specified session token. Get the account id.
     var accountId;
     Session.findOne({ token : req.body.sessionToken })
     .select('accountId')
@@ -24,7 +24,7 @@ router.post('/', function(req, res, next) {
         }
     });
 
-    //Find a user with the username requested. Select salt and password
+    //Find a user with the id requested. Get phone number.
     var toPhone;
     User.findOne({ _id : req.body.toId })
     .select('phone')
