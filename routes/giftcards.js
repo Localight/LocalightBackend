@@ -85,8 +85,13 @@ router.post('/', function(req, res, next) {
 
 });
 
-/* Get a giftcard */
+/* Get giftcards */
 router.get('/', function(req, res, next) {
+  //Logic goes here
+});
+
+/* Get a giftcard */
+router.get('/:id', function(req, res, next) {
   //Logic goes here
 });
 
