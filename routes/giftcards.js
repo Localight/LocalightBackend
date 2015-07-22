@@ -2,7 +2,8 @@ var express = require('express'),
     router = express.Router(),
     mongoose = require('mongoose'),
     Giftcard = mongoose.model('Giftcard')
-    Session = mongoose.model('Session');
+    Session = mongoose.model('Session')
+    User = mongoose.model('User');
 
 /* Create a giftcard */
 router.post('/', function(req, res, next) {
@@ -20,6 +21,22 @@ router.post('/', function(req, res, next) {
                   errorid: "34"});
         } else {
             accountId = session.accountId;
+        }
+    });
+
+    //Find a user with the username requested. Select salt and password
+    var toPhone;
+    User.findOne({ _id : req.body.toId })
+    .select('phone')
+    .exec(function(err, user) {
+        if(err){
+          return res.json({msg: "Couldn't search the database for user!",
+                  errorid: "774"});
+        } else if(!user){
+          return res.json({msg: "No user exists under that phone!",
+                  errorid: "13234"});
+        } else {
+            toPhone = user.phone;
         }
     });
 
