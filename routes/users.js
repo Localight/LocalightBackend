@@ -2,8 +2,8 @@ var express = require('express'),
     router = express.Router(),
     mongoose = require('mongoose'),
     crypto = require('crypto'),
-    User = mongoose.model('User'),
-    Session = mongoose.model('Session');
+    Session = mongoose.model('Session'),
+    User = mongoose.model('User');
 
 /* User Join */
 router.post('/join', function(req, res, next) {
@@ -109,7 +109,63 @@ router.post('/login', function(req, res, next) {
 
 /* User Join Through Twilio */
 router.post('/twilio', function(req, res, next) {
-  //Logic goes here
+    //Trim phone number
+    var phone = req.body.From.substring(2);
+    if(req.body.Body == "Gift"){
+        //Check if a user with that username already exists
+        User.findOne({ phone : phone })
+        .select('_id')
+        .exec(function(err, user) {
+            if(user){
+                //Create a random token
+                var token = crypto.randomBytes(48).toString('hex');
+                //New session!
+                new Session({
+                        user_id: user._id,
+                        token: token
+                    }).save(function(err){
+                        if(err){
+                            console.log("Error saving token to DB!");
+                            res.json({msg: "Error saving token to DB!",
+                                    errorid: "667", rawerr: err});
+                        } else {
+                            //All good, give the user their token
+                            res.send('<Response><Message>http://lbgift.com/#!/giftcards/create/' + token + '</Message></Response>');
+                        }
+                    });
+          } else {
+              //Create a new user with the assembled information
+              var user = new User({
+                  phone: phone
+              }).save(function(err, user){
+                  if(err){
+                      console.log("Error saving user to DB!");
+                      res.json({msg: "Error saving user to DB!",
+                              errorid: "666"});
+                  } else {
+                      //Create a random token
+                      var token = crypto.randomBytes(48).toString('hex');
+                      //New session!
+                      new Session(
+                          {
+                              accountId: user._id,
+                              type: 'user',
+                              token: token
+                          }).save(function(err){
+                              if(err){
+                                  console.log("Error saving token to DB!");
+                                  res.json({msg: "Error saving token to DB!",
+                                          errorid: "667", rawerr: err});
+                              } else {
+                                  //All good, give the user their token
+                                  res.send('<Response><Message>http://lbgift.com/#!/giftcards/create/' + token + '</Message></Response>');
+                              }
+                          });
+                  }
+              });
+          }
+        });
+    }
 });
 
 /* Reset Password */

@@ -2,8 +2,7 @@
 var mongoose = require('mongoose');
 var User = new mongoose.Schema({
    name:{
-     type:String,
-     require:'please enter a name for the user.'
+     type:String
    },
    email:{
      type:String,
