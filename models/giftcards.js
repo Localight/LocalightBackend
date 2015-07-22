@@ -23,15 +23,15 @@ var Giftcard = new mongoose.Schema({
       required: 'Please provide the stripeOrderId in the correct format.'
    }, // I should only get one stripeOrderId once
    fromId: {
-      type: Schema.ObjectId,
+      type: mongoose.Schema.ObjectId,
       ref: 'User',
       required: 'Please, enter the user id to send this giftcard too.'
    },
    toId: {
-      type: Schema.ObjectId,
+      type: mongoose.Schema.ObjectId,
       ref: 'User',
       required: 'Please, enter the user id who is sending the giftcard.'
-   },
+   }
 });
 
 mongoose.model('Giftcard', Giftcard);
