@@ -8,7 +8,7 @@ var Giftcard = new mongoose.Schema({
     toId: {
         type: String,
         required: 'Please, enter the user id who is sending the giftcard.'
-    }
+    },
     amount: {
         type: Number,
         min: 0,
@@ -17,7 +17,7 @@ var Giftcard = new mongoose.Schema({
     },
     iconId: {
         type: Number
-    }
+    },
     message: {
         type: String
             //TODO: create limit for how long text can be.
