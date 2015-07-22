@@ -3,4 +3,4 @@ var Location = new mongoose.Schema({
     //schema data
 });
 
-mongoose.model('Location', location);
+mongoose.model('Location', Location);
