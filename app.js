@@ -13,10 +13,7 @@ var giftcards = require('./routes/giftcards');
 
 //Database
 var mongo = require('mongodb');
-var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/localight');
-
-//Models
+var db = require('./models/db');
 var users = require('./models/users');
 var giftcards = require('./models/giftcards');
 var locations = require('./models/locations');
