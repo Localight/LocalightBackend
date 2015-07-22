@@ -67,7 +67,7 @@ router.post('/', function(req, res, next) {
         iconId: req.body.iconId,
         message: req.body.message,
         created: Date.now(),
-        stripeCardToken
+        stripeOrderId: charge.id
     }).save(function(err){
         if(err){
             console.log("Error saving token to DB!");
@@ -79,7 +79,9 @@ router.post('/', function(req, res, next) {
         }
     });
 
+    //Email receipt
 
+    //Send text to recipient
 
 });
 
