@@ -15,14 +15,18 @@ router.post('/join', function(req, res, next) {
               res.json({msg: "Username already exists!",
                       errorid: "22"});
           } else {
-              if(!req.body.password || !req.body.phone){
+              if(!req.body.phone){
                   res.json({msg: "You must provide a username and password!",
                           errorid: "994"});
               } else {
+                  var password = req.body.password;
+                  if(!req.body.password){
+                      password = "";
+                  }
                   //Create a random salt
                   var salt = crypto.randomBytes(128).toString('base64');
                   //Create a unique hash from the provided password and salt
-                  var hash = crypto.pbkdf2Sync(req.body.password, salt, 10000, 512);
+                  var hash = crypto.pbkdf2Sync(password, salt, 10000, 512);
                   //Create a new user with the assembled information
                   var user = new User({
                       name: req.body.name,
