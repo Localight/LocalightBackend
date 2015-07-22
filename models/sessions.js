@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var session = new mongoose.Schema({
+var Session = new mongoose.Schema({
     accountId: {
         type: String,
         require:'Please provide the id of the account'
@@ -14,4 +14,4 @@ var session = new mongoose.Schema({
     }
 });
 
-mongoose.model('session', session);
+mongoose.model('Session', Session);

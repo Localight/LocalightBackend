@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
-var location = new mongoose.Schema({
+var Location = new mongoose.Schema({
     //schema data
 });
 
-mongoose.model('location', location);
+mongoose.model('Location', Location);

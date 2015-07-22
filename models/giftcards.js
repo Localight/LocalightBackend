@@ -1,15 +1,6 @@
 'use strict';
-/**
- * Module Dependencies
- */
-
-var mongoose = require('mongoose'),
-    Schema = mongoose.Schema;
-
-/**
- * GiftCard Schema
- */
-var GiftCardSchema = new Schema({
+var mongoose = require('mongoose');
+var Giftcard = new mongoose.Schema({
    amount: {
       type:Number,
       min: 0,
@@ -32,15 +23,15 @@ var GiftCardSchema = new Schema({
       required: 'Please provide the stripeOrderId in the correct format.'
    }, // I should only get one stripeOrderId once
    fromId: {
-      type: Schema.ObjectId,
+      type: mongoose.Schema.ObjectId,
       ref: 'User',
       required: 'Please, enter the user id to send this giftcard too.'
    },
    toId: {
-      type: Schema.ObjectId,
+      type: mongoose.Schema.ObjectId,
       ref: 'User',
       required: 'Please, enter the user id who is sending the giftcard.'
-   },
+   }
 });
 
-mongoose.model('GiftCard', GiftCardSchema);
+mongoose.model('Giftcard', Giftcard);

@@ -1,7 +1,7 @@
 var express = require('express'),
     router = express.Router(),
     mongoose = require('mongoose'),
-    location = mongoose.model('location');
+    Location = mongoose.model('Location');
 
 /* Create a Location */
 router.post('/', function(req, res, next) {

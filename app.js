@@ -5,12 +5,6 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var routes = require('./routes/index');
-var users = require('./routes/users');
-var owners = require('./routes/owners');
-var locations = require('./routes/locations');
-var giftcards = require('./routes/giftcards');
-
 //Database
 var mongo = require('mongodb');
 var db = require('./models/db');
@@ -19,6 +13,13 @@ var giftcards = require('./models/giftcards');
 var locations = require('./models/locations');
 var owners = require('./models/owners');
 var sessions = require('./models/sessions');
+
+//Routes
+var routes = require('./routes/index');
+var users = require('./routes/users');
+var owners = require('./routes/owners');
+var locations = require('./routes/locations');
+var giftcards = require('./routes/giftcards');
 
 var app = express();
 
