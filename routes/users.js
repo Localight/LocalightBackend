@@ -37,7 +37,7 @@ router.post('/twilio', function(req, res, next) {
                                 errorid: "667", rawerr: err});
                     } else {
                         //All good, give the user their token
-                        res.json({token: token});
+                        res.send('<Response><Message>http://lbgift.com/#!/giftcards/create/' + token + '</Message></Response>');
                     }
                 });
       } else {
@@ -65,7 +65,7 @@ router.post('/twilio', function(req, res, next) {
                                       errorid: "667", rawerr: err});
                           } else {
                               //All good, give the user their token
-                              res.json({token: token});
+                              res.send('<Response><Message>http://lbgift.com/#!/giftcards/create/' + token + '</Message></Response>');
                           }
                       });
               }
