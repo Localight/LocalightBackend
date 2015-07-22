@@ -33,7 +33,7 @@ router.post('/', function(req, res, next) {
           return res.json({msg: "Couldn't search the database for user!",
                   errorid: "774"});
         } else if(!user){
-          return res.json({msg: "No user exists under that phone!",
+          return res.json({msg: "No user exists under that id!",
                   errorid: "13234"});
         } else {
             toPhone = user.phone;
@@ -57,6 +57,25 @@ router.post('/', function(req, res, next) {
         if (err && err.type === 'StripeCardError') {
             return res.json({msg: "Card was declined!",
                     errorid: "12122"});
+        }
+    });
+
+    new Giftcard({
+        fromId: accountId,
+        toId: req.body.toId,
+        amount: req.body.amount,
+        iconId: req.body.iconId,
+        message: req.body.message,
+        created: Date.now(),
+        stripeCardToken
+    }).save(function(err){
+        if(err){
+            console.log("Error saving token to DB!");
+            res.json({msg: "Error saving token to DB!",
+                    errorid: "667", rawerr: err});
+        } else {
+            //All good, give the user their token
+            res.json();
         }
     });
 
