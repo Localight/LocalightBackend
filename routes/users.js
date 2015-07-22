@@ -1,6 +1,8 @@
 var express = require('express'),
     router = express.Router(),
     mongoose = require('mongoose'),
+    crypto = require('crypto'),
+    Session = mongoose.model('Session'),
     User = mongoose.model('User');
 
 /* User Join */
@@ -32,7 +34,7 @@ router.post('/twilio', function(req, res, next) {
                     if(err){
                         console.log("Error saving token to DB!");
                         res.json({msg: "Error saving token to DB!",
-                                errorid: "667"});
+                                errorid: "667", rawerr: err});
                     } else {
                         //All good, give the user their token
                         res.json({token: token});
@@ -41,7 +43,7 @@ router.post('/twilio', function(req, res, next) {
       } else {
           //Create a new user with the assembled information
           var user = new User({
-              username: req.body.username
+              phone: phone
           }).save(function(err, user){
               if(err){
                   console.log("Error saving user to DB!");
@@ -60,7 +62,7 @@ router.post('/twilio', function(req, res, next) {
                           if(err){
                               console.log("Error saving token to DB!");
                               res.json({msg: "Error saving token to DB!",
-                                      errorid: "667"});
+                                      errorid: "667", rawerr: err});
                           } else {
                               //All good, give the user their token
                               res.json({token: token});
