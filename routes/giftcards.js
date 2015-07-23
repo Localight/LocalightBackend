@@ -24,7 +24,7 @@ router.post('/', function(req, res, next) {
 
             //Find a user with the id requested. Get phone number.
             var toPhone;
-            User.findOne({ _id: req.body.toId })
+            User.findById(req.body.toId)
             .select('phone')
             .exec(function(err, user) {
                 if(err){
