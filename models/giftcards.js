@@ -16,11 +16,11 @@ var Giftcard = new mongoose.Schema({
         required: 'amount between 0 and 50000'
     },
     iconId: {
-        type: Number
+        type: Number,
         required: 'iconId is required'
     },
     message: {
-        type: String
+        type: String,
         required: 'message is required'
     },
     stripeOrderId: {
