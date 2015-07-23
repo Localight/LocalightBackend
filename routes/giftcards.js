@@ -2,9 +2,10 @@ var express = require('express'),
     router = express.Router(),
     mongoose = require('mongoose'),
     config = require('../config/keys.json'),
+    stripe = require("stripe")(config.stripe.accountKey),
     client = require('twilio')(config.twilio.accountSid, config.twilio.authToken),
-    Giftcard = mongoose.model('Giftcard')
-    Session = mongoose.model('Session')
+    Giftcard = mongoose.model('Giftcard'),
+    Session = mongoose.model('Session'),
     User = mongoose.model('User');
 
 /* Create a giftcard */
@@ -40,18 +41,12 @@ router.post('/', function(req, res, next) {
 
                     if(!accountId ||
                     !req.body.toId ||
-                    !req.body.amount ||
+                    !req.body.amount || !(req.body.amount > 0) || !(req.body.amount < 50000) ||
                     !req.body.iconId ||
                     !req.body.message){
-                        return res.json({msg: "You must provide toId, amount, iconId and message."});
+                        return res.json({msg: "You must provide toId, 0<amount<50000, iconId and message."});
                     }
 
-
-                    // Set your secret key: remember to change this to your live secret key in production
-                    // See your keys here https://dashboard.stripe.com/account/apikeys
-                    var stripe = require("stripe")("sk_test_BQokikJOvBiI2HlWgH4olfQ2");
-
-                    // (Assuming you're using express - expressjs.com)
                     // Get the credit card details submitted by the form
                     var stripeCardToken = req.body.stripeCardToken;
 
