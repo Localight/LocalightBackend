@@ -71,8 +71,7 @@ router.post('/', function(req, res, next) {
                         stripeOrderId: charge.id
                     }).save(function(err){
                         if(err){
-                            console.log("Error saving token to DB!");
-                            res.json({msg: "Error saving token to DB!",
+                            res.json({msg: "Error saving giftcard to database!",
                                     errorid: "667", rawerr: err});
                         } else {
                             //All good, give basic response
