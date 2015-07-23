@@ -125,7 +125,8 @@ router.post('/twilio', function(req, res, next) {
                 var token = crypto.randomBytes(48).toString('hex');
                 //New session!
                 new Session({
-                        user_id: user._id,
+                        accountId: user._id,
+                        type: 'user',
                         token: token
                     }).save(function(err){
                         if(err){
