@@ -23,10 +23,7 @@ var Giftcard = new mongoose.Schema({
             //TODO: create limit for how long text can be.
     },
     stripeOrderId: {
-        type: String,
-        match: [/ch_[\w\d._%+-]+/, 'This value entered for the stripeId does not match ({VALUE})'],
-        //TODO: write regular expresion to match "ch_"[0-2](spaces) for the stripe id.
-        required: 'Please provide the stripeOrderId in the correct format.'
+        type: String
     }
 });
 
