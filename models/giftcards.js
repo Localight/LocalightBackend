@@ -3,24 +3,25 @@ var mongoose = require('mongoose');
 var Giftcard = new mongoose.Schema({
     fromId: {
         type: String,
-        required: 'Please, enter the user id to send this giftcard too.'
+        required: 'fromId is required'
     },
     toId: {
         type: String,
-        required: 'Please, enter the user id who is sending the giftcard.'
+        required: 'toId is required'
     },
     amount: {
         type: Number,
         min: 0,
         max: 50000,
-        required: 'Please enter an amount to purchase between 0 and 50000'
+        required: 'amount between 0 and 50000'
     },
     iconId: {
         type: Number
+        required: 'iconId is required'
     },
     message: {
         type: String
-            //TODO: create limit for how long text can be.
+        required: 'message is required'
     },
     stripeOrderId: {
         type: String
