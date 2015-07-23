@@ -1,6 +1,8 @@
 var express = require('express'),
     router = express.Router(),
     mongoose = require('mongoose'),
+    config = require('../config/keys.json'),
+    client = require('twilio')(config.twilio.accountSid, config.twilio.authToken),
     Giftcard = mongoose.model('Giftcard')
     Session = mongoose.model('Session')
     User = mongoose.model('User');
@@ -79,7 +81,13 @@ router.post('/', function(req, res, next) {
 
                             //Email receipt
 
-                            //Send text to recipient
+                            client.messages.create({
+                                body: "You have a new giftcard on lbgift.com! http://lbgift.com/giftcards/",
+                                to: "+1" + toPhone,
+                                from: "+15623208034"
+                            }, function(err, message) {
+                                process.stdout.write(message.sid);
+                            });
                         }
                     });
                 }
