@@ -82,11 +82,15 @@ router.post('/', function(req, res, next) {
                             //Email receipt
 
                             client.messages.create({
-                                body: "You have a new giftcard on lbgift.com! http://lbgift.com/giftcards/",
+                                body: "You have a new giftcard on lbgift! http://lbgift.com/giftcards/",
                                 to: "+1" + toPhone,
                                 from: "+15623208034"
                             }, function(err, message) {
-                                process.stdout.write(message.sid);
+                                if(err){
+                                    res.json(err);
+                                } else {
+                                    process.stdout.write(message.sid);
+                                }
                             });
                         }
                     });
