@@ -1,6 +1,6 @@
 var mongoose = require('mongoose'),
-    crypto = require('crypto');,
-Session = mongoose.model('Session');
+    crypto = require('crypto'),
+    Session = mongoose.model('Session');
 
 //Checks if a token exists, and returns the corrosponding accountId
 exports.validateSession = function(token, type, callback) {
