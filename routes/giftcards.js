@@ -121,7 +121,12 @@ router.get('/', function(req, res, next) {
             })
             .select('fromId amount iconId message')
             .exec(function(err, giftcards) {
-                res.json(giftcards);
+                if(err){
+                    return res.json({msg: "Couldn't search the database for session!",
+                            errorid: "779"});
+                } else {
+                    res.json(giftcards);
+                }
             });
         }
     });
