@@ -2,7 +2,7 @@ var express = require('express'),
     router = express.Router(),
     mongoose = require('mongoose'),
     crypto = require('crypto'),
-    Session = mongoose.model('Session'),
+    SessionService = require('../services/sessions.js'),
     User = mongoose.model('User');
 
 /* User Join */
@@ -40,23 +40,14 @@ router.post('/join', function(req, res, next) {
                           res.json({msg: "Error saving user to DB!",
                                   errorid: "666"});
                       } else {
-                          //Create a random token
-                          var token = crypto.randomBytes(48).toString('hex');
-                          //New session!
-                          new Session(
-                              {
-                                  accountId: user._id,
-                                  token: token
-                              }).save(function(err){
-                                  if(err){
-                                      console.log("Error saving token to DB!");
-                                      res.json({msg: "Error saving token to DB!",
-                                              errorid: "667"});
-                                  } else {
-                                      //All good, give the user their token
-                                      res.json({token: token});
-                                  }
-                              });
+                          SessionService.generateSession(user._id, "user", function(err, token){
+                              if(err){
+                                  res.json(err);
+                              } else {
+                                  //All good, give the user their token
+                                  res.json({token: token});
+                              }
+                          });
                       }
                   });
               }
@@ -68,7 +59,7 @@ router.post('/join', function(req, res, next) {
 router.post('/login', function(req, res, next) {
     //Find a user with the username requested. Select salt and password
       User.findOne({ phone : req.body.phone })
-      .select('password salt')
+      .select('password salt _id')
       .exec(function(err, user) {
           if(err){
               res.json({msg: "Couldn't search the database for user!",
@@ -85,23 +76,14 @@ router.post('/login', function(req, res, next) {
                   var hash = crypto.pbkdf2Sync(req.body.password, user.salt, 10000, 512);
                   //Compare to stored hash
                   if(hash == user.password){
-                      //Create a random token
-                      var token = crypto.randomBytes(48).toString('hex');
-                      //New session!
-                      new Session(
-                          {
-                              accountId: user._id,
-                              token: token
-                          }).save(function(err){
-                              if(err){
-                                  console.log("Error saving token to DB!");
-                                  res.json({msg: "Error saving token to DB!",
-                                          errorid: "667"});
-                              } else {
-                                  //All good, give the user their token
-                                  res.json({token: token});
-                              }
-                          });
+                      SessionService.generateSession(user._id, "user", function(err, token){
+                          if(err){
+                              res.json(err);
+                          } else {
+                              //All good, give the user their token
+                              res.json({token: token});
+                          }
+                      });
                   } else {
                       res.json({msg: "Password is incorrect!",
                               errorid: "32"});
@@ -121,23 +103,14 @@ router.post('/twilio', function(req, res, next) {
         .select('_id')
         .exec(function(err, user) {
             if(user){
-                //Create a random token
-                var token = crypto.randomBytes(48).toString('hex');
-                //New session!
-                new Session({
-                        accountId: user._id,
-                        type: 'user',
-                        token: token
-                    }).save(function(err){
-                        if(err){
-                            console.log("Error saving token to DB!");
-                            res.json({msg: "Error saving token to DB!",
-                                    errorid: "667", rawerr: err});
-                        } else {
-                            //All good, give the user their token
-                            res.send('<Response><Message>http://lbgift.com/#!/giftcards/create/' + token + '</Message></Response>');
-                        }
-                    });
+                SessionService.generateSession(user._id, "user", function(err, token){
+                    if(err){
+                        res.json(err);
+                    } else {
+                        //All good, give the user their token
+                        res.send('<Response><Message>http://lbgift.com/#!/giftcards/create/' + token + '</Message></Response>');
+                    }
+                });
           } else {
               //Create a new user with the assembled information
               var user = new User({
@@ -148,24 +121,14 @@ router.post('/twilio', function(req, res, next) {
                       res.json({msg: "Error saving user to DB!",
                               errorid: "666"});
                   } else {
-                      //Create a random token
-                      var token = crypto.randomBytes(48).toString('hex');
-                      //New session!
-                      new Session(
-                          {
-                              accountId: user._id,
-                              type: 'user',
-                              token: token
-                          }).save(function(err){
-                              if(err){
-                                  console.log("Error saving token to DB!");
-                                  res.json({msg: "Error saving token to DB!",
-                                          errorid: "667", rawerr: err});
-                              } else {
-                                  //All good, give the user their token
-                                  res.send('<Response><Message>http://lbgift.com/#!/giftcards/create/' + token + '</Message></Response>');
-                              }
-                          });
+                      SessionService.generateSession(user._id, "user", function(err, token){
+                          if(err){
+                              res.json(err);
+                          } else {
+                              //All good, give the user their token
+                              res.send('<Response><Message>http://lbgift.com/#!/giftcards/create/' + token + '</Message></Response>');
+                          }
+                      });
                   }
               });
           }
@@ -180,16 +143,9 @@ router.post('/reset', function(req, res, next) {
 
 /* Update a user */
 router.put('/', function(req, res, next) {
-    //Find a session with the specified session token. Get the account id.
-    Session.findOne({ token : req.body.sessionToken })
-    .select('accountId')
-    .exec(function(err, session) {
+    SessionService.validateSession(req.body.sessionToken, "user", function(err, accountId){
         if(err){
-          return res.json({msg: "Couldn't search the database for session!",
-                  errorid: "779"});
-        } else if(!session){
-          return res.json({msg: "Session is not valid!",
-                  errorid: "34"});
+            res.json(err);
         } else {
             var updatedUser = {};
 
