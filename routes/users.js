@@ -45,7 +45,7 @@ router.post('/join', function(req, res, next) {
                                   res.json(err);
                               } else {
                                   //All good, give the user their token
-                                  res.json(token);
+                                  res.json({token: token});
                               }
                           });
                       }
@@ -81,7 +81,7 @@ router.post('/login', function(req, res, next) {
                               res.json(err);
                           } else {
                               //All good, give the user their token
-                              res.json(token);
+                              res.json({token: token});
                           }
                       });
                   } else {
