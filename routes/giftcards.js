@@ -123,6 +123,7 @@ router.get('/:id', function(req, res, next) {
         if(err){
             res.json(err);
         } else {
+<<<<<<< HEAD
             Giftcard.findOne({ toId : accountId, _id: req.params.id })
             .select('fromId toId amount iconId message')
             .exec(function(err, giftcard) {
@@ -133,11 +134,27 @@ router.get('/:id', function(req, res, next) {
                                 errorid: "39"});
                 } else {
                     res.json(giftcard);
+=======
+            Giftcard.findOne({
+                toId: session.accountId,
+                _id: req.params.id
+            })
+            .select('_id fromId amount iconId message')
+            .exec(function(err, giftcards) {
+                if(err){
+                    return res.json({msg: "Couldn't search the database for session!",
++                            errorid: "779"});
+                } else {
+                    res.json(giftcards);
+>>>>>>> getGiftcard
                 }
             });
         }
     });
+<<<<<<< HEAD
 
+=======
+>>>>>>> getGiftcard
 });
 
 /* Update a giftcard */
