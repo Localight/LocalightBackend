@@ -222,7 +222,7 @@ router.put('/', function(req, res, next) {
 
 /* Get a user */
 router.get('/', function(req, res, next) {
-    SessionService.validateSession(req.body.sessionToken, "user", function(err, accountId){
+    SessionService.validateSession(req.query.sessionToken, "user", function(err, accountId){
         if(err){
             res.json(err);
         } else {
