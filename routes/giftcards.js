@@ -90,7 +90,25 @@ router.post('/', function(req, res, next) {
 
 /* Get giftcards */
 router.get('/', function(req, res, next) {
-  //Logic goes here
+    Session.findOne({ token : req.query.sessionToken })
+    .select('accountId')
+    .exec(function(err, session) {
+        if(err){
+          return res.json({msg: "Couldn't search the database for session!",
+                  errorid: "779"});
+        } else if(!session){
+          return res.json({msg: "Session is not valid!",
+                  errorid: "34"});
+        } else {
+            Giftcard.find({
+                toId: session.accountId
+            })
+            .select('fromId amount iconId message')
+            .exec(function(err, giftcards) {
+                res.json(giftcards);
+            });
+        }
+    });
 });
 
 /* Get a giftcard */
