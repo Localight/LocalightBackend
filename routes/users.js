@@ -178,13 +178,49 @@ router.post('/reset', function(req, res, next) {
   //Logic goes here
 });
 
-/* Get a user */
-router.get('/:id', function(req, res, next) {
-  //Logic goes here
+/* Update a user */
+router.put('/', function(req, res, next) {
+    //Find a session with the specified session token. Get the account id.
+    Session.findOne({ token : req.body.sessionToken })
+    .select('accountId')
+    .exec(function(err, session) {
+        if(err){
+          return res.json({msg: "Couldn't search the database for session!",
+                  errorid: "779"});
+        } else if(!session){
+          return res.json({msg: "Session is not valid!",
+                  errorid: "34"});
+        } else {
+            var updatedUser = {};
+
+            if (req.body.name) updatedUser.name = req.body.name;
+            if (req.body.email) updatedUser.email = req.body.email;
+            if (req.body.password){
+                //Create a random salt
+                var salt = crypto.randomBytes(128).toString('base64');
+                //Create a unique hash from the provided password and salt
+                var hash = crypto.pbkdf2Sync(req.body.password, salt, 10000, 512);
+                updatedUser.password = hash;
+                updatedUser.salt = salt;
+            }
+            updatedUser.updated = Date.now();
+
+            var setUser = { $set: updatedUser }
+
+            User.update({_id:session.accountId}, setUser)
+            .exec(function(err, user){
+                if(err){
+                    res.json(err);
+                } else {
+                    res.json(user);
+                }
+            })
+        }
+    });
 });
 
-/* Update a user */
-router.put('/:id', function(req, res, next) {
+/* Get a user */
+router.get('/:id', function(req, res, next) {
   //Logic goes here
 });
 
