@@ -6,6 +6,7 @@ var express = require('express'),
     client = require('twilio')(config.twilio.accountSid, config.twilio.authToken),
     Giftcard = mongoose.model('Giftcard'),
     Session = mongoose.model('Session'),
+    SessionService = require('../services/sessions.js'),
     User = mongoose.model('User');
 
 /* Create a giftcard */
@@ -129,18 +130,25 @@ router.get('/', function(req, res, next) {
 
 /* Get a giftcard */
 router.get('/:id', function(req, res, next) {
-    Giftcard.findById(req.params.id)
-    .select('fromId toId amount iconId message')
-    .exec(function(err, giftcard) {
+    SessionService.validateSession(req.query.sessionToken, "user", function(err, accountId){
         if(err){
             res.json(err);
-        } else if(!giftcard){
-            res.json({msg: "No giftard with that ID!",
-                        errorid: "39"});
         } else {
-            res.json(giftcard);
+            Giftcard.findOne({ toId : accountId, _id: req.params.id })
+            .select('fromId toId amount iconId message')
+            .exec(function(err, giftcard) {
+                if(err){
+                    res.json(err);
+                } else if(!giftcard){
+                    res.json({msg: "No giftard with that ID!",
+                                errorid: "39"});
+                } else {
+                    res.json(giftcard);
+                }
+            });
         }
     });
+
 });
 
 /* Update a giftcard */
