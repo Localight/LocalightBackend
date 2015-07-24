@@ -45,3 +45,4 @@ exports.generateSession = function(accountId, type, callback) {
                 callback(null, token);
             }
         });
+};
