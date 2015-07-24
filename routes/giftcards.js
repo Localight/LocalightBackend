@@ -5,26 +5,16 @@ var express = require('express'),
     stripe = require("stripe")(config.stripe.accountKey),
     client = require('twilio')(config.twilio.accountSid, config.twilio.authToken),
     Giftcard = mongoose.model('Giftcard'),
-    Session = mongoose.model('Session'),
+    SessionService = require('../services/sessions.js'),
     User = mongoose.model('User');
 
 /* Create a giftcard */
 router.post('/', function(req, res, next) {
-
-    //Find a session with the specified session token. Get the account id.
-    var accountId;
-    Session.findOne({ token : req.body.sessionToken })
-    .select('accountId')
-    .exec(function(err, session) {
+    //Validate session
+    SessionService.validateSession(req.body.sessionToken, "user", function(err, accountId){
         if(err){
-          return res.json({msg: "Couldn't search the database for session!",
-                  errorid: "779"});
-        } else if(!session){
-          return res.json({msg: "Session is not valid!",
-                  errorid: "34"});
+            res.json(err);
         } else {
-            accountId = session.accountId;
-
             //Find a user with the id requested. Get phone number.
             var toPhone;
             User.findById(req.body.toId)
@@ -106,15 +96,10 @@ router.post('/', function(req, res, next) {
 
 /* Get giftcards */
 router.get('/', function(req, res, next) {
-    Session.findOne({ token : req.query.sessionToken })
-    .select('accountId')
-    .exec(function(err, session) {
+    //Validate session
+    SessionService.validateSession(req.query.sessionToken, "user", function(err, accountId){
         if(err){
-          return res.json({msg: "Couldn't search the database for session!",
-                  errorid: "779"});
-        } else if(!session){
-          return res.json({msg: "Session is not valid!",
-                  errorid: "34"});
+            res.json(err);
         } else {
             Giftcard.find({
                 toId: session.accountId
