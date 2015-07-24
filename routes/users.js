@@ -176,8 +176,26 @@ router.put('/', function(req, res, next) {
 });
 
 /* Get a user */
-router.get('/:id', function(req, res, next) {
-  //Logic goes here
+router.get('/', function(req, res, next) {
+    SessionService.validateSession(req.query.sessionToken, "user", function(err, accountId){
+        if(err){
+            res.json(err);
+        } else {
+            User.findOne({ _id: accountId })
+            .select('name email phone created updated')
+            .exec(function(err, user) {
+                if(err){
+                    res.json({msg: "Couldn't search the database for user!",
+                            errorid: "777"});
+                } else if(!user){
+                    res.json({msg: "User does not exist!",
+                            errorid: "23"});
+                } else {
+                    res.json(user);
+                }
+            });
+        }
+    });
 });
 
 /* Delete a user */
