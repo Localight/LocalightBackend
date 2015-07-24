@@ -2,7 +2,7 @@ var express = require('express'),
     router = express.Router(),
     mongoose = require('mongoose'),
     crypto = require('crypto'),
-    Session = mongoose.model('Session'),
+    SessionService = require('../services/sessions.js'),
     User = mongoose.model('User');
 
 /* User Join */
