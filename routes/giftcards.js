@@ -114,7 +114,25 @@ router.get('/', function(req, res, next) {
 
 /* Get a giftcard */
 router.get('/:id', function(req, res, next) {
-  //Logic goes here
+    SessionService.validateSession(req.query.sessionToken, "user", function(err, accountId){
+        if(err){
+            res.json(err);
+        } else {
+            Giftcard.findOne({ toId : accountId, _id: req.params.id })
+            .select('fromId toId amount iconId message')
+            .exec(function(err, giftcard) {
+                if(err){
+                    res.json(err);
+                } else if(!giftcard){
+                    res.json({msg: "No giftard with that ID!",
+                                errorid: "39"});
+                } else {
+                    res.json(giftcard);
+                }
+            });
+        }
+    });
+
 });
 
 /* Update a giftcard */
