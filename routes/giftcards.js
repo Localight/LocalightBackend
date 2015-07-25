@@ -102,7 +102,7 @@ router.get('/', function(req, res, next) {
             res.json(err);
         } else {
             Giftcard.find({
-                toId: session.accountId
+                toId: accountId
             })
             .select('_id fromId amount iconId message')
             .exec(function(err, giftcards) {
@@ -124,7 +124,7 @@ router.get('/:id', function(req, res, next) {
             res.json(err);
         } else {
             Giftcard.findOne({
-                toId: session.accountId,
+                toId: accountId,
                 _id: req.params.id
             })
             .select('_id fromId amount iconId message')
