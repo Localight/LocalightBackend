@@ -128,12 +128,14 @@ router.get('/:id', function(req, res, next) {
                 _id: req.params.id
             })
             .select('_id fromId amount iconId message')
-            .exec(function(err, giftcards) {
+            .exec(function(err, giftcard) {
                 if(err){
-                    return res.json({msg: "Couldn't search the database for session!",
-                            errorid: "779"});
+                    res.json(err);
+                } else if(!giftcard){
+                    res.json({msg: "No giftard with that ID!",
+                        errorid: "39"});
                 } else {
-                    res.json(giftcards);
+                    res.json(giftcard);
                 }
             });
         }
