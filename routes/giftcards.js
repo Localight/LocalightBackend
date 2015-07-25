@@ -81,7 +81,7 @@ router.post('/', function(req, res, next) {
                                 from: "+15623208034"
                             }, function(err, message) {
                                 if(err){
-                                    res.json(err);
+                                    console.log(err);
                                 } else {
                                     process.stdout.write(message.sid);
                                 }
