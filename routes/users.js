@@ -149,9 +149,9 @@ router.put('/', function(req, res, next) {
         } else {
             var updatedUser = {};
 
-            if (req.body.name) updatedUser.name = req.body.name;
-            if (req.body.email) updatedUser.email = req.body.email;
-            if (req.body.password){
+            if (req.body.name && typeof req.body.name === 'string') updatedUser.name = req.body.name;
+            if (req.body.email && typeof req.body.email === 'string') updatedUser.email = req.body.email;
+            if (req.body.password && typeof req.body.password === 'string'){
                 //Create a random salt
                 var salt = crypto.randomBytes(128).toString('base64');
                 //Create a unique hash from the provided password and salt
@@ -163,7 +163,7 @@ router.put('/', function(req, res, next) {
 
             var setUser = { $set: updatedUser }
 
-            User.update({_id:session.accountId}, setUser)
+            User.update({_id:accountId}, setUser)
             .exec(function(err, user){
                 if(err){
                     res.json(err);
