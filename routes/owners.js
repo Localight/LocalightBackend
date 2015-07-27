@@ -3,13 +3,6 @@ var express = require('express'),
     mongoose = require('mongoose'),
     Owner = mongoose.model('Owner');
 
-//Allow Cross Origin Support
-router.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
-});
-
 /* Owner Join */
 router.post('/join', function(req, res, next) {
   //Logic goes here

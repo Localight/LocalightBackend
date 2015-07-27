@@ -8,13 +8,6 @@ var express = require('express'),
     SessionService = require('../services/sessions.js'),
     User = mongoose.model('User');
 
-//Allow Cross Origin Support
-router.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
-});
-
 /* Create a giftcard */
 router.post('/', function(req, res, next) {
     //Validate session
