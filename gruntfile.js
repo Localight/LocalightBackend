@@ -39,5 +39,5 @@ module.exports = function(grunt) {
    // Debug task.
    grunt.registerTask('debug', ['concurrent:debug']);
    // Test Task.
-   grunt.registerTask('test', ['env:test', 'mochaTest','karma:unit']);
+   grunt.registerTask('test', ['env:test', 'mochaTest']);
 };
