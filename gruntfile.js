@@ -24,7 +24,7 @@ module.exports = function(grunt) {
       },
    });
    // Load NPM tasks
-   require('load-grunt-taks')(grunt);
+   require('load-grunt-tasks')(grunt);
 
    // Making grunt default to force in order not to brak the Projet.
    grunt.option('force', true);
