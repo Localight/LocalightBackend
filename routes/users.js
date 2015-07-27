@@ -163,7 +163,7 @@ router.put('/', function(req, res, next) {
 
             var setUser = { $set: updatedUser }
 
-            User.update({_id:session.accountId}, setUser)
+            User.update({_id:accountId}, setUser)
             .exec(function(err, user){
                 if(err){
                     res.json(err);
