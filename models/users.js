@@ -1,6 +1,9 @@
 'use strict';
-var mongoose = require('mongoose');
+var mongoose = require('mongoose'),
+    Schema = mongoose.Schema;
+
 var User = new mongoose.Schema({
+   
     name: {
         type: String
     },
@@ -32,4 +35,5 @@ var User = new mongoose.Schema({
         default: Date.now
     }
 });
+
 mongoose.model('User', User);
