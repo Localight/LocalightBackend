@@ -104,7 +104,10 @@ router.get('/', function(req, res, next) {
             Giftcard.find({
                 toId: accountId
             })
-            .select('_id fromId amount iconId message')
+            .select('_id toId fromId amount iconId message')
+            //use populate to also returns the users name in the giftcards object!
+            .populate('fromId', 'name') // populate the actual user and only return their name
+            .populate('toId', 'name') //populate the actual user and only return their name
             .exec(function(err, giftcards) {
                 if(err){
                     return res.json({msg: "Couldn't search the database for session!",

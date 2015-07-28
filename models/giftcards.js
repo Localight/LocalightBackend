@@ -3,10 +3,12 @@ var mongoose = require('mongoose');
 var Giftcard = new mongoose.Schema({
     fromId: {
         type: String,
+        ref: 'User',
         required: 'fromId is required'
     },
     toId: {
         type: String,
+        ref: 'User',
         required: 'toId is required'
     },
     amount: {
