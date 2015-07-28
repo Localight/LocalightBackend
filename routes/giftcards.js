@@ -104,7 +104,7 @@ router.get('/', function(req, res, next) {
             Giftcard.find({
                 toId: accountId
             })
-            .select('_id fromId amount iconId message')
+            .select('_id toId fromId amount iconId message')
             //use populate to return only a users name
             .populate('fromId', 'name') // populate the actual user and only return their name
             .populate('toId', 'name') //populate the actual user and only return their name
@@ -122,8 +122,8 @@ router.get('/', function(req, res, next) {
 
                     //Fill our users with a loop through the giftcards
                     for(var i = 0; i < giftcards.length; ++i) {
+                        console.log(giftcards[i]);
                         //Create the user object, and place it in the users array
-                        console.log(giftcards[i].toId)
                         users[i] = {
                             sender : giftcards[i].fromId.name,
                             recipient: giftcards[i].toId.name
