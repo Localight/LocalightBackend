@@ -104,6 +104,7 @@ router.get('/', function(req, res, next) {
             Giftcard.find({
                 toId: accountId
             })
+            //Added toId as we need the client to know the users name
             .select('_id toId fromId amount iconId message')
             //use populate to also returns the users name in the giftcards object!
             .populate('fromId', 'name') // populate the actual user and only return their name
@@ -130,7 +131,11 @@ router.get('/:id', function(req, res, next) {
                 toId: accountId,
                 _id: req.params.id
             })
-            .select('_id fromId amount iconId message')
+            //added the toId as we need the client to know the users name
+            .select('_id toId fromId amount iconId message')
+            //use populate to also returns the users name in the giftcards object!
+            .populate('fromId', 'name') // populate the actual user and only return their name
+            .populate('toId', 'name') //populate the actual user and only return their name
             .exec(function(err, giftcard) {
                 if(err){
                     res.json(err);
