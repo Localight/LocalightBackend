@@ -2,7 +2,7 @@
 module.exports = function(grunt) {
    // Unified Watch Object
    var watchFiles = {
-      mochaTests: ['app/tests/**/*.js']
+      mochaTests: ['tests/**/*.js']
    };
    // Project Configuration
    grunt.initConfig({
