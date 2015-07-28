@@ -107,15 +107,21 @@ var express = require('express'),
 
                     //Email receipt
 
-                    client.messages.create({
-                        body: "You have a new giftcard on lbgift! http://lbgift.com/giftcards/",
-                        to: "+1" + req.body.phone,
-                        from: "+15623208034"
-                    }, function(err, message) {
+                    SessionService.generateSession(user._id, "user", function(err, token){
                         if(err){
-                            console.log(err);
+                            res.json(err);
                         } else {
-                            process.stdout.write(message.sid);
+                            client.messages.create({
+                                body: "You have a new giftcard on lbgift! http://lbgift.com/giftcards/receive/" + token,
+                                to: "+1" + req.body.phone,
+                                from: "+15623208034"
+                            }, function(err, message) {
+                                if(err){
+                                    console.log(err);
+                                } else {
+                                    process.stdout.write(message.sid);
+                                }
+                            });
                         }
                     });
                 }
