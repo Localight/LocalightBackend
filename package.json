@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "test": "mocha tests"
   },
   "dependencies": {
     "body-parser": "^1.13.2",
@@ -18,5 +19,15 @@
     "serve-favicon": "~2.3.0",
     "stripe": "^3.6.0",
     "twilio": "^2.2.1"
+  },
+  "devDependencies": {
+    "grunt-concurrent": "^2.0.0",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-env": "^0.4.4",
+    "grunt-mocha-test": "^0.12.7",
+    "grunt-nodemon": "^0.4.0",
+    "load-grunt-tasks": "^3.2.0",
+    "should": "^7.0.2",
+    "supertest": "^1.0.1"
   }
 }
