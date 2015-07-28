@@ -105,12 +105,37 @@ router.get('/', function(req, res, next) {
                 toId: accountId
             })
             .select('_id fromId amount iconId message')
+            //use populate to return only a users name
+            .populate('fromId', 'name') // only return the Persons name
+            .populate('toId', 'name') // only return the Persons name
             .exec(function(err, giftcards) {
                 if(err){
                     return res.json({msg: "Couldn't search the database for session!",
                             errorid: "779"});
                 } else {
-                    res.json(giftcards);
+
+                    //We have found our giftcards, now create a multi-dimensional array to
+                    //pass back both the giftcards and the names of their users
+
+                    //Create our users object array
+                    var users;
+
+                    //Fill our users with a loop through the giftcards
+                    for(var i = 0; i < giftcards.length; ++i) {
+                        //Create the user object, and place it in the users array
+                        users[i] = {
+                            sender : giftcards[i].fromId.name,
+                            recipient: giftcards[i].toId.name
+                        };
+                    }
+
+                    //add the users and giftcards to a two dimensional array
+                    var resArray = [
+                        giftcards,
+                        users
+                    ];
+
+                    res.json(resArray);
                 }
             });
         }
