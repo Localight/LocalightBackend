@@ -27,22 +27,19 @@ describe('Giftcard Model Unit Tests:', function() {
       // 2. create a fake giftcard for them to pass around,
       user = new User({
          // create what you need to make a bare minumn user.
-         firstName: 'Sebastion',
-         lastName: 'Ultron',
-         displayName: 'Sebastion Ultron',
+         name: 'Ultron',
          email: 'test@tester.com', //TODO: use an actual email address for this user.
-         username: '2132203433',
+         phone: '1234567890',
          password: 'password'
       });
       user2 = new User({
          // create what you need to make a bare minumn user.
-         firstName: 'Tina',
-         lastName: 'Fey',
-         displayName: 'Tina Fey',
-         email: 'greatwolf3d@gmail.com', //TODO: use an actual email address for this user.
-         username: 'testUser2',
+         name: 'brian',
+         email: 'testUser2@test.com',
+         phone: '1112223333',
          password: 'password'
       });
+
       user2.save();
       user.save(function(){
          giftcard = new Giftcard({
