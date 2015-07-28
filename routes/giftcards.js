@@ -13,7 +13,7 @@ var express = require('express'),
     router.post('/', function(req, res, next) {
         if(req.body.phone.length > 10 || req.body.phone.length < 10){
             return res.json({msg: "Invalid Phone Number (only xxxxxxxxxx)!",
-                    errorid: "774", rawerr: err});
+                    errorid: "774"});
         }
 
         //Validate session
