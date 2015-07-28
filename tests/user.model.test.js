@@ -20,16 +20,16 @@ describe('User Model Unit Tests:', function() {
 
    before(function(done) {
       user = new User({
-         username:'1234567890',
+         name: 'test user',
+         email:'test@test.com',
+         phone:'1234567890',
          password:'password',
-         provider:'local',
-         stripeCustomerToken:'cus_6KW9JPW77VzgP4'
       });
       user2 = new User({
-         username:'1234567890',
+         name:'test user2',
+         email: 'test@test.com',
+         phone:'1113334444',
          password:'password',
-         provider:'local',
-         stripeCustomerToken:'cus_6KW9JPW77VzgP4'
       });
       done();
    });
@@ -53,13 +53,13 @@ describe('User Model Unit Tests:', function() {
          //});
       });
 
-      it('should fail to save an existing user again', function(done) {
-         user.save();
-         return user2.save(function(err) {
-            should.exist(err);
-            done();
-         });
-      });
+      // it('should fail to save an existing user again', function(done) {
+      //    user.save();
+      //    return user2.save(function(err) {
+      //       should.exist(err);
+      //       done();
+      //    });
+      // });
 
       // it('should be able to show an error when try to save without first name', function(done) {
       //    user.firstName = '';
@@ -86,7 +86,7 @@ describe('User Model Unit Tests:', function() {
       // });
 
       it('should be able to show an error when try to save without a phone number/username', function(done) {
-         user.username = '';
+         user.phone = '';
          return user.save(function(err) {
             should.exist(err);
             done();
@@ -94,7 +94,7 @@ describe('User Model Unit Tests:', function() {
       });
 
       it('should pass when entering the correct format for the username, pattern: 1234567890', function(done) {
-      	user.username = '1234567890';
+      	user.phone = '1234567890';
       	return user.save(function(err) {
       		console.log(err);
       		should.not.exist(err);
@@ -103,7 +103,7 @@ describe('User Model Unit Tests:', function() {
       });
 
       it('should be able to show an error when try to save without a phone number/username with characters', function(done) {
-         user.username = 'asdfas';
+         user.phone= 'asdfas';
          return user.save(function(err) {
             should.exist(err);
             done();
@@ -112,7 +112,7 @@ describe('User Model Unit Tests:', function() {
 
 
       it('should be able to show an error when try to save without a  password', function(done) {
-         user.username = '';
+         user.phone = '';
          return user.save(function(err) {
             should.exist(err);
             done();
@@ -120,7 +120,7 @@ describe('User Model Unit Tests:', function() {
       });
 
       it('should throw an error if phone number/username is less than ten digits', function(done) {
-         user.username = '344564545';
+         user.phone = '344564545';
          return user.save(function(err) {
             should.exist(err);
             done();
@@ -128,36 +128,36 @@ describe('User Model Unit Tests:', function() {
       });
 
       it('should throw an error if phone number contains letters or characters', function(done) {
-         user.username = 'a4564545';
+         user.phone = 'a4564545';
          return user.save(function(err) {
             should.exist(err);
             done();
          });
       });
 
-      it('should throw an error if stripe customer id token does not match regex pattern', function(done) {
-         user.stripeCustomerToken = 'sd_a4sd5fg64g5r4b5';
-         return user.save(function(err) {
-            should.exist(err);
-            done();
-         });
-      });
+      // it('should throw an error if stripe customer id token does not match regex pattern', function(done) {
+      //    user.stripeCustomerToken = 'sd_a4sd5fg64g5r4b5';
+      //    return user.save(function(err) {
+      //       should.exist(err);
+      //       done();
+      //    });
+      // });
 
-      it('should throw an error if stripe card token does not match regex pattern', function(done) {
-         user.stripeCardToken = 'ssd_a4sd5fg64g5r4b5';
-         return user.save(function(err) {
-            should.exist(err);
-            done();
-         });
-      });
+      // it('should throw an error if stripe card token does not match regex pattern', function(done) {
+      //    user.stripeCardToken = 'ssd_a4sd5fg64g5r4b5';
+      //    return user.save(function(err) {
+      //       should.exist(err);
+      //       done();
+      //    });
+      // });
 
-      it('should throw an error if stripe account token does not match regex pattern', function(done) {
-         user.stripeAccountToken = 'ssd_a4sd5fg64g5r4b5';
-         return user.save(function(err) {
-            should.exist(err);
-            done();
-         });
-      });
+      // it('should throw an error if stripe account token does not match regex pattern', function(done) {
+      //    user.stripeAccountToken = 'ssd_a4sd5fg64g5r4b5';
+      //    return user.save(function(err) {
+      //       should.exist(err);
+      //       done();
+      //    });
+      // });
 
    });
 
