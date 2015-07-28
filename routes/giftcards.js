@@ -104,7 +104,7 @@ var express = require('express'),
 
                     client.messages.create({
                         body: "You have a new giftcard on lbgift! http://lbgift.com/giftcards/",
-                        to: "+1" + toId,
+                        to: "+1" + req.body.phone,
                         from: "+15623208034"
                     }, function(err, message) {
                         if(err){
