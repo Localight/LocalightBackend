@@ -41,12 +41,15 @@ describe('Giftcard Model Unit Tests:', function() {
       });
 
       user2.save();
+
       user.save(function(){
          giftcard = new Giftcard({
             stripeOrderId: 'ch_34sdfsdf',
             amount: 1000,
-            purchaserOfGiftCard:user,
-            spenderOfGiftCard: user2,
+            fromId:user._id,
+            toId: user2._id,
+            message:'a gift for you',
+            iconId:'1231231'
          });// end gift card
          done();
       });// end user save
@@ -99,16 +102,16 @@ describe('Giftcard Model Unit Tests:', function() {
          });
       });
 
-      it('should throw an error when trying to save a without a purchaserOfGiftCard', function(done) {
-         giftcard.purchaserOfGiftCard = '';
+      it('should throw an error when trying to save a without a fromId', function(done) {
+         giftcard.fromId = '';
          return giftcard.save(function(err) {
             should.exist(err);
             done();
          });
       });
 
-      it('should throw an error when trying to save without a spenderOfGiftCard', function(done) {
-         giftcard.spenderOfGiftCard = '';
+      it('should throw an error when trying to save without a toId', function(done) {
+         giftcard.toId = '';
          return giftcard.save(function(err) {
             should.exist(err);
             done();
