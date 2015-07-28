@@ -52,6 +52,13 @@ describe('User Model Unit Tests:', function() {
             // done();
          //});
       });
+      it('should throw a warning when no name is present', function(done){
+         user.name = '';
+         return user.save(function(err){
+            should.exist(err);
+            done();
+         });
+      });
 
       // it('should fail to save an existing user again', function(done) {
       //    user.save();
