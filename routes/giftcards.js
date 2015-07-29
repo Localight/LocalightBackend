@@ -103,13 +103,13 @@ var express = require('express'),
                             errorid: "667", rawerr: err});
                 } else {
                     //All good, give basic response
-                    res.json({msg: "Success!"});
+                    res.json({msg: "Giftcard was created!"});
 
                     //Email receipt
 
                     SessionService.generateSession(toId, "user", function(err, token){
                         if(err){
-                            res.json(err);
+                            console.log(err);
                         } else {
                             client.messages.create({
                                 body: "You have a new giftcard on lbgift! http://lbgift.com/#/giftcards/receive/" + token,
@@ -119,7 +119,7 @@ var express = require('express'),
                                 if(err){
                                     console.log(err);
                                 } else {
-                                    process.stdout.write(message.sid);
+                                    console.log(message.sid);
                                 }
                             });
                         }
