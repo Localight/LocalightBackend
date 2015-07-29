@@ -1,7 +1,8 @@
 {
     "twilio": {
         "accountSid": "AC3f3d26948bcaffbde196abc45c3e7b89",
-        "authToken": "be441e1b8273e1fe4af1ba78169638b0"
+        "authToken": "be441e1b8273e1fe4af1ba78169638b0",
+        "number": "+15624454688"
     },
     "stripe": {
         "secretKey": "sk_test_GF61iHn9X33Ip9vNGCnRRZTP"
