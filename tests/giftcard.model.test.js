@@ -22,6 +22,7 @@ describe('Giftcard Model Unit Tests:', function() {
    // WHAT AM I TESTING?
    // I am testing the unit of the giftcard class object and all the things it could be doing.
    beforeEach(function(done) {
+      // If I wanted too I could make a call to get a session token
       // THE SETUP
       // 1. create a fake user to use that simulates an actualy user.
       // 2. create a fake giftcard for them to pass around,

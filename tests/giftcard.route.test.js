@@ -2,7 +2,7 @@
 
 var should = require('should'),
    request = require('supertest'),
-   app = require('../'), // ../app.js
+   app = require('../app'), //
    mongoose = require('mongoose'),
    User = mongoose.model('User'),
    Giftcard = mongoose.model('Giftcard'),
