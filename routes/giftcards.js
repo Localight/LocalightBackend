@@ -103,7 +103,7 @@ var express = require('express'),
                             errorid: "667", rawerr: err});
                 } else {
                     //All good, give basic response
-                    res.json({msg: "Success!"});
+                    res.json({msg: "Giftcard was created!"});
 
                     //Email receipt
 
