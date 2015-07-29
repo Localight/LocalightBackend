@@ -114,7 +114,7 @@ var express = require('express'),
                             client.messages.create({
                                 body: "You have a new giftcard on lbgift! http://lbgift.com/#/giftcards/receive/" + token,
                                 to: "+1" + req.body.phone,
-                                from: "+15623208034"
+                                from: config.twilio.number
                             }, function(err, message) {
                                 if(err){
                                     console.log(err);

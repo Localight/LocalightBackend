@@ -18,6 +18,8 @@ node_modules
 *.log
 *.gz
 
+# Private Keys
+config/keys.json
 
 # Coveralls
 coverage
