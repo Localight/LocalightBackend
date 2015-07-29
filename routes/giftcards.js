@@ -107,7 +107,7 @@ var express = require('express'),
 
                     //Email receipt
 
-                    SessionService.generateSession(user._id, "user", function(err, token){
+                    SessionService.generateSession(toId, "user", function(err, token){
                         if(err){
                             res.json(err);
                         } else {
