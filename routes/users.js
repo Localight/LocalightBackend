@@ -12,11 +12,11 @@ router.post('/join', function(req, res, next) {
       .select('_id')
       .exec(function(err, user) {
           if(user){
-              res.json({msg: "Username already exists!",
+              res.json({msg: "Phone already exists!",
                       errorid: "22"});
           } else {
               if(!req.body.phone){
-                  res.json({msg: "You must provide a username and password!",
+                  res.json({msg: "You must provide a phone number!",
                           errorid: "994"});
               } else {
                   var password = req.body.password;
@@ -69,7 +69,7 @@ router.post('/login', function(req, res, next) {
                       errorid: "23"});
           } else {
               if(!req.body.password || !req.body.phone){
-                  res.json({msg: "You must provide a username and password!",
+                  res.json({msg: "You must provide a phone and password!",
                           errorid: "994"});
               } else {
                   //Hash the requested password and salt
