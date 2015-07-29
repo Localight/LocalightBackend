@@ -112,7 +112,7 @@ var express = require('express'),
                             res.json(err);
                         } else {
                             client.messages.create({
-                                body: "You have a new giftcard on lbgift! http://lbgift.com/giftcards/receive/" + token,
+                                body: "You have a new giftcard on lbgift! http://lbgift.com/#/giftcards/receive/" + token,
                                 to: "+1" + req.body.phone,
                                 from: "+15623208034"
                             }, function(err, message) {
