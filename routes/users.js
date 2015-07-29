@@ -108,7 +108,7 @@ router.post('/twilio', function(req, res, next) {
                         res.json(err);
                     } else {
                         //All good, give the user their token
-                        res.send('<Response><Message>http://lbgift.com/#!/giftcards/create/' + token + '</Message></Response>');
+                        res.send('<Response><Message>http://lbgift.com/#/giftcards/create/' + token + '</Message></Response>');
                     }
                 });
           } else {
@@ -126,7 +126,7 @@ router.post('/twilio', function(req, res, next) {
                               res.json(err);
                           } else {
                               //All good, give the user their token
-                              res.send('<Response><Message>http://lbgift.com/#!/giftcards/create/' + token + '</Message></Response>');
+                              res.send('<Response><Message>http://lbgift.com/#/giftcards/create/' + token + '</Message></Response>');
                           }
                       });
                   }
