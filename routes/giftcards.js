@@ -29,20 +29,9 @@ var express = require('express'),
                       return res.json({msg: "Couldn't search the database for user!",
                               status: 500});
                     } else if(!user){
-                        var password = req.body.password;
-                        if(!req.body.password){
-                            password = "";
-                        }
-                        //Create a random salt
-                        var salt = crypto.randomBytes(128).toString('base64');
-                        //Create a unique hash from the provided password and salt
-                        var hash = crypto.pbkdf2Sync(password, salt, 10000, 512);
-                        //Create a new user with the assembled information
                         var user = new User({
                             name: req.body.name,
-                            phone: req.body.phone,
-                            password: hash,
-                            salt: salt
+                            phone: req.body.phone
                         }).save(function(err, user){
                             if(err){
                                 console.log("Error saving user to DB!");
