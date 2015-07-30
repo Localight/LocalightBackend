@@ -17,26 +17,30 @@ router.post('/', function(req, res, next) {
         });
     }
     SessionService.validateSession(req.body.sessionToken, "owner", function(err, accountId) {
-        new Location({
-            name: req.body.name,
-            triconKey: req.body.triconKey,
-            address1: req.body.address1,
-            address2: req.body.address2,
-            city: req.body.city,
-            state: req.body.state,
-            zipcode: req.body.zipcode,
-            ownerId: accountId
-        }).save(function(err, location) {
-            if (err) {
-                console.log("Error saving location to DB!");
-                res.json({
-                    msg: "Error saving location to DB!",
-                    errorid: "666"
-                });
-            } else {
-                res.json({status: 200});
-            }
-        });
+        if(err){
+            res.json(err);
+        } else {
+            new Location({
+                name: req.body.name,
+                triconKey: req.body.triconKey,
+                address1: req.body.address1,
+                address2: req.body.address2,
+                city: req.body.city,
+                state: req.body.state,
+                zipcode: req.body.zipcode,
+                ownerId: accountId
+            }).save(function(err, location) {
+                if (err) {
+                    console.log("Error saving location to DB!");
+                    res.json({
+                        msg: "Error saving location to DB!",
+                        errorid: "666"
+                    });
+                } else {
+                    res.json({status: 200});
+                }
+            });
+        }
     });
 });
 
