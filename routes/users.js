@@ -5,56 +5,6 @@ var express = require('express'),
     SessionService = require('../services/sessions.js'),
     User = mongoose.model('User');
 
-/* User Join */
-router.post('/join', function(req, res, next) {
-    //Check if a user with that username already exists
-      User.findOne({ phone : req.body.phone })
-      .select('_id')
-      .exec(function(err, user) {
-          if(user){
-              res.json({msg: "Phone already exists!",
-                      status: 409});
-          } else {
-              if(!req.body.phone){
-                  res.json({msg: "You must provide a phone number!",
-                          status: 412});
-              } else {
-                  var password = req.body.password;
-                  if(!req.body.password){
-                      password = "";
-                  }
-                  //Create a random salt
-                  var salt = crypto.randomBytes(128).toString('base64');
-                  //Create a unique hash from the provided password and salt
-                  var hash = crypto.pbkdf2Sync(password, salt, 10000, 512);
-                  //Create a new user with the assembled information
-                  var user = new User({
-                      name: req.body.name,
-                      email: req.body.email,
-                      phone: req.body.phone,
-                      password: hash,
-                      salt: salt
-                  }).save(function(err, user){
-                      if(err){
-                          console.log("Error saving user to DB!");
-                          res.json({msg: "Error saving user to DB!",
-                                  status: 500});
-                      } else {
-                          SessionService.generateSession(user._id, "user", function(err, token){
-                              if(err){
-                                  res.json(err);
-                              } else {
-                                  //All good, give the user their token
-                                  res.json({token: token, status: 201});
-                              }
-                          });
-                      }
-                  });
-              }
-          }
-      });
-});
-
 /* User Login */
 router.post('/login', function(req, res, next) {
     //Find a user with the username requested. Select salt and password
