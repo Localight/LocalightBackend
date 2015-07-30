@@ -18,12 +18,12 @@ router.post('/join', function(req, res, next) {
     }
 
     //Check if an owner with that email already exists
-    User.findOne({
+    Owner.findOne({
             email: req.body.email
         })
         .select('_id')
-        .exec(function(err, user) {
-            if (user) {
+        .exec(function(err, owner) {
+            if (owner) {
                 res.json({
                     msg: "Email already exists!",
                     errorid: "22"
