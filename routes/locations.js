@@ -56,7 +56,16 @@ router.get('/', function(req, res, next) {
 
 /* Get a Location by id */
 router.get('/:id', function(req, res, next) {
-    //Logic goes here
+    Location.findOne({_id: req.params.id})
+    .select('name address1 address2 city state zipcode')
+    .exec(function(err, locations) {
+        if(err){
+            return res.json({msg: "Couldn't query the database for locations!",
+                    errorid: "779"});
+        } else {
+            res.json(locations);
+        }
+    });
 });
 
 /* Update a Location */
