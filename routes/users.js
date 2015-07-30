@@ -13,11 +13,11 @@ router.post('/join', function(req, res, next) {
       .exec(function(err, user) {
           if(user){
               res.json({msg: "Phone already exists!",
-                      errorid: "22"});
+                      status: 409});
           } else {
               if(!req.body.phone){
                   res.json({msg: "You must provide a phone number!",
-                          errorid: "994"});
+                          status: 412});
               } else {
                   var password = req.body.password;
                   if(!req.body.password){
@@ -38,14 +38,14 @@ router.post('/join', function(req, res, next) {
                       if(err){
                           console.log("Error saving user to DB!");
                           res.json({msg: "Error saving user to DB!",
-                                  errorid: "666"});
+                                  status: 500});
                       } else {
                           SessionService.generateSession(user._id, "user", function(err, token){
                               if(err){
                                   res.json(err);
                               } else {
                                   //All good, give the user their token
-                                  res.json({token: token});
+                                  res.json({token: token, status: 201});
                               }
                           });
                       }
@@ -63,14 +63,14 @@ router.post('/login', function(req, res, next) {
       .exec(function(err, user) {
           if(err){
               res.json({msg: "Couldn't search the database for user!",
-                      errorid: "777"});
+                      status: 500});
           } else if(!user){
               res.json({msg: "Username does not exist!",
-                      errorid: "23"});
+                      status: 401});
           } else {
               if(!req.body.password || !req.body.phone){
                   res.json({msg: "You must provide a phone and password!",
-                          errorid: "994"});
+                          status: 412});
               } else {
                   //Hash the requested password and salt
                   var hash = crypto.pbkdf2Sync(req.body.password, user.salt, 10000, 512);
@@ -81,12 +81,12 @@ router.post('/login', function(req, res, next) {
                               res.json(err);
                           } else {
                               //All good, give the user their token
-                              res.json({token: token});
+                              res.json({token: token, 200});
                           }
                       });
                   } else {
                       res.json({msg: "Password is incorrect!",
-                              errorid: "32"});
+                              status: 401});
                   }
               }
           }
@@ -166,8 +166,10 @@ router.put('/', function(req, res, next) {
             User.update({_id:accountId}, setUser)
             .exec(function(err, user){
                 if(err){
-                    res.json(err);
+                    res.json({msg: "Could not update user",
+                            status: 500});
                 } else {
+                    user.status = 200;
                     res.json(user);
                 }
             })
@@ -186,10 +188,10 @@ router.get('/', function(req, res, next) {
             .exec(function(err, user) {
                 if(err){
                     res.json({msg: "Couldn't search the database for user!",
-                            errorid: "777"});
+                            status: 500});
                 } else if(!user){
                     res.json({msg: "User does not exist!",
-                            errorid: "23"});
+                            404});
                 } else {
                     res.json(user);
                 }

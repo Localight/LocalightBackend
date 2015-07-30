@@ -13,7 +13,7 @@ router.post('/', function(req, res, next) {
             req.body.sessionToken)) {
         return res.json({
             msg: "You must provide all required fields!",
-            errorid: "994"
+            status: 412
         });
     }
     SessionService.validateSession(req.body.sessionToken, "owner", function(err, accountId) {
@@ -34,10 +34,10 @@ router.post('/', function(req, res, next) {
                     console.log("Error saving location to DB!");
                     res.json({
                         msg: "Error saving location to DB!",
-                        errorid: "666"
+                        status: 500
                     });
                 } else {
-                    res.json({status: 200});
+                    res.json({status: 201});
                 }
             });
         }
@@ -51,8 +51,9 @@ router.get('/', function(req, res, next) {
     .exec(function(err, locations) {
         if(err){
             return res.json({msg: "Couldn't query the database for locations!",
-                    errorid: "779"});
+                    status: 500);
         } else {
+            locations.status = 200;
             res.json(locations);
         }
     });
@@ -65,8 +66,9 @@ router.get('/:id', function(req, res, next) {
     .exec(function(err, locations) {
         if(err){
             return res.json({msg: "Couldn't query the database for locations!",
-                    errorid: "779"});
+                    status: 500});
         } else {
+            locations.status = 200;
             res.json(locations);
         }
     });
@@ -78,7 +80,7 @@ router.put('/:id', function(req, res, next) {
     if (!req.body.sessionToken) {
         return res.json({
             msg: "You must provide all required fields!",
-            errorid: "994"
+            status: 412
         });
     }
     SessionService.validateSession(req.body.sessionToken, "owner", function(err, accountId){
