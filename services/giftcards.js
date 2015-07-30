@@ -2,10 +2,11 @@ var mongoose = require('mongoose'),
     crypto = require('crypto'),
     config = require('../config/keys.json'),
     client = require('twilio')(config.twilio.accountSid, config.twilio.authToken),
+    SessionService = require('../services/sessions.js'),
     Giftcard = mongoose.model('Giftcard');
 
 //Send current giftcards that have today's sendDate
-exports.sendCurrent = function(token, type, callback) {
+exports.sendCurrent = function(callback) {
     Giftcard.find({
             sendDate: Date.now(),
             sent: false
@@ -17,12 +18,12 @@ exports.sendCurrent = function(token, type, callback) {
                 callback({
                     msg: "Could not search database for giftcards!",
                     status: 500
-                }, false);
+                });
             } else if (!giftcards) {
                 callback({
                     msg: "No giftcards to send.",
                     status: 200
-                }, false);
+                });
             } else {
                 for(giftcard in giftcards){
                     SessionService.generateSession(giftcard.toId._id, "user", function(err, token){
@@ -43,6 +44,10 @@ exports.sendCurrent = function(token, type, callback) {
                         }
                     });
                 }
+                callback({
+                    msg: "Complete",
+                    status: 200
+                });
             }
         });
 };
