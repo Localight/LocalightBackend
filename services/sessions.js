@@ -13,12 +13,12 @@ exports.validateSession = function(token, type, callback) {
             if (err) {
                 callback({
                     msg: "Could not search database for session!",
-                    errorid: 779
+                    status: 500
                 }, false);
             } else if (!session) {
                 callback({
                     msg: "Session is not valid!",
-                    errorid: 34
+                    status: 401
                 }, false);
             } else {
                 callback(null, session.accountId);
@@ -39,7 +39,7 @@ exports.generateSession = function(accountId, type, callback) {
             if (err) {
                 callback({
                     msg: "Could not add session to DB!",
-                    errorid: 779
+                    status: 500
                 }, false);
             } else {
                 callback(null, token);

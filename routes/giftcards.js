@@ -13,7 +13,7 @@ var express = require('express'),
     router.post('/', function(req, res, next) {
         if(req.body.phone.length > 10 || req.body.phone.length < 10){
             return res.json({msg: "Invalid Phone Number (only xxxxxxxxxx)!",
-                    errorid: "774"});
+                    status: 412});
         }
 
         //Validate session
@@ -27,7 +27,7 @@ var express = require('express'),
                 .exec(function(err, user) {
                     if(err){
                       return res.json({msg: "Couldn't search the database for user!",
-                              errorid: "774", rawerr: err});
+                              status: 500});
                     } else if(!user){
                         var password = req.body.password;
                         if(!req.body.password){
@@ -47,7 +47,7 @@ var express = require('express'),
                             if(err){
                                 console.log("Error saving user to DB!");
                                 res.json({msg: "Error saving user to DB!",
-                                        errorid: "666"});
+                                        status: 500});
                             } else {
                                 createGift(accountId, user._id, req);
                             }
@@ -66,7 +66,8 @@ var express = require('express'),
             !req.body.amount || !(req.body.amount > 0) || !(req.body.amount < 50000) ||
             !req.body.iconId ||
             !req.body.message){
-                return res.json({msg: "You must provide toId, 0<amount<50000, iconId and message."});
+                return res.json({msg: "You must provide toId, 0<amount<50000, iconId and message."
+                                status: 412});
             }
 
             // Get the credit card details submitted by the form
@@ -81,12 +82,12 @@ var express = require('express'),
             }, function(err, charge) {
                 if (err && err.type === 'StripeCardError') {
                     stripeError = {msg: "Card was declined!",
-                            errorid: "12122"};
+                            status: 412};
                 }
             });
 
             if(stripeError){
-                return res.json(stripeError);
+                return res.json({stripeError: stripeError, status: 500});
             }
 
             new Giftcard({
@@ -100,10 +101,11 @@ var express = require('express'),
             }).save(function(err){
                 if(err){
                     res.json({msg: "Error saving giftcard to database!",
-                            errorid: "667", rawerr: err});
+                            status: 500});
                 } else {
                     //All good, give basic response
-                    res.json({msg: "Giftcard was created!"});
+                    res.json({msg: "Giftcard was created!",
+                            status: 201});
 
                     //Email receipt
 
@@ -147,7 +149,7 @@ router.get('/', function(req, res, next) {
             .exec(function(err, giftcards) {
                 if(err){
                     return res.json({msg: "Couldn't search the database for session!",
-                            errorid: "779"});
+                            status: 500});
                 } else {
                     res.json(giftcards);
                 }
@@ -176,7 +178,7 @@ router.get('/:id', function(req, res, next) {
                     res.json(err);
                 } else if(!giftcard){
                     res.json({msg: "No giftard with that ID!",
-                        errorid: "39"});
+                        status: 404});
                 } else {
                     res.json(giftcard);
                 }

@@ -14,7 +14,7 @@ router.post('/join', function(req, res, next) {
             req.body.stripeCustomerId)) {
         return res.json({
             msg: "You must provide all required fields!",
-            errorid: "994"
+            status: 412
         });
     }
 
@@ -27,7 +27,7 @@ router.post('/join', function(req, res, next) {
             if (owner) {
                 res.json({
                     msg: "Email already exists!",
-                    errorid: "22"
+                    status: 409
                 });
             } else {
                 //Create a random salt
@@ -47,7 +47,7 @@ router.post('/join', function(req, res, next) {
                         console.log("Error saving owner to DB!");
                         res.json({
                             msg: "Error saving owner to DB!",
-                            errorid: "666"
+                            status: 500
                         });
                     } else {
                         SessionService.generateSession(owner._id, "owner", function(err, token) {
@@ -56,7 +56,8 @@ router.post('/join', function(req, res, next) {
                             } else {
                                 //All good, give the owner their token
                                 res.json({
-                                    token: token
+                                    token: token,
+                                    status: 201
                                 });
                             }
                         });
@@ -74,7 +75,7 @@ router.post('/login', function(req, res, next) {
             req.body.password)) {
         return res.json({
             msg: "You must provide all required fields!",
-            errorid: "994"
+            status: 412
         });
     }
     //Find an owner with the email requested. Select salt and password
@@ -86,12 +87,12 @@ router.post('/login', function(req, res, next) {
             if (err) {
                 res.json({
                     msg: "Couldn't search the database for owner!",
-                    errorid: "777"
+                    status: 500
                 });
             } else if (!owner) {
                 res.json({
                     msg: "Email does not exist!",
-                    errorid: "23"
+                    status: 401
                 });
             } else {
                 //Hash the requested password and salt
@@ -104,14 +105,15 @@ router.post('/login', function(req, res, next) {
                         } else {
                             //All good, give the owner their token
                             res.json({
-                                token: token
+                                token: token,
+                                status: 200
                             });
                         }
                     });
                 } else {
                     res.json({
                         msg: "Password is incorrect!",
-                        errorid: "32"
+                        status: 401
                     });
                 }
             }
