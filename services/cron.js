@@ -2,13 +2,14 @@ var express = require('express'),
     GiftcardService = require('../services/sessions.js');
 
 exports.start = function(){
+    console.log("CronManager: Manager has started!")
 
     //3 hours, 60 minutes, 60 seconds, 1000 milliseconds
     sendGiftcardsInterval = 3 * 60 * 60 * 1000;
     setInterval(function(){
-        console.log("CronTask: GiftcardService.sendCurrent() has just started!");
+        console.log("CronManager: GiftcardService.sendCurrent() has just started!");
         GiftcardService.sendCurrent(function(err){
-            console.log("CronTask: GiftcardService.sendCurrent() results: " + err);
+            console.log("CronManager: GiftcardService.sendCurrent() results: " + err);
         });
 
     }, sendGiftcardsInterval);
