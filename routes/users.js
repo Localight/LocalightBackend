@@ -81,7 +81,7 @@ router.post('/login', function(req, res, next) {
                               res.json(err);
                           } else {
                               //All good, give the user their token
-                              res.json({token: token, 200});
+                              res.json({token: token, status: 200});
                           }
                       });
                   } else {
@@ -191,7 +191,7 @@ router.get('/', function(req, res, next) {
                             status: 500});
                 } else if(!user){
                     res.json({msg: "User does not exist!",
-                            404});
+                            status: 404});
                 } else {
                     res.json(user);
                 }

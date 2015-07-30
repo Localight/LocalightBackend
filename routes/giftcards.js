@@ -66,7 +66,7 @@ var express = require('express'),
             !req.body.amount || !(req.body.amount > 0) || !(req.body.amount < 50000) ||
             !req.body.iconId ||
             !req.body.message){
-                return res.json({msg: "You must provide toId, 0<amount<50000, iconId and message."
+                return res.json({msg: "You must provide toId, 0<amount<50000, iconId and message.",
                                 status: 412});
             }
 
