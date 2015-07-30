@@ -47,7 +47,7 @@ router.post('/', function(req, res, next) {
 /* Get all Locations */
 router.get('/', function(req, res, next) {
     Location.find({})
-    .select('name address1 address2 city state zipcode')
+    .select('_id name address1 address2 city state zipcode')
     .exec(function(err, locations) {
         if(err){
             return res.json({msg: "Couldn't query the database for locations!",
@@ -61,7 +61,7 @@ router.get('/', function(req, res, next) {
 /* Get a Location by id */
 router.get('/:id', function(req, res, next) {
     Location.findOne({_id: req.params.id})
-    .select('name address1 address2 city state zipcode')
+    .select('_id name address1 address2 city state zipcode')
     .exec(function(err, locations) {
         if(err){
             return res.json({msg: "Couldn't query the database for locations!",
