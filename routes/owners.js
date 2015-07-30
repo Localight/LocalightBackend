@@ -10,7 +10,7 @@ router.post('/join', function(req, res, next) {
     if (!(req.body.email &&
             req.body.password &&
             req.body.name &&
-            req.body.StripeCustomerId)) {
+            req.body.stripeCustomerId)) {
         return res.json({
             msg: "You must provide all required fields!",
             errorid: "994"
@@ -36,7 +36,7 @@ router.post('/join', function(req, res, next) {
                 //Create a new owner with the assembled information
                 new Owner({
                     name: req.body.name,
-                    StripeCustomerId: req.body.StripeCustomerId,
+                    stripeCustomerId: req.body.stripeCustomerId,
                     email: req.body.email,
                     password: hash,
                     salt: salt,
