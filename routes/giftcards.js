@@ -96,8 +96,8 @@ var express = require('express'),
                 amount: req.body.amount,
                 iconId: req.body.iconId,
                 message: req.body.message,
-                created: Date.now(),
-                stripeOrderId: charge.id
+                stripeOrderId: charge.id,
+                sendDate: req.body.sendDate
             }).save(function(err){
                 if(err){
                     res.json({msg: "Error saving giftcard to database!",
