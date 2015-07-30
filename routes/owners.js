@@ -68,7 +68,53 @@ router.post('/join', function(req, res, next) {
 
 /* Owner Login */
 router.post('/login', function(req, res, next) {
-    //Logic goes here
+    //Check if required was sent
+    if (!(req.body.email &&
+            req.body.password)) {
+        return res.json({
+            msg: "You must provide all required fields!",
+            errorid: "994"
+        });
+    }
+    //Find an owner with the email requested. Select salt and password
+    Owner.findOne({
+            email: req.body.email
+        })
+        .select('password salt _id')
+        .exec(function(err, owner) {
+            if (err) {
+                res.json({
+                    msg: "Couldn't search the database for owner!",
+                    errorid: "777"
+                });
+            } else if (!owner) {
+                res.json({
+                    msg: "Email does not exist!",
+                    errorid: "23"
+                });
+            } else {
+                //Hash the requested password and salt
+                var hash = crypto.pbkdf2Sync(req.body.password, owner.salt, 10000, 512);
+                //Compare to stored hash
+                if (hash == owner.password) {
+                    SessionService.generateSession(owner._id, "owner", function(err, token) {
+                        if (err) {
+                            res.json(err);
+                        } else {
+                            //All good, give the owner their token
+                            res.json({
+                                token: token
+                            });
+                        }
+                    });
+                } else {
+                    res.json({
+                        msg: "Password is incorrect!",
+                        errorid: "32"
+                    });
+                }
+            }
+        });
 });
 
 /* Reset Password */
