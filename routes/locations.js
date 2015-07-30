@@ -70,7 +70,38 @@ router.get('/:id', function(req, res, next) {
 
 /* Update a Location */
 router.put('/:id', function(req, res, next) {
-    //Logic goes here
+    //Check if required was sent
+    if (!req.body.sessionToken) {
+        return res.json({
+            msg: "You must provide all required fields!",
+            errorid: "994"
+        });
+    }
+    SessionService.validateSession(req.body.sessionToken, "owner", function(err, accountId){
+        if(err){
+            res.json(err);
+        } else {
+            var updatedLocation = {};
+
+            if (req.body.name && typeof req.body.name === 'string') updatedLocation.name = req.body.name;
+            if (req.body.address1 && typeof req.body.address1 === 'string') updatedLocation.address1 = req.body.address1;
+            if (req.body.address2 && typeof req.body.address2 === 'string') updatedLocation.address2 = req.body.address2;
+            if (req.body.city && typeof req.body.city === 'string') updatedLocation.city = req.body.city;
+            if (req.body.state && typeof req.body.state === 'string') updatedLocation.state = req.body.state;
+            if (req.body.zipcode && typeof req.body.zipcode === 'string') updatedLocation.zipcode = req.body.zipcode;
+
+            var setLocation = { $set: updatedLocation }
+
+            Location.update({_id: req.params.id, ownerId: accountId}, setLocation)
+            .exec(function(err, location){
+                if(err){
+                    res.json(err);
+                } else {
+                    res.json({status: 200});
+                }
+            })
+        }
+    });
 });
 
 /* Delete a Location */
