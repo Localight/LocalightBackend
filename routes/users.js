@@ -12,15 +12,12 @@ router.post('/login', function(req, res, next) {
       .select('password salt _id')
       .exec(function(err, user) {
           if(err){
-              res.json({msg: "Couldn't search the database for user!",
-                      status: 500});
+              res.status(500).json({msg: "Couldn't search the database for user!"});
           } else if(!user){
-              res.json({msg: "Username does not exist!",
-                      status: 401});
+              res.status(401).json({msg: "Username does not exist!"});
           } else {
               if(!req.body.password || !req.body.phone){
-                  res.json({msg: "You must provide a phone and password!",
-                          status: 412});
+                  res.status(412).json({msg: "You must provide a phone and password!"});
               } else {
                   //Hash the requested password and salt
                   var hash = crypto.pbkdf2Sync(req.body.password, user.salt, 10000, 512);
@@ -31,12 +28,11 @@ router.post('/login', function(req, res, next) {
                               res.json(err);
                           } else {
                               //All good, give the user their token
-                              res.json({token: token, status: 200});
+                              res.status(200).json({token: token});
                           }
                       });
                   } else {
-                      res.json({msg: "Password is incorrect!",
-                              status: 401});
+                      res.status(401).json({msg: "Password is incorrect!"});
                   }
               }
           }
@@ -116,11 +112,9 @@ router.put('/', function(req, res, next) {
             User.update({_id:accountId}, setUser)
             .exec(function(err, user){
                 if(err){
-                    res.json({msg: "Could not update user",
-                            status: 500});
+                    res.status(500).json({msg: "Could not update user"});
                 } else {
-                    user.status = 200;
-                    res.json(user);
+                    res.status(200).json(user);
                 }
             })
         }
@@ -137,13 +131,11 @@ router.get('/', function(req, res, next) {
             .select('name email phone created updated')
             .exec(function(err, user) {
                 if(err){
-                    res.json({msg: "Couldn't search the database for user!",
-                            status: 500});
+                    res.status(500).json({msg: "Couldn't search the database for user!"});
                 } else if(!user){
-                    res.json({msg: "User does not exist!",
-                            status: 404});
+                    res.status(404).json({msg: "User does not exist!"});
                 } else {
-                    res.json(user);
+                    res.status(200).json(user);
                 }
             });
         }

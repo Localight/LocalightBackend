@@ -12,8 +12,7 @@ var express = require('express'),
     /* Create a giftcard */
     router.post('/', function(req, res, next) {
         if(req.body.phone.length > 10 || req.body.phone.length < 10){
-            return res.json({msg: "Invalid Phone Number (only xxxxxxxxxx)!",
-                    status: 412});
+            return res.status(412).json({msg: "Invalid Phone Number (only xxxxxxxxxx)!"});
         }
 
         //Validate session
@@ -26,8 +25,7 @@ var express = require('express'),
                 .select('_id')
                 .exec(function(err, user) {
                     if(err){
-                      return res.json({msg: "Couldn't search the database for user!",
-                              status: 500});
+                      return res.status().json({msg: "Couldn't search the database for user!"});
                     } else if(!user){
                         var user = new User({
                             name: req.body.name,
@@ -35,8 +33,7 @@ var express = require('express'),
                         }).save(function(err, user){
                             if(err){
                                 console.log("Error saving user to DB!");
-                                res.json({msg: "Error saving user to DB!",
-                                        status: 500});
+                                res.status(500).json({msg: "Error saving user to DB!"});
                             } else {
                                 createGift(accountId, user._id, req);
                             }
@@ -55,8 +52,7 @@ var express = require('express'),
             !req.body.amount || !(req.body.amount > 0) || !(req.body.amount < 50000) ||
             !req.body.iconId ||
             !req.body.message){
-                return res.json({msg: "You must provide toId, 0<amount<50000, iconId and message.",
-                                status: 412});
+                return res.status(412).json({msg: "You must provide toId, 0<amount<50000, iconId and message."});
             }
 
             // Get the credit card details submitted by the form
@@ -70,13 +66,12 @@ var express = require('express'),
             description: req.body.message
             }, function(err, charge) {
                 if (err && err.type === 'StripeCardError') {
-                    stripeError = {msg: "Card was declined!",
-                            status: 412};
+                    stripeError = {msg: "Card was declined!"};
                 }
             });
 
             if(stripeError){
-                return res.json({stripeError: stripeError, status: 500});
+                return res.status(412).json(stripeError);
             }
 
             var sent = !(req.body.sendDate && req.body.sendDate != Date.now());
@@ -99,12 +94,10 @@ var express = require('express'),
                 sent: sent
             }).save(function(err){
                 if(err){
-                    res.json({msg: "Error saving giftcard to database!",
-                            status: 500});
+                    res.status(500).json({msg: "Error saving giftcard to database!"});
                 } else {
                     //All good, give basic response
-                    res.json({msg: "Giftcard was created!",
-                            status: 201});
+                    res.status(201).json({msg: "Giftcard was created!"});
 
                     //Email receipt
 
@@ -151,10 +144,9 @@ router.get('/', function(req, res, next) {
             .populate('toId', 'name') //populate the actual user and only return their name
             .exec(function(err, giftcards) {
                 if(err){
-                    return res.json({msg: "Couldn't search the database for session!",
-                            status: 500});
+                    return res.status(500).json({msg: "Couldn't search the database for session!"});
                 } else {
-                    res.json(giftcards);
+                    res.status(200).json(giftcards);
                 }
             });
         }
@@ -178,12 +170,11 @@ router.get('/:id', function(req, res, next) {
             .populate('toId', 'name') //populate the actual user and only return their name
             .exec(function(err, giftcard) {
                 if(err){
-                    res.json(err);
+                    res.status(500).json(err);
                 } else if(!giftcard){
-                    res.json({msg: "No giftard with that ID!",
-                        status: 404});
+                    res.status(404).json({msg: "No giftard with that ID!"});
                 } else {
-                    res.json(giftcard);
+                    res.status(200).json(giftcard);
                 }
             });
         }
