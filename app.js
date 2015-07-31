@@ -22,6 +22,9 @@ var owners = require('./routes/owners');
 var locations = require('./routes/locations');
 var giftcards = require('./routes/giftcards');
 
+//services
+var cron = require('./services/cron.js');
+
 var app = express();
 
 //Use cors for cross origin support
@@ -44,6 +47,8 @@ app.use('/users', users);
 app.use('/locations', locations);
 app.use('/owners', owners);
 app.use('/giftcards', giftcards);
+
+cron.start();
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -55,7 +55,7 @@ var express = require('express'),
             !req.body.amount || !(req.body.amount > 0) || !(req.body.amount < 50000) ||
             !req.body.iconId ||
             !req.body.message){
-                return res.json({msg: "You must provide toId, 0<amount<50000, iconId and message."
+                return res.json({msg: "You must provide toId, 0<amount<50000, iconId and message.",
                                 status: 412});
             }
 
@@ -79,14 +79,24 @@ var express = require('express'),
                 return res.json({stripeError: stripeError, status: 500});
             }
 
+            var sent = !(req.body.sendDate && req.body.sendDate != Date.now());
+
+            var sendDate;
+            if(req.body.sendDate){
+                sendDate = req.body.sendDate;
+            } else {
+                sendDate = Date.now();
+            }
+
             new Giftcard({
                 fromId: accountId,
                 toId: toId,
                 amount: req.body.amount,
                 iconId: req.body.iconId,
                 message: req.body.message,
-                created: Date.now(),
-                stripeOrderId: charge.id
+                stripeOrderId: charge.id,
+                sendDate: req.body.sendDate,
+                sent: sent
             }).save(function(err){
                 if(err){
                     res.json({msg: "Error saving giftcard to database!",
@@ -98,23 +108,27 @@ var express = require('express'),
 
                     //Email receipt
 
-                    SessionService.generateSession(toId, "user", function(err, token){
-                        if(err){
-                            console.log(err);
-                        } else {
-                            client.messages.create({
-                                body: "You have a new giftcard on lbgift! http://lbgift.com/#/giftcards/receive/" + token,
-                                to: "+1" + req.body.phone,
-                                from: config.twilio.number
-                            }, function(err, message) {
-                                if(err){
-                                    console.log(err);
-                                } else {
-                                    console.log(message.sid);
-                                }
-                            });
-                        }
-                    });
+                    if(sent){
+                        SessionService.generateSession(toId, "user", function(err, token){
+                            if(err){
+                                console.log(err);
+                            } else {
+                                client.messages.create({
+                                    body: "You have a new giftcard on lbgift! http://lbgift.com/#/giftcards/receive/" + token,
+                                    to: "+1" + req.body.phone,
+                                    from: config.twilio.number
+                                }, function(err, message) {
+                                    if(err){
+                                        console.log(err);
+                                    } else {
+                                        console.log(message.sid);
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        console.log("Added giftcard to send queue");
+                    }
                 }
             });
         }

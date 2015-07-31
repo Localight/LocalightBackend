@@ -51,7 +51,7 @@ router.get('/', function(req, res, next) {
     .exec(function(err, locations) {
         if(err){
             return res.json({msg: "Couldn't query the database for locations!",
-                    status: 500);
+                    status: 500});
         } else {
             locations.status = 200;
             res.json(locations);
