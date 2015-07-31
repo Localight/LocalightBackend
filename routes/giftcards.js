@@ -90,7 +90,14 @@ var express = require('express'),
                 return res.json({stripeError: stripeError, status: 500});
             }
 
-            var sent = (req.body.sendDate && req.body.sendDate != Date.now());
+            var sent = !(req.body.sendDate && req.body.sendDate != Date.now());
+
+            var sendDate;
+            if(req.body.sendDate){
+                sendDate = req.body.sendDate;
+            } else {
+                sendDate = Date.now();
+            }
 
             new Giftcard({
                 fromId: accountId,

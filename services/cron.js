@@ -1,5 +1,5 @@
 var express = require('express'),
-    GiftcardService = require('../services/sessions.js');
+    GiftcardService = require('../services/giftcards.js');
 
 exports.start = function(){
     console.log("CronManager: Manager has started!")
@@ -9,7 +9,8 @@ exports.start = function(){
     setInterval(function(){
         console.log("CronManager: GiftcardService.sendCurrent() has just started!");
         GiftcardService.sendCurrent(function(err){
-            console.log("CronManager: GiftcardService.sendCurrent() results: " + err);
+            console.log("CronManager: GiftcardService.sendCurrent() results:");
+            console.log(err);
         });
 
     }, sendGiftcardsInterval);
