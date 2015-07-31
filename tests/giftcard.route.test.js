@@ -12,7 +12,7 @@ var should = require('should'),
  * Globals
  */
 
-var credentials, credentials2, user1, user2, giftcard;
+var textBody, user1, user2, giftcard;
 
 /**
  * Gitcard Routes Tests
@@ -22,30 +22,25 @@ describe('Giftcard Routes Tests', function() {
 
    beforeEach(function(done) {
 
-      credentials = {
-         From: '1234567890',
-         Body: 'Gift',
-      };
-
-      credentials2 = {
-         From: '1112223333',
-         Body: 'password',
-      };
-
       //create a session token and associate it to our user
       user1 = new User({
          name: 'test user',
          email: 'test@test.com',
-         phone: credentials.phone,
-         password: credentials.password
+         phone: '1112223333',
+         password:'password'
       });
 
       user2 = new User({
          name: 'test2 user2',
          email: 'test2@test.com',
-         phone: credentials2.phone,
-         password: credentials2.password
+         phone: '1234567890',
+         password:'password'
       });
+
+      textBody = {
+         From:user1.phone,
+         Body:'Gift'
+      };
 
       giftcard = new Giftcard({
          sessionToken: 'something',
@@ -68,14 +63,14 @@ describe('Giftcard Routes Tests', function() {
     * Create A gifcard - Test1
     */
    it('should be able to get a session token given the phone number is correct', function(done) {
-      agent.post('/users/twilio')
-         .send(credentials)
+      agent.post('/users/join')
+         .send(user1)
          .expect(200)
          .end(function(signinErr, signinRes) {
             // Handle Sign-In error
 
             if (signinErr) {
-               console.log('this is the signin error'+signinErr.body);
+               console.log('this is the signin error'+JSON.stringify(signinErr.body));
                done(signinErr);
             }
 

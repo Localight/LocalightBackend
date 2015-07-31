@@ -37,8 +37,7 @@ router.post('/join', function(req, res, next) {
                   }).save(function(err, user){
                       if(err){
                           console.log("Error saving user to DB!");
-                          res.json({msg: "Error saving user to DB!",
-                                  errorid: "666"});
+                         return res.json(err);
                       } else {
                           SessionService.generateSession(user._id, "user", function(err, token){
                               if(err){

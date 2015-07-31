@@ -33,6 +33,7 @@ describe('Giftcard Model Unit Tests:', function() {
          phone: '1234567890',
          password: 'password'
       });
+
       user2 = new User({
          // create what you need to make a bare minumn user.
          name: 'brian',
@@ -62,13 +63,7 @@ describe('Giftcard Model Unit Tests:', function() {
       // specified in the objects model schema. i.e, all the require functions are valid and the informaiton made it to the database.
       // this is the base case that everyhthing works.
       it('should be able to save without problems', function(done) {
-         return giftcard.save(function(err) {
-            if(err){
-               console.log(err);
-            }
-            should.not.exist(err);
-            done();
-         });
+         return giftcard.save(done);
       });
 
       it('should throw an error when trying to save without a number', function(done) {
@@ -134,7 +129,7 @@ describe('Giftcard Model Unit Tests:', function() {
             done();
          });
       });
-      
+
       //TODO: create a method or way to make sure the spenderOfGiftCard and purchaserOfGiftCard,
       // are not the same value.
    });
