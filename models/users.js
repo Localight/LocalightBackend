@@ -21,7 +21,6 @@ var User = new mongoose.Schema({
     },
     password: {
         type: String,
-        default: '',
     },
     salt: {
         type: String
