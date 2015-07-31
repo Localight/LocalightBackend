@@ -1,6 +1,7 @@
 var express = require('express'),
     router = express.Router(),
     mongoose = require('mongoose'),
+    crypto = require('crypto'),
     config = require('../config/keys.json'),
     stripe = require("stripe")(config.stripe.accountKey),
     client = require('twilio')(config.twilio.accountSid, config.twilio.authToken),
@@ -8,82 +9,108 @@ var express = require('express'),
     SessionService = require('../services/sessions.js'),
     User = mongoose.model('User');
 
-/* Create a giftcard */
-router.post('/', function(req, res, next) {
-    //Validate session
-    SessionService.validateSession(req.body.sessionToken, "user", function(err, accountId){
-        if(err){
-            res.json(err);
-        } else {
-            //Find a user with the id requested. Get phone number.
-            var toPhone;
-            User.findById(req.body.toId)
-            .select('phone')
-            .exec(function(err, user) {
+    /* Create a giftcard */
+    router.post('/', function(req, res, next) {
+        if(req.body.phone.length > 10 || req.body.phone.length < 10){
+            return res.json({msg: "Invalid Phone Number (only xxxxxxxxxx)!",
+                    status: 412});
+        }
+
+        //Validate session
+        SessionService.validateSession(req.body.sessionToken, "user", function(err, accountId){
+            if(err){
+                res.json(err);
+            } else {
+                //Find a user with the phone requested. Get the id.
+                User.findOne({phone: req.body.phone})
+                .select('_id')
+                .exec(function(err, user) {
+                    if(err){
+                      return res.json({msg: "Couldn't search the database for user!",
+                              status: 500});
+                    } else if(!user){
+                        var user = new User({
+                            name: req.body.name,
+                            phone: req.body.phone
+                        }).save(function(err, user){
+                            if(err){
+                                console.log("Error saving user to DB!");
+                                res.json({msg: "Error saving user to DB!",
+                                        status: 500});
+                            } else {
+                                createGift(accountId, user._id, req);
+                            }
+                        });
+                    } else {
+                        createGift(accountId, user._id, req);
+
+                    }
+                });
+            }
+        });
+
+        function createGift(accountId, toId, req){
+            if(!accountId ||
+            !toId ||
+            !req.body.amount || !(req.body.amount > 0) || !(req.body.amount < 50000) ||
+            !req.body.iconId ||
+            !req.body.message){
+                return res.json({msg: "You must provide toId, 0<amount<50000, iconId and message."
+                                status: 412});
+            }
+
+            // Get the credit card details submitted by the form
+            var stripeCardToken = req.body.stripeCardToken;
+
+            var stripeError;
+            var charge = stripe.charges.create({
+            amount: req.body.amount, // amount in cents, again
+            currency: "usd",
+            source: stripeCardToken,
+            description: req.body.message
+            }, function(err, charge) {
+                if (err && err.type === 'StripeCardError') {
+                    stripeError = {msg: "Card was declined!",
+                            status: 412};
+                }
+            });
+
+            if(stripeError){
+                return res.json({stripeError: stripeError, status: 500});
+            }
+
+            new Giftcard({
+                fromId: accountId,
+                toId: toId,
+                amount: req.body.amount,
+                iconId: req.body.iconId,
+                message: req.body.message,
+                created: Date.now(),
+                stripeOrderId: charge.id
+            }).save(function(err){
                 if(err){
-                  return res.json({msg: "Couldn't search the database for user!",
-                          errorid: "774", rawerr: err});
-                } else if(!user){
-                  return res.json({msg: "No user exists under that id!",
-                          errorid: "13234"});
+                    res.json({msg: "Error saving giftcard to database!",
+                            status: 500});
                 } else {
-                    toPhone = user.phone;
+                    //All good, give basic response
+                    res.json({msg: "Giftcard was created!",
+                            status: 201});
 
-                    if(!accountId ||
-                    !req.body.toId ||
-                    !req.body.amount || !(req.body.amount > 0) || !(req.body.amount < 50000) ||
-                    !req.body.iconId ||
-                    !req.body.message){
-                        return res.json({msg: "You must provide toId, 0<amount<50000, iconId and message."});
-                    }
+                    //Email receipt
 
-                    // Get the credit card details submitted by the form
-                    var stripeCardToken = req.body.stripeCardToken;
-
-                    var stripeError;
-                    var charge = stripe.charges.create({
-                    amount: req.body.amount, // amount in cents, again
-                    currency: "usd",
-                    source: stripeCardToken,
-                    description: req.body.message
-                    }, function(err, charge) {
-                        if (err && err.type === 'StripeCardError') {
-                            stripeError = {msg: "Card was declined!",
-                                    errorid: "12122"};
-                        }
-                    });
-
-                    if(stripeError){
-                        return res.json(stripeError);
-                    }
-
-                    new Giftcard({
-                        fromId: accountId,
-                        toId: req.body.toId,
-                        amount: req.body.amount,
-                        iconId: req.body.iconId,
-                        message: req.body.message,
-                        created: Date.now(),
-                        stripeOrderId: charge.id
-                    }).save(function(err){
+                    SessionService.generateSession(toId, "user", function(err, token){
                         if(err){
-                            res.json({msg: "Error saving giftcard to database!",
-                                    errorid: "667", rawerr: err});
+                            console.log(err);
                         } else {
-                            //All good, give basic response
-                            res.json({msg: "Success!"});
-
-                            //Email receipt
-
                             client.messages.create({
-                                body: "You have a new giftcard on lbgift! http://lbgift.com/giftcards/",
-                                to: "+1" + toPhone,
-                                from: "+15623208034"
+                                body: "You have a new giftcard on lbgift! http://lbgift.com/#/giftcards/receive/" + token,
+                                to: "+1" + req.body.phone,
+                                from: config.twilio.number
                             }, function(err, message) {
                                 if(err){
                                     console.log(err);
                                 } else {
-                                    process.stdout.write(message.sid);
+                                    console.log(message.sid);
                                 }
                             });
                         }
@@ -91,7 +118,6 @@ router.post('/', function(req, res, next) {
                 }
             });
         }
-    });
 });
 
 /* Get giftcards */
@@ -112,7 +138,7 @@ router.get('/', function(req, res, next) {
             .exec(function(err, giftcards) {
                 if(err){
                     return res.json({msg: "Couldn't search the database for session!",
-                            errorid: "779"});
+                            status: 500});
                 } else {
                     res.json(giftcards);
                 }
@@ -141,7 +167,7 @@ router.get('/:id', function(req, res, next) {
                     res.json(err);
                 } else if(!giftcard){
                     res.json({msg: "No giftard with that ID!",
-                        errorid: "39"});
+                        status: 404});
                 } else {
                     res.json(giftcard);
                 }
