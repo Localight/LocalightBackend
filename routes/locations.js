@@ -11,13 +11,12 @@ router.post('/', function(req, res, next) {
             req.body.triconKey &&
             req.body.address1 &&
             req.body.sessionToken)) {
-        return res.json({
-            msg: "You must provide all required fields!",
-            status: 412
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
         });
     }
     SessionService.validateSession(req.body.sessionToken, "owner", function(err, accountId) {
-        if(err){
+        if (err) {
             res.json(err);
         } else {
             new Location({
@@ -32,12 +31,11 @@ router.post('/', function(req, res, next) {
             }).save(function(err, location) {
                 if (err) {
                     console.log("Error saving location to DB!");
-                    res.json({
-                        msg: "Error saving location to DB!",
-                        status: 500
+                    res.status(500).json({
+                        msg: "Error saving location to DB!"
                     });
                 } else {
-                    res.json({status: 201});
+                    res.status(201);
                 }
             });
         }
@@ -47,44 +45,45 @@ router.post('/', function(req, res, next) {
 /* Get all Locations */
 router.get('/', function(req, res, next) {
     Location.find({})
-    .select('_id name address1 address2 city state zipcode')
-    .exec(function(err, locations) {
-        if(err){
-            return res.json({msg: "Couldn't query the database for locations!",
-                    status: 500);
-        } else {
-            locations.status = 200;
-            res.json(locations);
-        }
-    });
+        .select('_id name address1 address2 city state zipcode')
+        .exec(function(err, locations) {
+            if (err) {
+                return res.status(500).json({
+                    msg: "Couldn't query the database for locations!"
+                });
+            } else {
+                res.status(200).json(locations);
+            }
+        });
 });
 
 /* Get a Location by id */
 router.get('/:id', function(req, res, next) {
-    Location.findOne({_id: req.params.id})
-    .select('_id name address1 address2 city state zipcode')
-    .exec(function(err, locations) {
-        if(err){
-            return res.json({msg: "Couldn't query the database for locations!",
-                    status: 500});
-        } else {
-            locations.status = 200;
-            res.json(locations);
-        }
-    });
+    Location.findOne({
+            _id: req.params.id
+        })
+        .select('_id name address1 address2 city state zipcode')
+        .exec(function(err, locations) {
+            if (err) {
+                return res.status(500).json({
+                    msg: "Couldn't query the database for locations!"
+                });
+            } else {
+                res.status(200).json(locations);
+            }
+        });
 });
 
 /* Update a Location */
 router.put('/:id', function(req, res, next) {
     //Check if required was sent
     if (!req.body.sessionToken) {
-        return res.json({
-            msg: "You must provide all required fields!",
-            status: 412
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
         });
     }
-    SessionService.validateSession(req.body.sessionToken, "owner", function(err, accountId){
-        if(err){
+    SessionService.validateSession(req.body.sessionToken, "owner", function(err, accountId) {
+        if (err) {
             res.json(err);
         } else {
             var updatedLocation = {};
@@ -96,16 +95,21 @@ router.put('/:id', function(req, res, next) {
             if (req.body.state && typeof req.body.state === 'string') updatedLocation.state = req.body.state;
             if (req.body.zipcode && typeof req.body.zipcode === 'string') updatedLocation.zipcode = req.body.zipcode;
 
-            var setLocation = { $set: updatedLocation }
+            var setLocation = {
+                $set: updatedLocation
+            }
 
-            Location.update({_id: req.params.id, ownerId: accountId}, setLocation)
-            .exec(function(err, location){
-                if(err){
-                    res.json(err);
-                } else {
-                    res.json({status: 200});
-                }
-            })
+            Location.update({
+                    _id: req.params.id,
+                    ownerId: accountId
+                }, setLocation)
+                .exec(function(err, location) {
+                    if (err) {
+                        res.status(500).json(err);
+                    } else {
+                        res.status(200);
+                    }
+                })
         }
     });
 });

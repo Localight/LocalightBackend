@@ -9,45 +9,39 @@ var express = require('express'),
     SessionService = require('../services/sessions.js'),
     User = mongoose.model('User');
 
-    /* Create a giftcard */
-    router.post('/', function(req, res, next) {
-        if(req.body.phone.length > 10 || req.body.phone.length < 10){
-            return res.json({msg: "Invalid Phone Number (only xxxxxxxxxx)!",
-                    status: 412});
-        }
+/* Create a giftcard */
+router.post('/', function(req, res, next) {
+    if (req.body.phone.length > 10 || req.body.phone.length < 10) {
+        return res.status(412).json({
+            msg: "Invalid Phone Number (only xxxxxxxxxx)!"
+        });
+    }
 
-        //Validate session
-        SessionService.validateSession(req.body.sessionToken, "user", function(err, accountId){
-            if(err){
-                res.json(err);
-            } else {
-                //Find a user with the phone requested. Get the id.
-                User.findOne({phone: req.body.phone})
+    //Validate session
+    SessionService.validateSession(req.body.sessionToken, "user", function(err, accountId) {
+        if (err) {
+            res.json(err);
+        } else {
+            //Find a user with the phone requested. Get the id.
+            User.findOne({
+                    phone: req.body.phone
+                })
                 .select('_id')
                 .exec(function(err, user) {
-                    if(err){
-                      return res.json({msg: "Couldn't search the database for user!",
-                              status: 500});
-                    } else if(!user){
-                        var password = req.body.password;
-                        if(!req.body.password){
-                            password = "";
-                        }
-                        //Create a random salt
-                        var salt = crypto.randomBytes(128).toString('base64');
-                        //Create a unique hash from the provided password and salt
-                        var hash = crypto.pbkdf2Sync(password, salt, 10000, 512);
-                        //Create a new user with the assembled information
+                    if (err) {
+                        return res.status().json({
+                            msg: "Couldn't search the database for user!"
+                        });
+                    } else if (!user) {
                         var user = new User({
                             name: req.body.name,
-                            phone: req.body.phone,
-                            password: hash,
-                            salt: salt
-                        }).save(function(err, user){
-                            if(err){
+                            phone: req.body.phone
+                        }).save(function(err, user) {
+                            if (err) {
                                 console.log("Error saving user to DB!");
-                                res.json({msg: "Error saving user to DB!",
-                                        status: 500});
+                                res.status(500).json({
+                                    msg: "Error saving user to DB!"
+                                });
                             } else {
                                 createGift(accountId, user._id, req);
                             }
@@ -57,60 +51,75 @@ var express = require('express'),
 
                     }
                 });
-            }
-        });
+        }
+    });
 
-        function createGift(accountId, toId, req){
-            if(!accountId ||
+    function createGift(accountId, toId, req) {
+        if (!accountId ||
             !toId ||
             !req.body.amount || !(req.body.amount > 0) || !(req.body.amount < 50000) ||
             !req.body.iconId ||
-            !req.body.message){
-                return res.json({msg: "You must provide toId, 0<amount<50000, iconId and message."
-                                status: 412});
-            }
+            !req.body.message) {
+            return res.status(412).json({
+                msg: "You must provide toId, 0<amount<50000, iconId and message."
+            });
+        }
 
-            // Get the credit card details submitted by the form
-            var stripeCardToken = req.body.stripeCardToken;
+        // Get the credit card details submitted by the form
+        var stripeCardToken = req.body.stripeCardToken;
 
-            var stripeError;
-            var charge = stripe.charges.create({
+        var stripeError;
+        var charge = stripe.charges.create({
             amount: req.body.amount, // amount in cents, again
             currency: "usd",
             source: stripeCardToken,
             description: req.body.message
-            }, function(err, charge) {
-                if (err && err.type === 'StripeCardError') {
-                    stripeError = {msg: "Card was declined!",
-                            status: 412};
-                }
-            });
-
-            if(stripeError){
-                return res.json({stripeError: stripeError, status: 500});
+        }, function(err, charge) {
+            if (err && err.type === 'StripeCardError') {
+                stripeError = {
+                    msg: "Card was declined!"
+                };
             }
+        });
 
-            new Giftcard({
-                fromId: accountId,
-                toId: toId,
-                amount: req.body.amount,
-                iconId: req.body.iconId,
-                message: req.body.message,
-                created: Date.now(),
-                stripeOrderId: charge.id
-            }).save(function(err){
-                if(err){
-                    res.json({msg: "Error saving giftcard to database!",
-                            status: 500});
-                } else {
-                    //All good, give basic response
-                    res.json({msg: "Giftcard was created!",
-                            status: 201});
+        if (stripeError) {
+            return res.status(412).json(stripeError);
+        }
 
-                    //Email receipt
+        var sent = !(req.body.sendDate && req.body.sendDate != Date.now());
 
-                    SessionService.generateSession(toId, "user", function(err, token){
-                        if(err){
+        var sendDate;
+        if (req.body.sendDate) {
+            sendDate = req.body.sendDate;
+        } else {
+            sendDate = Date.now();
+        }
+
+        new Giftcard({
+            fromId: accountId,
+            toId: toId,
+            amount: req.body.amount,
+            iconId: req.body.iconId,
+            message: req.body.message,
+            stripeOrderId: charge.id,
+            sendDate: req.body.sendDate,
+            sent: sent
+        }).save(function(err) {
+            if (err) {
+                res.status(500).json({
+                    msg: "Error saving giftcard to database!"
+                });
+            } else {
+                //All good, give basic response
+                res.status(201).json({
+                    msg: "Giftcard was created!"
+                });
+
+                //Email receipt
+
+                if (sent) {
+                    SessionService.generateSession(toId, "user", function(err, token) {
+                        if (err) {
                             console.log(err);
                         } else {
                             client.messages.create({
@@ -118,7 +127,7 @@ var express = require('express'),
                                 to: "+1" + req.body.phone,
                                 from: config.twilio.number
                             }, function(err, message) {
-                                if(err){
+                                if (err) {
                                     console.log(err);
                                 } else {
                                     console.log(message.sid);
@@ -126,70 +135,75 @@ var express = require('express'),
                             });
                         }
                     });
+                } else {
+                    console.log("Added giftcard to send queue");
                 }
-            });
-        }
+            }
+        });
+    }
 });
 
 /* Get giftcards */
 router.get('/', function(req, res, next) {
     //Validate session
-    SessionService.validateSession(req.query.sessionToken, "user", function(err, accountId){
-        if(err){
+    SessionService.validateSession(req.query.sessionToken, "user", function(err, accountId) {
+        if (err) {
             res.json(err);
         } else {
             Giftcard.find({
-                toId: accountId
-            })
-            //Added toId as we need the client to know the users name
-            .select('_id toId fromId amount iconId message')
-            //use populate to also returns the users name in the giftcards object!
-            .populate('fromId', 'name') // populate the actual user and only return their name
-            .populate('toId', 'name') //populate the actual user and only return their name
-            .exec(function(err, giftcards) {
-                if(err){
-                    return res.json({msg: "Couldn't search the database for session!",
-                            status: 500});
-                } else {
-                    res.json(giftcards);
-                }
-            });
+                    toId: accountId
+                })
+                //Added toId as we need the client to know the users name
+                .select('_id toId fromId amount iconId message')
+                //use populate to also returns the users name in the giftcards object!
+                .populate('fromId', 'name') // populate the actual user and only return their name
+                .populate('toId', 'name') //populate the actual user and only return their name
+                .exec(function(err, giftcards) {
+                    if (err) {
+                        return res.status(500).json({
+                            msg: "Couldn't search the database for session!"
+                        });
+                    } else {
+                        res.status(200).json(giftcards);
+                    }
+                });
         }
     });
 });
 
 /* Get a giftcard */
 router.get('/:id', function(req, res, next) {
-    SessionService.validateSession(req.query.sessionToken, "user", function(err, accountId){
-        if(err){
+    SessionService.validateSession(req.query.sessionToken, "user", function(err, accountId) {
+        if (err) {
             res.json(err);
         } else {
             Giftcard.findOne({
-                toId: accountId,
-                _id: req.params.id
-            })
-            //added the toId as we need the client to know the users name
-            .select('_id toId fromId amount iconId message')
-            //use populate to also returns the users name in the giftcards object!
-            .populate('fromId', 'name') // populate the actual user and only return their name
-            .populate('toId', 'name') //populate the actual user and only return their name
-            .exec(function(err, giftcard) {
-                if(err){
-                    res.json(err);
-                } else if(!giftcard){
-                    res.json({msg: "No giftard with that ID!",
-                        status: 404});
-                } else {
-                    res.json(giftcard);
-                }
-            });
+                    toId: accountId,
+                    _id: req.params.id
+                })
+                //added the toId as we need the client to know the users name
+                .select('_id toId fromId amount iconId message')
+                //use populate to also returns the users name in the giftcards object!
+                .populate('fromId', 'name') // populate the actual user and only return their name
+                .populate('toId', 'name') //populate the actual user and only return their name
+                .exec(function(err, giftcard) {
+                    if (err) {
+                        res.status(500).json(err);
+                    } else if (!giftcard) {
+                        res.status(404).json({
+                            msg: "No giftard with that ID!"
+                        });
+                    } else {
+                        res.status(200).json(giftcard);
+                    }
+                });
         }
     });
 });
 
 /* Update a giftcard */
 router.put('/:id', function(req, res, next) {
-  //Logic goes here
+    //Logic goes here
 });
 
 module.exports = router;
