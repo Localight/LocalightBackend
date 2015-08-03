@@ -63,8 +63,8 @@ describe('Giftcard Routes Tests', function() {
     * Create A gifcard - Test1
     */
    it('should be able to get a session token given the phone number is correct', function(done) {
-      agent.post('/users/join')
-         .send(user1)
+      agent.post('/users/twilio')
+         .send(textBody)
          .expect(200)
          .end(function(signinErr, signinRes) {
             // Handle Sign-In error
