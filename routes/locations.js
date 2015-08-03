@@ -121,7 +121,57 @@ router.delete('/:id', function(req, res, next) {
 
 /* Make a purchase at a location */
 router.post('/:id/spend', function(req, res, next) {
-    //Logic goes here
+    SessionService.validateSession(req.body.sessionToken, "owner", function(err, accountId) {
+        if (err) {
+            res.json(err);
+        } else {
+            Giftcard.find({
+                    toId: accountId,
+                    sent: true
+                })
+                .select('_id toId fromId amount iconId message')
+                .exec(function(err, giftcards) {
+                    if (err) {
+                        return res.status(500).json({
+                            msg: "Couldn't search the database for giftcard!"
+                        });
+                    } else {
+                        var total = 0;
+                        for (var i = 0; i < giftcards.length; i++) {
+                            total += giftcards[i].amount;
+                        }
+                        var chargeAmt = req.body.amount;
+                        if (chargeAmt > total) {
+                            res.status(402).json({
+                                msg: "Not enough funds."
+                            });
+                        } else {
+                            i = 0;
+                            while (chargeAmt > 0) {
+                                if (chargeAmt > giftcards[i].amount) {
+                                    Giftcard.find({
+                                        _id: giftcards[i]._id
+                                    }).remove(function() {
+
+                                    });
+                                    chargeAmt = chargeAmt - giftcards[i].amount;
+                                } else {
+                                    var newGcAmt = giftcards[i].amount - chargeAmt;
+                                    Giftcard.find({
+                                        _id: giftcards[i]._id
+                                    }).remove(function() {
+                                        
+                                    });
+                                    chargeAmt = chargeAmt - giftcards[i].amount;
+                                }
+
+                                i++;
+                            }
+                        }
+                    }
+                });
+        }
+    });
 });
 
 module.exports = router;
