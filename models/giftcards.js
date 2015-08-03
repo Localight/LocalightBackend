@@ -27,6 +27,14 @@ var Giftcard = new mongoose.Schema({
     },
     stripeOrderId: {
         type: String
+    },
+    sendDate: {
+        type: Date,
+        default: Date.now()
+    },
+    sent: {
+        type: Boolean,
+        default: false
     }
 });
 

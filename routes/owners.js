@@ -12,9 +12,8 @@ router.post('/join', function(req, res, next) {
             req.body.password &&
             req.body.name &&
             req.body.stripeCustomerId)) {
-        return res.json({
-            msg: "You must provide all required fields!",
-            status: 412
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
         });
     }
 
@@ -25,9 +24,8 @@ router.post('/join', function(req, res, next) {
         .select('_id')
         .exec(function(err, owner) {
             if (owner) {
-                res.json({
-                    msg: "Email already exists!",
-                    status: 409
+                res.status(409).json({
+                    msg: "Email already exists!"
                 });
             } else {
                 //Create a random salt
@@ -45,9 +43,8 @@ router.post('/join', function(req, res, next) {
                 }).save(function(err, owner) {
                     if (err) {
                         console.log("Error saving owner to DB!");
-                        res.json({
-                            msg: "Error saving owner to DB!",
-                            status: 500
+                        res.status(500).json({
+                            msg: "Error saving owner to DB!"
                         });
                     } else {
                         SessionService.generateSession(owner._id, "owner", function(err, token) {
@@ -55,9 +52,8 @@ router.post('/join', function(req, res, next) {
                                 res.json(err);
                             } else {
                                 //All good, give the owner their token
-                                res.json({
-                                    token: token,
-                                    status: 201
+                                res.status(201).json({
+                                    token: token
                                 });
                             }
                         });
@@ -73,9 +69,8 @@ router.post('/login', function(req, res, next) {
     //Check if required was sent
     if (!(req.body.email &&
             req.body.password)) {
-        return res.json({
-            msg: "You must provide all required fields!",
-            status: 412
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
         });
     }
     //Find an owner with the email requested. Select salt and password
@@ -85,14 +80,12 @@ router.post('/login', function(req, res, next) {
         .select('password salt _id')
         .exec(function(err, owner) {
             if (err) {
-                res.json({
-                    msg: "Couldn't search the database for owner!",
-                    status: 500
+                res.status(500).json({
+                    msg: "Couldn't search the database for owner!"
                 });
             } else if (!owner) {
-                res.json({
-                    msg: "Email does not exist!",
-                    status: 401
+                res.status(401).json({
+                    msg: "Email does not exist!"
                 });
             } else {
                 //Hash the requested password and salt
@@ -104,16 +97,14 @@ router.post('/login', function(req, res, next) {
                             res.json(err);
                         } else {
                             //All good, give the owner their token
-                            res.json({
-                                token: token,
-                                status: 200
+                            res.status(200).json({
+                                token: token
                             });
                         }
                     });
                 } else {
-                    res.json({
-                        msg: "Password is incorrect!",
-                        status: 401
+                    res.status(401).json({
+                        msg: "Password is incorrect!"
                     });
                 }
             }
