@@ -146,13 +146,13 @@ router.post('/:id/spend', function(req, res, next) {
                                 msg: "Not enough funds."
                             });
                         } else {
-                            i = 0;
+                            var i = 0;
                             while (chargeAmt > 0) {
                                 if (chargeAmt > giftcards[i].amount) {
                                     Giftcard.find({
                                         _id: giftcards[i]._id
-                                    }).remove(function() {
-
+                                    }).remove(function(err) {
+                                        console.log(err);
                                     });
                                     chargeAmt = chargeAmt - giftcards[i].amount;
                                 } else {
@@ -169,7 +169,7 @@ router.post('/:id/spend', function(req, res, next) {
                                         }, updateGiftcard)
                                         .exec(function(err, location) {
                                             if(err){
-
+                                                console.log(err);
                                             }
                                         })
                                     chargeAmt = chargeAmt - giftcards[i].amount;
