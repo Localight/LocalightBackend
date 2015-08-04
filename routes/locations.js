@@ -2,7 +2,8 @@ var express = require('express'),
     router = express.Router(),
     mongoose = require('mongoose'),
     SessionService = require('../services/sessions.js'),
-    Location = mongoose.model('Location');
+    Location = mongoose.model('Location'),
+    Giftcard = mongoose.model('Giftcard');
 
 /* Create a Location */
 router.post('/', function(req, res, next) {
@@ -121,7 +122,7 @@ router.delete('/:id', function(req, res, next) {
 
 /* Make a purchase at a location */
 router.post('/:id/spend', function(req, res, next) {
-    SessionService.validateSession(req.body.sessionToken, "owner", function(err, accountId) {
+    SessionService.validateSession(req.body.sessionToken, "user", function(err, accountId) {
         if (err) {
             res.json(err);
         } else {
@@ -177,6 +178,7 @@ router.post('/:id/spend', function(req, res, next) {
 
                                 i++;
                             }
+                            res.status(200).json({test: "complete?"});
                         }
                     }
                 });
