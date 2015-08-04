@@ -157,11 +157,21 @@ router.post('/:id/spend', function(req, res, next) {
                                     chargeAmt = chargeAmt - giftcards[i].amount;
                                 } else {
                                     var newGcAmt = giftcards[i].amount - chargeAmt;
-                                    Giftcard.find({
-                                        _id: giftcards[i]._id
-                                    }).remove(function() {
-                                        
-                                    });
+
+                                    var updateGiftcard = {
+                                        $set: {
+                                            amount: newGcAmt
+                                        }
+                                    }
+
+                                    Giftcard.update({
+                                            _id: giftcards[i]._id
+                                        }, updateGiftcard)
+                                        .exec(function(err, location) {
+                                            if(err){
+
+                                            }
+                                        })
                                     chargeAmt = chargeAmt - giftcards[i].amount;
                                 }
 
