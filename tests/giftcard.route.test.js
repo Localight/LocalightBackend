@@ -12,15 +12,14 @@ var should = require('should'),
  * Globals
  */
 
-var textBody, user1, user2, giftcardDump, giftcard;
+var textBody, user1, user2, giftcardDump, giftcard, leToken, giftcardUpdate;
 
 /**
  * Gitcard Routes Tests
  */
 
 describe('Giftcard Routes Tests', function() {
-
-   beforeEach(function(done) {
+   before(function() {
 
       //create a session token and associate it to our user
       user1 = new User({
@@ -29,21 +28,26 @@ describe('Giftcard Routes Tests', function() {
          phone: '+11234567890',
          password: 'password'
       });
-
       user2 = new User({
          name: 'test2 user2',
          email: 'test2@test.com',
          phone: '+11234567890',
          password: 'password'
       });
-
       textBody = {
          From: user1.phone,
          Body: 'Gift'
       };
-
+      giftcard = new Giftcard({
+         fromId: user1._id,
+         toId: user2._id,
+         amount: 3333,
+         iconId: 1232,
+         message: 'a gift for you',
+         stripeOrderId: 'ch_2343hsd',
+      });
       giftcardDump = {
-         sessionToken: 'something', // need session token
+         sessionToken: leToken, // need session token
          name: 'bob',
          phone: '1234567890',
          amount: 39393,
@@ -52,205 +56,144 @@ describe('Giftcard Routes Tests', function() {
          message: 'a gift for you!',
          stripeCardToken: 'ch_2h234'
       }; // end giftcard
-
+      giftcardUpdate = {
+         sessionToken: leToken,
+         iconId: '2342',
+         message: 'a new gift for you.'
+      };
       user2.save();
       user1.save(); // end user1 save
+      giftcard.save();
       // make call to twilio and get session token.
-      done();
+
    }); // end beforeEach
    // Create a way for us to test create of giftcard based on presence of session token or not.
-
-   /**
-    * Session Token
-    */
-   // it('should be able to get a session token given the phone number is correct', function(done) {
-   //    agent.post('/users/twilio')
-   //       .send(textBody)
-   //       .expect(200)
-   //       .end(function(signinErr, signinRes) {
-   //          // Handle Sign-In error
-   //
-   //          if (signinErr) {
-   //             console.log('this is the signin error' + JSON.stringify(signinErr.body));
-   //             done(signinErr);
-   //          }
-   //
-   //          if (signinRes) {
-   //             console.log('this is the sigin Response' + JSON.stringify(signinRes.text));
-   //             var holder = signinRes.text;
-   //             console.log(holder);
-   //
-   //             var something = holder.indexOf('e/');
-   //             var anotherThing = holder.substr(56, 96);
-   //             console.log('the value of the parsed string ' + anotherThing);
-   //             console.log(giftcard);
-   //             giftcardDump.sessionToken = anotherThing;
-   //
-   //             console.log(giftcardDump);
-   //             done(signinRes);
-   //          }
-   //          done();
-   //       });
-   // });
-
    /**
     * Create Gift Card
     */
-   it('should be able to save the giftcard successfully,  given correct parameter', function(done) {
+   it('should be able to save the giftcard successfully,  given correct parameter', function() {
       agent.post('/users/twilio')
          .send(textBody)
          .expect(200)
          .end(function(signinErr, signinRes) {
             // Handle Sign-In error
-
             if (signinErr) {
                console.log('this is the signin error' + JSON.stringify(signinErr.body));
-               done(signinErr);
             }
             var holder = signinRes.text;
             // console.log(holder);
-            var anotherThing = holder.substr(56, 96);
+            leToken = holder.substr(56, 96);
             // console.log('the value of the parsed string ' + anotherThing);
             // console.log(giftcard);
-            giftcardDump.sessionToken = anotherThing;
             agent.post('/giftcards')
                .send(giftcardDump)
                .expect(201)
                .end(function(giftcardSaveErr, giftcardSaveRes) {
                   if (giftcardSaveErr) {
                      console.log('got an error trying to save giftcard' + giftcardSaveErr);
-                     done(giftcardSaveErr);
                   }
                   // console.log('results of saving' + JSON.stringify(giftcardSaveRes));
-
                   should.not.exist(giftcardSaveErr);
-                  done();
                });
          });
    });
-
 
    /**
     * Get Gift Cards
     */
-   it('should be able to give back a list of giftcard, given correct parameter', function(done) {
-      agent.post('') // TODO: add in url
-         .send(credentials)
+   it('should be able to give back a list of giftcard, given correct parameter', function() {
+      agent.get('/giftcards') // TODO: add in url
+         .query({sessionToken:leToken})
          .expect(200)
-         .end(function(signinErr, signinRes) {
+         .end(function(giftcardGetErr, giftcardGetRes) {
             // Handle Sigin Error
-            if (signinErr) {
-               console.log('You had an error Signin in: ' + signinErr);
-               console.log('You got a successfully logged in:' + signinRes.body);
-               done(signinErr);
+            if (giftcardGetErr) {
+               console.log('You had an error Signin in: ' + giftcardGetErr);
+               console.log('You got a successfully logged in:' + giftcardGetRes.body);
             }
+            // if(giftcardGetRes){
+            //    console.log(giftcardGetRes.body);
+            // }
+            //NOTE: I need to come back, and fine tune this test.
+            should.not.exist(giftcardGetErr);
             // save a new giftcard
-            agent.post('/') // need the long rougte for this to work.
-               .send(Giftcard)
-               .expect(200)
-               .end(function(giftcardSaveErr, giftcardSaveRes) {
-                  // Handle giftcard save error
-                  if (giftcardSaveErr) {
-                     console.log('You had an error saving the giftcard: ' + giftcardSaveErr);
-                     done(giftcardSaveErr);
-                  }
-                  should.not.exist(giftcardSaveErr);
-                  done();
-               });
          });
    });
 
    /**
-    * Get A Gift Card
+    * Get Gift-Card by Id
     */
-   it('should be able to give back a giftcard, given correct parameter', function(done) {
-      agent.post('') // TODO: add in url
-         .send(credentials)
+
+   it('should be able to get a giftcard by id', function() {
+      agent.get('/giftcards/'+giftcard._id) // TODO: add in url
+         .query({sessionToken:leToken})
          .expect(200)
-         .end(function(signinErr, signinRes) {
+         .end(function(giftcardGetErr, giftcardGetRes) {
             // Handle Sigin Error
-            if (signinErr) {
-               console.log('You had an error Signin in: ' + signinErr);
-               console.log('You got a successfully logged in:' + signinRes.body);
-               done(signinErr);
+            if (giftcardGetErr) {
+               console.log('You had an error Signin in: ' + giftcardGetErr);
+               console.log('You got a successfully logged in:' + giftcardGetRes.body);
             }
+            // if(giftcardGetRes){
+            //    console.log(giftcardGetRes.body);
+            // }
+            //NOTE: I need to come back, and fine tune this test.
+            should.not.exist(giftcardGetErr);
             // save a new giftcard
-            agent.post('/') // need the long rougte for this to work.
-               .send(Giftcard)
-               .expect(200)
-               .end(function(giftcardSaveErr, giftcardSaveRes) {
-                  // Handle giftcard save error
-                  if (giftcardSaveErr) {
-                     console.log('You had an error saving the giftcard: ' + giftcardSaveErr);
-                     done(giftcardSaveErr);
-                  }
-                  should.not.exist(giftcardSaveErr);
-                  done();
-               });
+         });
+   });
+   /**
+    * Get Gift-Card by Id
+    */
+
+   it('should be able update giftcard by id', function() {
+      agent.put('/giftcards/'+giftcard._id) // TODO: add in url
+         .send(giftcardUpdate)
+         .expect(200)
+         .end(function(giftcardGetErr, giftcardGetRes) {
+            // Handle Sigin Error
+            if (giftcardGetErr) {
+               console.log('You had an error Signin in: ' + giftcardGetErr);
+               console.log('You got a successfully logged in:' + giftcardGetRes.body);
+            }
+            // if(giftcardGetRes){
+            //    console.log('you successfully got backa  giftcard'+giftcardGetRes.body);
+            // }
+            //NOTE: I need to come back, and fine tune this test.
+            should.not.exist(giftcardGetErr);
+            // save a new giftcard
          });
    });
 
    // /**
-   //   * Update A gifcard - Test1
-   //   */
-   //  it('should be able to save the giftcard successfully,  given correct parameter', function(done){
-   //     agent.post()// TODO: add in url
-   //     .send(credentials)
-   //     .expect(200)
-   //     .end(function(signinErr, signinRes){
-   //        // Handle Sigin Error
-   //        if(signinErr){
-   //           console.log('You had an error Signin in: '+signinErr);
-   //           console.log('You got a successfully logged in:'+signinRes.body);
-   //           done(signinErr);
-   //        }
-   //        // save a new giftcard
-   //        agent.post('/')// need the long rougte for this to work.
-   //        .send(Giftcard)
-   //        .expect(200)
-   //        .end(function(giftcardSaveErr, giftcardSaveRes){
-   //           // Handle giftcard save error
-   //           if(giftcardSaveErr){
-   //              console.log('You had an error saving the giftcard: '+ giftcardSaveErr);
-   //              done(giftcardSaveErr);
-   //           }
-   //           should.not.exist(giftcardSaveErr);
-   //           done();
-   //        });
-   //     });
-   //  });
-   // /**
-   //   * Get A gifcard - Test1
-   //   */
-   // it('should be able to save the giftcard successfully,  given correct parameter', function(done){
-   //    agent.post()// TODO: add in url
-   //    .send(credentials)
-   //    .expect(200)
-   //    .end(function(signinErr, signinRes){
-   //       // Handle Sigin Error
-   //       if(signinErr){
-   //          console.log('You had an error Signin in: '+signinErr);
-   //          console.log('You got a successfully logged in:'+signinRes.body);
-   //          done(signinErr);
-   //       }
-   //       // save a new giftcard
-   //       agent.post('/')// need the long rougte for this to work.
-   //       .send(Giftcard)
+   //  * Get A Gift Card
+   //  */
+   // it('should be able to give back a giftcard, given correct parameter', function() {
+   //    agent.get('/giftcards') // TODO: add in ur
+   //       .query({sessionToken:leToken})
    //       .expect(200)
-   //       .end(function(giftcardSaveErr, giftcardSaveRes){
-   //          // Handle giftcard save error
-   //          if(giftcardSaveErr){
-   //             console.log('You had an error saving the giftcard: '+ giftcardSaveErr);
-   //             done(giftcardSaveErr);
+   //       .end(function(signinErr, signinRes) {
+   //          // Handle Sigin Error
+   //          if (signinErr) {
+   //             console.log('You had an error Signin in: ' + signinErr);
+   //             console.log('You got a successfully logged in:' + signinRes.body);
    //          }
-   //          should.not.exist(giftcardSaveErr);
-   //          done();
+   //          // save a new giftcard
+   //          agent.post('/') // need the long rougte for this to work.
+   //             .send(Giftcard)
+   //             .expect(200)
+   //             .end(function(giftcardSaveErr, giftcardSaveRes) {
+   //                // Handle giftcard save error
+   //                if (giftcardSaveErr) {
+   //                   console.log('You had an error saving the giftcard: ' + giftcardSaveErr);
+   //                }
+   //                should.not.exist(giftcardSaveErr);
+   //             });
    //       });
-   //    });
    // });
-   afterEach(function(done) {
+
+   after(function() {
       User.remove().exec();
       Giftcard.remove().exec();
-      done();
    });
 });

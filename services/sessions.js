@@ -7,8 +7,7 @@ exports.validateSession = function(token, type, callback) {
     Session.findOne({
             token: token,
             type: type
-        })
-        .select('accountId')
+        }).select('accountId')
         .exec(function(err, session) {
             if (err) {
                 callback({
