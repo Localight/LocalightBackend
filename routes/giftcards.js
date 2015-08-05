@@ -10,7 +10,7 @@ var express = require('express'),
     User = mongoose.model('User');
 
 /* Create a giftcard */
-router.post('/', function(req, res, next) {
+router.post('/', function(req, res) {
     //Check if required was sent
     if (!(req.body.sessionToken &&
             req.body.name &&
@@ -153,7 +153,7 @@ router.post('/', function(req, res, next) {
 });
 
 /* Get giftcards */
-router.get('/', function(req, res, next) {
+router.get('/', function(req, res) {
     //Check if required was sent
     if (!req.query.sessionToken) {
         return res.status(412).json({
@@ -188,7 +188,7 @@ router.get('/', function(req, res, next) {
 });
 
 /* Get a giftcard */
-router.get('/:id', function(req, res, next) {
+router.get('/:id', function(req, res) {
     //Check if required was sent
     if (!req.query.sessionToken) {
         return res.status(412).json({
@@ -225,7 +225,7 @@ router.get('/:id', function(req, res, next) {
 });
 
 /* Update a giftcard */
-router.put('/:id', function(req, res, next) {
+router.put('/:id', function(req, res) {
     //Logic goes here
 });
 

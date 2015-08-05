@@ -6,7 +6,7 @@ var express = require('express'),
     User = mongoose.model('User');
 
 /* User Login */
-router.post('/login', function(req, res, next) {
+router.post('/login', function(req, res) {
     //Check if required was sent
     if (!(req.body.password &&
         req.body.phone)) {
@@ -54,7 +54,7 @@ router.post('/login', function(req, res, next) {
 });
 
 /* User Join Through Twilio */
-router.post('/twilio', function(req, res, next) {
+router.post('/twilio', function(req, res) {
     //Check if required was sent
     if (!(req.body.Body &&
         req.body.From)) {
@@ -109,7 +109,7 @@ router.post('/twilio', function(req, res, next) {
 });
 
 /* Reset Password */
-router.post('/reset', function(req, res, next) {
+router.post('/reset', function(req, res) {
     //Logic goes here
 });
 
@@ -161,7 +161,7 @@ router.put('/', function(req, res, next) {
 });
 
 /* Get a user */
-router.get('/', function(req, res, next) {
+router.get('/', function(req, res) {
     //Check if required was sent
     if (!req.query.sessionToken) {
         return res.status(412).json({
@@ -195,7 +195,7 @@ router.get('/', function(req, res, next) {
 });
 
 /* Delete a user */
-router.delete('/:id', function(req, res, next) {
+router.delete('/:id', function(req, res) {
     //Logic goes here
 });
 
