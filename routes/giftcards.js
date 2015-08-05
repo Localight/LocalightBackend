@@ -11,7 +11,20 @@ var express = require('express'),
 
 /* Create a giftcard */
 router.post('/', function(req, res, next) {
-    if (req.body.phone.length > 10 || req.body.phone.length < 10) {
+    //Check if required was sent
+    if (!(req.body.sessionToken &&
+            req.body.name &&
+            req.body.phone &&
+            req.body.amount && req.body.amount > 0 && req.body.amount < 50000 &&
+            req.body.iconId &&
+            req.body.message &&
+            req.body.stripeCardToken)) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+
+    if (req.body.phone.length != 10) {
         return res.status(412).json({
             msg: "Invalid Phone Number (only xxxxxxxxxx)!"
         });
@@ -55,11 +68,7 @@ router.post('/', function(req, res, next) {
     });
 
     function createGift(accountId, toId, req) {
-        if (!accountId ||
-            !toId ||
-            !req.body.amount || !(req.body.amount > 0) || !(req.body.amount < 50000) ||
-            !req.body.iconId ||
-            !req.body.message) {
+        if (!accountId || !toId) {
             return res.status(412).json({
                 msg: "You must provide toId, 0<amount<50000, iconId and message."
             });
@@ -145,6 +154,13 @@ router.post('/', function(req, res, next) {
 
 /* Get giftcards */
 router.get('/', function(req, res, next) {
+    //Check if required was sent
+    if (!req.query.sessionToken) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+
     //Validate session
     SessionService.validateSession(req.query.sessionToken, "user", function(err, accountId) {
         if (err) {
@@ -173,6 +189,13 @@ router.get('/', function(req, res, next) {
 
 /* Get a giftcard */
 router.get('/:id', function(req, res, next) {
+    //Check if required was sent
+    if (!req.query.sessionToken) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+
     SessionService.validateSession(req.query.sessionToken, "user", function(err, accountId) {
         if (err) {
             res.json(err);
