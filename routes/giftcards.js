@@ -10,7 +10,7 @@ var express = require('express'),
     User = mongoose.model('User');
 
 /* Create a giftcard */
-router.post('/', function(req, res, next) {
+router.post('/', function(req, res) {
     if (req.body.phone.length > 10 || req.body.phone.length < 10) {
         return res.status(412).json({
             msg: "Invalid Phone Number (only xxxxxxxxxx)!"
@@ -144,7 +144,7 @@ router.post('/', function(req, res, next) {
 });
 
 /* Get giftcards */
-router.get('/', function(req, res, next) {
+router.get('/', function(req, res) {
     //Validate session
     SessionService.validateSession(req.query.sessionToken, "user", function(err, accountId) {
         if (err) {
@@ -172,7 +172,7 @@ router.get('/', function(req, res, next) {
 });
 
 /* Get a giftcard */
-router.get('/:id', function(req, res, next) {
+router.get('/:id', function(req, res) {
     SessionService.validateSession(req.query.sessionToken, "user", function(err, accountId) {
         if (err) {
             res.json(err);
@@ -202,7 +202,7 @@ router.get('/:id', function(req, res, next) {
 });
 
 /* Update a giftcard */
-router.put('/:id', function(req, res, next) {
+router.put('/:id', function(req, res) {
     //Logic goes here
 });
 

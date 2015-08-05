@@ -6,7 +6,7 @@ var express = require('express'),
     User = mongoose.model('User');
 
 /* User Login */
-router.post('/login', function(req, res, next) {
+router.post('/login', function(req, res) {
     //Find a user with the username requested. Select salt and password
     User.findOne({
             phone: req.body.phone
@@ -52,7 +52,7 @@ router.post('/login', function(req, res, next) {
 });
 
 /* User Join Through Twilio */
-router.post('/twilio', function(req, res, next) {
+router.post('/twilio', function(req, res) {
     //Trim phone number
     var phone = req.body.From.substring(2);
     if (req.body.Body == "Gift") {
@@ -99,12 +99,12 @@ router.post('/twilio', function(req, res, next) {
 });
 
 /* Reset Password */
-router.post('/reset', function(req, res, next) {
+router.post('/reset', function(req, res) {
     //Logic goes here
 });
 
 /* Update a user */
-router.put('/', function(req, res, next) {
+router.put('/', function(req, res) {
     SessionService.validateSession(req.body.sessionToken, "user", function(err, accountId) {
         if (err) {
             res.json(err);
@@ -144,7 +144,7 @@ router.put('/', function(req, res, next) {
 });
 
 /* Get a user */
-router.get('/', function(req, res, next) {
+router.get('/', function(req, res) {
     SessionService.validateSession(req.query.sessionToken, "user", function(err, accountId) {
         if (err) {
             res.json(err);
@@ -171,7 +171,7 @@ router.get('/', function(req, res, next) {
 });
 
 /* Delete a user */
-router.delete('/:id', function(req, res, next) {
+router.delete('/:id', function(req, res) {
     //Logic goes here
 });
 
