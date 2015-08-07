@@ -6,7 +6,15 @@ var express = require('express'),
     User = mongoose.model('User');
 
 /* User Login */
-router.post('/login', function(req, res, next) {
+router.post('/login', function(req, res) {
+    //Check if required was sent
+    if (!(req.body.password &&
+        req.body.phone)) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+
     //Find a user with the username requested. Select salt and password
     User.findOne({
             phone: req.body.phone
@@ -22,37 +30,39 @@ router.post('/login', function(req, res, next) {
                     msg: "Username does not exist!"
                 });
             } else {
-                if (!req.body.password || !req.body.phone) {
-                    res.status(412).json({
-                        msg: "You must provide a phone and password!"
+                //Hash the requested password and salt
+                var hash = crypto.pbkdf2Sync(req.body.password, user.salt, 10000, 512);
+                //Compare to stored hash
+                if (hash == user.password) {
+                    SessionService.generateSession(user._id, "user", function(err, token) {
+                        if (err) {
+                            res.json(err);
+                        } else {
+                            //All good, give the user their token
+                            res.status(200).json({
+                                token: token
+                            });
+                        }
                     });
                 } else {
-                    //Hash the requested password and salt
-                    var hash = crypto.pbkdf2Sync(req.body.password, user.salt, 10000, 512);
-                    //Compare to stored hash
-                    if (hash == user.password) {
-                        SessionService.generateSession(user._id, "user", function(err, token) {
-                            if (err) {
-                                res.json(err);
-                            } else {
-                                //All good, give the user their token
-                                res.status(200).json({
-                                    token: token
-                                });
-                            }
-                        });
-                    } else {
-                        res.status(401).json({
-                            msg: "Password is incorrect!"
-                        });
-                    }
+                    res.status(401).json({
+                        msg: "Password is incorrect!"
+                    });
                 }
             }
         });
 });
 
 /* User Join Through Twilio */
-router.post('/twilio', function(req, res, next) {
+router.post('/twilio', function(req, res) {
+    //Check if required was sent
+    if (!(req.body.Body &&
+        req.body.From)) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+
     //Trim phone number
     var phone = req.body.From.substring(2);
     if (req.body.Body == "Gift") {
@@ -99,12 +109,19 @@ router.post('/twilio', function(req, res, next) {
 });
 
 /* Reset Password */
-router.post('/reset', function(req, res, next) {
+router.post('/reset', function(req, res) {
     //Logic goes here
 });
 
 /* Update a user */
 router.put('/', function(req, res, next) {
+    //Check if required was sent
+    if (!req.body.sessionToken) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+
     SessionService.validateSession(req.body.sessionToken, "user", function(err, accountId) {
         if (err) {
             res.json(err);
@@ -144,7 +161,14 @@ router.put('/', function(req, res, next) {
 });
 
 /* Get a user */
-router.get('/', function(req, res, next) {
+router.get('/', function(req, res) {
+    //Check if required was sent
+    if (!req.query.sessionToken) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+
     SessionService.validateSession(req.query.sessionToken, "user", function(err, accountId) {
         if (err) {
             res.json(err);
@@ -171,7 +195,7 @@ router.get('/', function(req, res, next) {
 });
 
 /* Delete a user */
-router.delete('/:id', function(req, res, next) {
+router.delete('/:id', function(req, res) {
     //Logic goes here
 });
 
