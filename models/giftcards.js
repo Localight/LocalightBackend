@@ -26,7 +26,9 @@ var Giftcard = new mongoose.Schema({
         required: 'message is required'
     },
     stripeOrderId: {
-        type: String
+        type: String,
+        match: [/ch_[\w\d._%+-]+/, 'This value entered for the stripeId does not match ({VALUE})'],
+        required: 'Please provide the stripeOrderId in the correct format.'
     },
     sendDate: {
         type: Date,

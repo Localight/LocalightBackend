@@ -77,9 +77,7 @@ describe('Giftcard Routes Tests', function() {
          .expect(200)
          .end(function(signinErr, signinRes) {
             // Handle Sign-In error
-            if (signinErr) {
-               console.log('this is the signin error' + JSON.stringify(signinErr.body));
-            }
+            
             var holder = signinRes.text;
             // console.log(holder);
             leToken = holder.substr(56, 96);
@@ -89,9 +87,6 @@ describe('Giftcard Routes Tests', function() {
                .send(giftcardDump)
                .expect(201)
                .end(function(giftcardSaveErr, giftcardSaveRes) {
-                  if (giftcardSaveErr) {
-                     console.log('got an error trying to save giftcard' + giftcardSaveErr);
-                  }
                   // console.log('results of saving' + JSON.stringify(giftcardSaveRes));
                   should.not.exist(giftcardSaveErr);
                });
@@ -106,14 +101,6 @@ describe('Giftcard Routes Tests', function() {
          .query({sessionToken:leToken})
          .expect(200)
          .end(function(giftcardGetErr, giftcardGetRes) {
-            // Handle Sigin Error
-            if (giftcardGetErr) {
-               console.log('You had an error Signin in: ' + giftcardGetErr);
-               console.log('You got a successfully logged in:' + giftcardGetRes.body);
-            }
-            // if(giftcardGetRes){
-            //    console.log(giftcardGetRes.body);
-            // }
             //NOTE: I need to come back, and fine tune this test.
             should.not.exist(giftcardGetErr);
             // save a new giftcard
@@ -129,69 +116,12 @@ describe('Giftcard Routes Tests', function() {
          .query({sessionToken:leToken})
          .expect(200)
          .end(function(giftcardGetErr, giftcardGetRes) {
-            // Handle Sigin Error
-            if (giftcardGetErr) {
-               console.log('You had an error Signin in: ' + giftcardGetErr);
-               console.log('You got a successfully logged in:' + giftcardGetRes.body);
-            }
-            // if(giftcardGetRes){
-            //    console.log(giftcardGetRes.body);
-            // }
+
             //NOTE: I need to come back, and fine tune this test.
             should.not.exist(giftcardGetErr);
             // save a new giftcard
          });
    });
-   /**
-    * Get Gift-Card by Id
-    */
-
-   it('should be able update giftcard by id', function() {
-      agent.put('/giftcards/'+giftcard._id) // TODO: add in url
-         .send(giftcardUpdate)
-         .expect(200)
-         .end(function(giftcardGetErr, giftcardGetRes) {
-            // Handle Sigin Error
-            if (giftcardGetErr) {
-               console.log('You had an error Signin in: ' + giftcardGetErr);
-               console.log('You got a successfully logged in:' + giftcardGetRes.body);
-            }
-            // if(giftcardGetRes){
-            //    console.log('you successfully got backa  giftcard'+giftcardGetRes.body);
-            // }
-            //NOTE: I need to come back, and fine tune this test.
-            should.not.exist(giftcardGetErr);
-            // save a new giftcard
-         });
-   });
-
-   // /**
-   //  * Get A Gift Card
-   //  */
-   // it('should be able to give back a giftcard, given correct parameter', function() {
-   //    agent.get('/giftcards') // TODO: add in ur
-   //       .query({sessionToken:leToken})
-   //       .expect(200)
-   //       .end(function(signinErr, signinRes) {
-   //          // Handle Sigin Error
-   //          if (signinErr) {
-   //             console.log('You had an error Signin in: ' + signinErr);
-   //             console.log('You got a successfully logged in:' + signinRes.body);
-   //          }
-   //          // save a new giftcard
-   //          agent.post('/') // need the long rougte for this to work.
-   //             .send(Giftcard)
-   //             .expect(200)
-   //             .end(function(giftcardSaveErr, giftcardSaveRes) {
-   //                // Handle giftcard save error
-   //                if (giftcardSaveErr) {
-   //                   console.log('You had an error saving the giftcard: ' + giftcardSaveErr);
-   //                }
-   //                should.not.exist(giftcardSaveErr);
-   //             });
-   //       });
-   // });
-
    after(function() {
       User.remove().exec();
       Giftcard.remove().exec();
