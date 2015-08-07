@@ -77,7 +77,7 @@ describe('Giftcard Routes Tests', function() {
          .expect(200)
          .end(function(signinErr, signinRes) {
             // Handle Sign-In error
-            
+
             var holder = signinRes.text;
             // console.log(holder);
             leToken = holder.substr(56, 96);
@@ -116,7 +116,6 @@ describe('Giftcard Routes Tests', function() {
          .query({sessionToken:leToken})
          .expect(200)
          .end(function(giftcardGetErr, giftcardGetRes) {
-
             //NOTE: I need to come back, and fine tune this test.
             should.not.exist(giftcardGetErr);
             // save a new giftcard
