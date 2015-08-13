@@ -35,6 +35,7 @@ var Location = new mongoose.Schema({
     },
     ownerId: {
         type: String,
+        ref: 'Owner',
         require: 'please proivde an owner for the business.'
     },
     //NOTE: for business to be more precise later on consider added in geo location, around here somewhere.
