@@ -149,32 +149,27 @@ router.post('/:id/spend', function(req, res, next) {
                         } else {
                             var i = 0;
                             while (chargeAmt > 0) {
+                                var newGcAmt;
                                 if (chargeAmt > giftcards[i].amount) {
-                                    Giftcard.find({
-                                        _id: giftcards[i]._id
-                                    }).remove(function(err) {
-                                        console.log(err);
-                                    });
-                                    chargeAmt = chargeAmt - giftcards[i].amount;
+                                    newGcAmt = 0;
                                 } else {
-                                    var newGcAmt = giftcards[i].amount - chargeAmt;
-
-                                    var updateGiftcard = {
-                                        $set: {
-                                            amount: newGcAmt
-                                        }
-                                    }
-
-                                    Giftcard.update({
-                                            _id: giftcards[i]._id
-                                        }, updateGiftcard)
-                                        .exec(function(err, location) {
-                                            if(err){
-                                                console.log(err);
-                                            }
-                                        })
-                                    chargeAmt = chargeAmt - giftcards[i].amount;
+                                    newGcAmt = giftcards[i].amount - chargeAmt;
                                 }
+                                var updateGiftcard = {
+                                    $set: {
+                                        amount: newGcAmt
+                                    }
+                                }
+
+                                Giftcard.update({
+                                        _id: giftcards[i]._id
+                                    }, updateGiftcard)
+                                    .exec(function(err, location) {
+                                        if(err){
+                                            console.log(err);
+                                        }
+                                    });
+                                chargeAmt = chargeAmt - giftcards[i].amount;
 
                                 i++;
                             }
