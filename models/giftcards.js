@@ -17,6 +17,12 @@ var Giftcard = new mongoose.Schema({
         max: 50000,
         required: 'amount between 0 and 50000'
     },
+    origAmount: {
+        type: Number,
+        min: 0,
+        max: 50000,
+        required: 'amount between 0 and 50000'
+    },
     iconId: {
         type: Number,
         required: 'iconId is required'

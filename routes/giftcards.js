@@ -99,6 +99,7 @@ router.post('/', function(req, res, next) {
             fromId: accountId,
             toId: toId,
             amount: req.body.amount,
+            origAmount: req.body.amount,
             iconId: req.body.iconId,
             message: req.body.message,
             stripeOrderId: charge.id,
@@ -154,7 +155,7 @@ router.get('/', function(req, res, next) {
                     toId: accountId
                 })
                 //Added toId as we need the client to know the users name
-                .select('_id toId fromId amount iconId message')
+                .select('_id toId fromId amount origAmount iconId message')
                 //use populate to also returns the users name in the giftcards object!
                 .populate('fromId', 'name') // populate the actual user and only return their name
                 .populate('toId', 'name') //populate the actual user and only return their name
@@ -182,7 +183,7 @@ router.get('/:id', function(req, res, next) {
                     _id: req.params.id
                 })
                 //added the toId as we need the client to know the users name
-                .select('_id toId fromId amount iconId message')
+                .select('_id toId fromId amount origAmount iconId message')
                 //use populate to also returns the users name in the giftcards object!
                 .populate('fromId', 'name') // populate the actual user and only return their name
                 .populate('toId', 'name') //populate the actual user and only return their name
