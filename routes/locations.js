@@ -3,6 +3,7 @@ var express = require('express'),
     mongoose = require('mongoose'),
     SessionService = require('../services/sessions.js'),
     Location = mongoose.model('Location'),
+    Transaction = mongoose.model('Transaction'),
     Giftcard = mongoose.model('Giftcard');
 
 /* Create a Location */
