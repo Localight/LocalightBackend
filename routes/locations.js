@@ -173,7 +173,7 @@ router.post('/:id/spend', function(req, res, next) {
 
                                 i++;
                             }
-                            res.status(200).json({test: "complete?"});
+                            res.status(200).json({msg: "Charge was completed!"});
                         }
                     }
                 });
