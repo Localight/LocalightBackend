@@ -128,6 +128,7 @@ router.post('/:id/spend', function(req, res, next) {
         } else {
             Giftcard.find({
                     toId: accountId,
+                    amount: { $gt: 0 },
                     sent: true
                 })
                 .select('_id toId fromId amount iconId message')
