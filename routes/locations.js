@@ -131,7 +131,7 @@ router.post('/:id/spend', function(req, res, next) {
                     amount: { $gt: 0 },
                     sent: true
                 })
-                .select('_id toId fromId amount iconId message')
+                .select('_id amount')
                 .exec(function(err, giftcards) {
                     if (err) {
                         return res.status(500).json({
