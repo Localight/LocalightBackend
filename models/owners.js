@@ -4,6 +4,10 @@ var Owner = new mongoose.Schema({
         type: String,
         require: 'Please provide the name of the owner'
     },
+    triconKey: {
+        type: String,
+        require: 'Please provide the tricon key of the owner'
+    },
     stripeCustomerId: {
         type: String,
         require: 'Please provide the Stripe customer id of the owner'
