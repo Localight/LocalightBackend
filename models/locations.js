@@ -38,6 +38,12 @@ var Location = new mongoose.Schema({
         ref: 'Owner',
         require: 'please proivde an owner for the business.'
     },
+    subIds: [{
+        subId: {
+            type: String,
+            ref: 'Owner'
+        }
+    }]
     //NOTE: for business to be more precise later on consider added in geo location, around here somewhere.
 });
 
