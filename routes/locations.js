@@ -130,7 +130,9 @@ router.post('/:id/spend', function(req, res, next) {
             //Find all valid giftcards for the user
             Giftcard.find({
                     toId: accountId,
-                    amount: { $gt: 0 },
+                    amount: {
+                        $gt: 0
+                    },
                     sent: true
                 })
                 .select('_id amount')
@@ -166,16 +168,16 @@ router.post('/:id/spend', function(req, res, next) {
                                 }
                                 //Prepare the deducted card balance
                                 var updateGiftcard = {
-                                    $set: {
-                                        amount: newGcAmt
+                                        $set: {
+                                            amount: newGcAmt
+                                        }
                                     }
-                                }
-                                //Deduct from the card balance
+                                    //Deduct from the card balance
                                 Giftcard.update({
                                         _id: giftcards[i]._id
                                     }, updateGiftcard)
                                     .exec(function(err, location) {
-                                        if(err){
+                                        if (err) {
                                             console.log(err);
                                         }
                                     });
@@ -183,7 +185,9 @@ router.post('/:id/spend', function(req, res, next) {
                                 chargeAmt = chargeAmt - giftcards[i].amount;
                                 i++;
                             }
-                            res.status(200).json({msg: "Charge was completed!"});
+                            res.status(200).json({
+                                msg: "Charge was completed!"
+                            });
                         }
                     }
                 });
