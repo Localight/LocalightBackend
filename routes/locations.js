@@ -10,7 +10,6 @@ var express = require('express'),
 router.post('/', function(req, res, next) {
     //Check if required was sent
     if (!(req.body.name &&
-            req.body.triconKey &&
             req.body.address1 &&
             req.body.sessionToken)) {
         return res.status(412).json({
@@ -23,7 +22,6 @@ router.post('/', function(req, res, next) {
         } else {
             new Location({
                 name: req.body.name,
-                triconKey: req.body.triconKey,
                 address1: req.body.address1,
                 address2: req.body.address2,
                 city: req.body.city,

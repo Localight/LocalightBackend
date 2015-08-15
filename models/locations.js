@@ -11,10 +11,6 @@ var Location = new mongoose.Schema({
         type: String,
         require: 'Please provide the name of the location'
     },
-    triconKey: {
-        type: String,
-        require: 'Please provide the tricon key of the location'
-    },
     address1: {
         type: String,
         require: 'Please provide the address of the business'
