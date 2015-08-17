@@ -17,51 +17,70 @@ router.post('/join', function(req, res, next) {
         });
     }
 
-    //Check if an owner with that email already exists
-    Owner.findOne({
-            email: req.body.email
-        })
-        .select('_id')
-        .exec(function(err, owner) {
-            if (owner) {
-                res.status(409).json({
-                    msg: "Email already exists!"
-                });
-            } else {
-                //Create a random salt
-                var salt = crypto.randomBytes(128).toString('base64');
-                //Create a unique hash from the provided password and salt
-                var hash = crypto.pbkdf2Sync(req.body.password, salt, 10000, 512);
-                //Create a new owner with the assembled information
-                new Owner({
-                    name: req.body.name,
-                    stripeCustomerId: req.body.stripeCustomerId,
-                    email: req.body.email,
-                    password: hash,
-                    salt: salt,
-                    updated: Date.now()
-                }).save(function(err, owner) {
-                    if (err) {
-                        console.log("Error saving owner to DB!");
-                        res.status(500).json({
-                            msg: "Error saving owner to DB!"
-                        });
-                    } else {
-                        SessionService.generateSession(owner._id, "owner", function(err, token) {
-                            if (err) {
-                                res.json(err);
-                            } else {
-                                //All good, give the owner their token
-                                res.status(201).json({
-                                    token: token
+    //Generate until unique code is found
+    var codeValid = false;
+    while(!codeValid){
+        var giftCode = Math.floor(Math.random()*90000) + 10000;
+
+        Owner.findOne({
+                code: giftCode
+            })
+            .select('_id')
+            .exec(function(err, owner) {
+                if (owner) {
+                    res.status(409).json({
+                        msg: "Code already exists!"
+                    });
+                } else {
+                    var codeValid = true;
+                    //Check if an owner with that email already exists
+                    Owner.findOne({
+                            email: req.body.email
+                        })
+                        .select('_id')
+                        .exec(function(err, owner) {
+                            if (owner) {
+                                res.status(409).json({
+                                    msg: "Email already exists!"
                                 });
+                            } else {
+                                //Create a random salt
+                                var salt = crypto.randomBytes(128).toString('base64');
+                                //Create a unique hash from the provided password and salt
+                                var hash = crypto.pbkdf2Sync(req.body.password, salt, 10000, 512);
+                                //Create a new owner with the assembled information
+                                new Owner({
+                                    name: req.body.name,
+                                    stripeCustomerId: req.body.stripeCustomerId,
+                                    email: req.body.email,
+                                    password: hash,
+                                    salt: salt,
+                                    updated: Date.now()
+                                }).save(function(err, owner) {
+                                    if (err) {
+                                        console.log("Error saving owner to DB!");
+                                        res.status(500).json({
+                                            msg: "Error saving owner to DB!"
+                                        });
+                                    } else {
+                                        SessionService.generateSession(owner._id, "owner", function(err, token) {
+                                            if (err) {
+                                                res.json(err);
+                                            } else {
+                                                //All good, give the owner their token
+                                                res.status(201).json({
+                                                    token: token
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+
                             }
                         });
-                    }
-                });
-
-            }
-        });
+                }
+            });
+    }
 });
 
 /* Owner Login */
