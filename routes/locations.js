@@ -179,39 +179,52 @@ router.post('/:id/spend', function(req, res, next) {
                                         msg: "Not enough funds."
                                     });
                                 } else {
-                                    //Run until chargeAmount is satisfied
-                                    var i = 0;
-                                    while (chargeAmt > 0) {
-                                        //Store the deducted giftcard amount
-                                        var newGcAmt;
-                                        if (chargeAmt > giftcards[i].amount) {
-                                            //chargeAmount greater than giftcard, 0 the giftcard
-                                            newGcAmt = 0;
-                                        } else {
-                                            //Deduct the chargeAmount from giftcard
-                                            newGcAmt = giftcards[i].amount - chargeAmt;
-                                        }
-                                        //Prepare the deducted card balance
-                                        var updateGiftcard = {
-                                                $set: {
-                                                    amount: newGcAmt
-                                                }
-                                            }
-                                            //Deduct from the card balance
-                                        Giftcard.update({
-                                                _id: giftcards[i]._id
-                                            }, updateGiftcard)
-                                            .exec(function(err, location) {
-                                                if (err) {
-                                                    console.log(err);
-                                                }
+                                    new Transaction({
+                                        userId: accountId,
+                                        locationId: req.params.id,
+                                        amount: chargeAmt
+                                    }).save(function(err, transaction) {
+                                        if (err) {
+                                            console.log("Error saving charge to DB!");
+                                            res.status(500).json({
+                                                msg: "Error saving charge to DB!"
                                             });
-                                        //Subtract from the remaining amount to be charged
-                                        chargeAmt = chargeAmt - giftcards[i].amount;
-                                        i++;
-                                    }
-                                    res.status(200).json({
-                                        msg: "Charge was completed!"
+                                        } else {
+                                            //Run until chargeAmount is satisfied
+                                            var i = 0;
+                                            while (chargeAmt > 0) {
+                                                //Store the deducted giftcard amount
+                                                var newGcAmt;
+                                                if (chargeAmt > giftcards[i].amount) {
+                                                    //chargeAmount greater than giftcard, 0 the giftcard
+                                                    newGcAmt = 0;
+                                                } else {
+                                                    //Deduct the chargeAmount from giftcard
+                                                    newGcAmt = giftcards[i].amount - chargeAmt;
+                                                }
+                                                //Prepare the deducted card balance
+                                                var updateGiftcard = {
+                                                        $set: {
+                                                            amount: newGcAmt
+                                                        }
+                                                    }
+                                                    //Deduct from the card balance
+                                                Giftcard.update({
+                                                        _id: giftcards[i]._id
+                                                    }, updateGiftcard)
+                                                    .exec(function(err, location) {
+                                                        if (err) {
+                                                            console.log(err);
+                                                        }
+                                                    });
+                                                //Subtract from the remaining amount to be charged
+                                                chargeAmt = chargeAmt - giftcards[i].amount;
+                                                i++;
+                                            }
+                                            res.status(200).json({
+                                                msg: "Charge was completed!"
+                                            });
+                                        }
                                     });
                                 }
                             }
