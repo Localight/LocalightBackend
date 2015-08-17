@@ -14,8 +14,8 @@ var Transaction = new mongoose.Schema({
         type: String,
         require:'Please provide the session token'
     },
-    errors: [{
-        error: {
+    errs: [{
+        err: {
             type: String
         }
     }]

@@ -217,7 +217,7 @@ router.post('/:id/spend', function(req, res, next) {
                                                             //Prepare the error
                                                             var transactionError = {
                                                                     $push: {
-                                                                        errors: {err}
+                                                                        errs: {err: err}
                                                                     }
                                                                 }
                                                             Transaction.update({
