@@ -157,7 +157,7 @@ router.post('/', function(req, res) {
 router.get('/', function(req, res) {
     //Check if required was sent
     if (!req.query.sessionToken) {
-        return res.status(412).json();
+        return res.status(412);
     }
 
     //Validate session
