@@ -214,7 +214,20 @@ router.post('/:id/spend', function(req, res, next) {
                                                     }, updateGiftcard)
                                                     .exec(function(err, location) {
                                                         if (err) {
-                                                            console.log(err);
+                                                            //Prepare the error
+                                                            var transactionError = {
+                                                                    $push: {
+                                                                        errors: {err}
+                                                                    }
+                                                                }
+                                                            Transaction.update({
+                                                                    _id: transaction.id
+                                                                }, transactionError)
+                                                                .exec(function(err, location) {
+                                                                    if (err) {
+                                                                        console.log("FATAL error logging giftcard deduction transaction error!")
+                                                                    }
+                                                                });
                                                         }
                                                     });
                                                 //Subtract from the remaining amount to be charged
