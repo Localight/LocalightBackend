@@ -13,7 +13,12 @@ var Transaction = new mongoose.Schema({
     amount: {
         type: String,
         require:'Please provide the session token'
-    }
+    },
+    errors: [{
+        error: {
+            type: String
+        }
+    }]
 });
 
 mongoose.model('Transaction', Transaction);
