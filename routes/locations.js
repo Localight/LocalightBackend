@@ -91,6 +91,7 @@ router.put('/:id', function(req, res, next) {
             var updatedLocation = {};
 
             if (req.body.name && typeof req.body.name === 'string') updatedLocation.name = req.body.name;
+            if (req.body.triconKey && typeof req.body.triconKey === 'string') updatedLocation.triconKey = req.body.triconKey;
             if (req.body.address1 && typeof req.body.address1 === 'string') updatedLocation.address1 = req.body.address1;
             if (req.body.address2 && typeof req.body.address2 === 'string') updatedLocation.address2 = req.body.address2;
             if (req.body.city && typeof req.body.city === 'string') updatedLocation.city = req.body.city;
