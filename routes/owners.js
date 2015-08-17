@@ -6,7 +6,7 @@ var express = require('express'),
     Owner = mongoose.model('Owner');
 
 /* Owner Join */
-router.post('/join', function(req, res, next) {
+router.post('/join', function(req, res) {
     //Check if required was sent
     if (!(req.body.email &&
             req.body.password &&
@@ -88,7 +88,7 @@ router.post('/join', function(req, res, next) {
 });
 
 /* Owner Login */
-router.post('/login', function(req, res, next) {
+router.post('/login', function(req, res) {
     //Check if required was sent
     if (!(req.body.email &&
             req.body.password)) {
@@ -135,22 +135,22 @@ router.post('/login', function(req, res, next) {
 });
 
 /* Reset Password */
-router.post('/reset', function(req, res, next) {
+router.post('/reset', function(req, res) {
     //Logic goes here
 });
 
 /* Get an Owner */
-router.get('/:id', function(req, res, next) {
+router.get('/:id', function(req, res) {
     //Logic goes here
 });
 
 /* Update an Owner */
-router.put('/:id', function(req, res, next) {
+router.put('/:id', function(req, res) {
     //Logic goes here
 });
 
 /* Remove an Owner */
-router.delete('/:id', function(req, res, next) {
+router.delete('/:id', function(req, res) {
     //Logic goes here
 });
 

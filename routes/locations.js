@@ -7,7 +7,7 @@ var express = require('express'),
     Giftcard = mongoose.model('Giftcard');
 
 /* Create a Location */
-router.post('/', function(req, res, next) {
+router.post('/', function(req, res) {
     //Check if required was sent
     if (!(req.body.name &&
             req.body.triconKey &&
@@ -45,7 +45,7 @@ router.post('/', function(req, res, next) {
 });
 
 /* Get all Locations */
-router.get('/', function(req, res, next) {
+router.get('/', function(req, res) {
     Location.find({})
         .select('_id name address1 address2 city state zipcode')
         .exec(function(err, locations) {
@@ -60,7 +60,7 @@ router.get('/', function(req, res, next) {
 });
 
 /* Get a Location by id */
-router.get('/:id', function(req, res, next) {
+router.get('/:id', function(req, res) {
     Location.findOne({
             _id: req.params.id
         })
@@ -77,7 +77,7 @@ router.get('/:id', function(req, res, next) {
 });
 
 /* Update a Location */
-router.put('/:id', function(req, res, next) {
+router.put('/:id', function(req, res) {
     //Check if required was sent
     if (!req.body.sessionToken) {
         return res.status(412).json({
@@ -118,7 +118,7 @@ router.put('/:id', function(req, res, next) {
 });
 
 /* Delete a Location */
-router.delete('/:id', function(req, res, next) {
+router.delete('/:id', function(req, res) {
     //Logic goes here
 });
 
