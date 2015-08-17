@@ -156,15 +156,13 @@ router.post('/', function(req, res) {
 router.get('/', function(req, res) {
     //Check if required was sent
     if (!req.query.sessionToken) {
-        return res.status(412).json({
-            msg: "You must provide all required fields!"
-        });
+        return res.status(412).json();
     }
 
     //Validate session
     SessionService.validateSession(req.query.sessionToken, "user", function(err, accountId) {
         if (err) {
-            res.json(err);
+            res.status(err.status);
         } else {
             Giftcard.find({
                     toId: accountId
@@ -176,9 +174,7 @@ router.get('/', function(req, res) {
                 .populate('toId', 'name') //populate the actual user and only return their name
                 .exec(function(err, giftcards) {
                     if (err) {
-                        return res.status(500).json({
-                            msg: "Couldn't search the database for session!"
-                        });
+                        return res.status(500);
                     } else {
                         res.status(200).json(giftcards);
                     }
