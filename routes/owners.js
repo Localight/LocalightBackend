@@ -27,11 +27,7 @@ router.post('/join', function(req, res, next) {
             })
             .select('_id')
             .exec(function(err, owner) {
-                if (owner) {
-                    res.status(409).json({
-                        msg: "Code already exists!"
-                    });
-                } else {
+                if (!owner){
                     var codeValid = true;
                     //Check if an owner with that email already exists
                     Owner.findOne({
@@ -51,6 +47,7 @@ router.post('/join', function(req, res, next) {
                                 //Create a new owner with the assembled information
                                 new Owner({
                                     name: req.body.name,
+                                    code: giftCode,
                                     stripeCustomerId: req.body.stripeCustomerId,
                                     email: req.body.email,
                                     password: hash,
