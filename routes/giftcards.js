@@ -157,13 +157,13 @@ router.post('/', function(req, res) {
 router.get('/', function(req, res) {
     //Check if required was sent
     if (!req.query.sessionToken) {
-        return res.status(412);
+        return res.status(412).send("Requirements Unmet");
     }
 
     //Validate session
     SessionService.validateSession(req.query.sessionToken, "user", function(err, accountId) {
         if (err) {
-            res.status(err.status);
+            return res.status(err.status).send("Session Error");
         } else {
             Giftcard.find({
                     toId: accountId
@@ -175,7 +175,7 @@ router.get('/', function(req, res) {
                 .populate('toId', 'name') //populate the actual user and only return their name
                 .exec(function(err, giftcards) {
                     if (err) {
-                        return res.status(500);
+                        return res.status(500).send("Error searching DB");
                     } else {
                         res.status(200).json(giftcards);
                     }
