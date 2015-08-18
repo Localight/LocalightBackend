@@ -19,7 +19,7 @@ var sessions = require('./models/sessions');
 
 
 if (fs.existsSync("./config/keys.json")) {
-    console.log("CUSTOM KEYS.JSON FOUND");
+    console.log("keys.json found");
 } else {
     var content = fs.readFileSync('./config/keys-template.json');
     fs.writeFileSync('./config/keys.json', content);
