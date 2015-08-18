@@ -10,8 +10,21 @@ var express = require('express'),
     User = mongoose.model('User');
 
 /* Create a giftcard */
-router.post('/', function(req, res, next) {
-    if (req.body.phone.length > 10 || req.body.phone.length < 10) {
+router.post('/', function(req, res) {
+    //Check if required was sent
+    if (!(req.body.sessionToken &&
+            req.body.name &&
+            req.body.phone &&
+            req.body.amount && req.body.amount > 0 && req.body.amount < 50000 &&
+            req.body.iconId &&
+            req.body.message &&
+            req.body.stripeCardToken)) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+
+    if (req.body.phone.length != 10) {
         return res.status(412).json({
             msg: "Invalid Phone Number (only xxxxxxxxxx)!"
         });
@@ -29,7 +42,7 @@ router.post('/', function(req, res, next) {
                 .select('_id')
                 .exec(function(err, user) {
                     if (err) {
-                        return res.status().json({
+                        return res.status(500).json({
                             msg: "Couldn't search the database for user!"
                         });
                     } else if (!user) {
@@ -55,11 +68,7 @@ router.post('/', function(req, res, next) {
     });
 
     function createGift(accountId, toId, req) {
-        if (!accountId ||
-            !toId ||
-            !req.body.amount || !(req.body.amount > 0) || !(req.body.amount < 50000) ||
-            !req.body.iconId ||
-            !req.body.message) {
+        if (!accountId || !toId) {
             return res.status(412).json({
                 msg: "You must provide toId, 0<amount<50000, iconId and message."
             });
@@ -99,12 +108,13 @@ router.post('/', function(req, res, next) {
             fromId: accountId,
             toId: toId,
             amount: req.body.amount,
+            origAmount: req.body.amount,
             iconId: req.body.iconId,
             message: req.body.message,
             stripeOrderId: charge.id,
             sendDate: req.body.sendDate,
             sent: sent
-        }).save(function(err) {
+        }).save(function(err, giftcard) {
             if (err) {
                 res.status(500).json({
                     msg: "Error saving giftcard to database!"
@@ -123,7 +133,7 @@ router.post('/', function(req, res, next) {
                             console.log(err);
                         } else {
                             client.messages.create({
-                                body: "You have a new giftcard on lbgift! http://lbgift.com/#/giftcards/receive/" + token,
+                                body: "You have a new giftcard on lbgift! http://lbgift.com/#/giftcards/" + giftcard._id + "?sessionToken=" + token,
                                 to: "+1" + req.body.phone,
                                 from: config.twilio.number
                             }, function(err, message) {
@@ -144,25 +154,28 @@ router.post('/', function(req, res, next) {
 });
 
 /* Get giftcards */
-router.get('/', function(req, res, next) {
+router.get('/', function(req, res) {
+    //Check if required was sent
+    if (!req.query.sessionToken) {
+        return res.status(412).send("Requirements Unmet");
+    }
+
     //Validate session
     SessionService.validateSession(req.query.sessionToken, "user", function(err, accountId) {
         if (err) {
-            res.json(err);
+            return res.status(err.status).send("Session Error");
         } else {
             Giftcard.find({
                     toId: accountId
                 })
                 //Added toId as we need the client to know the users name
-                .select('_id toId fromId amount iconId message')
+                .select('_id toId fromId amount origAmount iconId message')
                 //use populate to also returns the users name in the giftcards object!
                 .populate('fromId', 'name') // populate the actual user and only return their name
                 .populate('toId', 'name') //populate the actual user and only return their name
                 .exec(function(err, giftcards) {
                     if (err) {
-                        return res.status(500).json({
-                            msg: "Couldn't search the database for session!"
-                        });
+                        return res.status(500).send("Error searching DB");
                     } else {
                         res.status(200).json(giftcards);
                     }
@@ -172,7 +185,14 @@ router.get('/', function(req, res, next) {
 });
 
 /* Get a giftcard */
-router.get('/:id', function(req, res, next) {
+router.get('/:id', function(req, res) {
+    //Check if required was sent
+    if (!req.query.sessionToken) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+
     SessionService.validateSession(req.query.sessionToken, "user", function(err, accountId) {
         if (err) {
             res.json(err);
@@ -182,7 +202,7 @@ router.get('/:id', function(req, res, next) {
                     _id: req.params.id
                 })
                 //added the toId as we need the client to know the users name
-                .select('_id toId fromId amount iconId message')
+                .select('_id toId fromId amount origAmount iconId message')
                 //use populate to also returns the users name in the giftcards object!
                 .populate('fromId', 'name') // populate the actual user and only return their name
                 .populate('toId', 'name') //populate the actual user and only return their name
@@ -202,7 +222,7 @@ router.get('/:id', function(req, res, next) {
 });
 
 /* Update a giftcard */
-router.put('/:id', function(req, res, next) {
+router.put('/:id', function(req, res) {
     //Logic goes here
 });
 

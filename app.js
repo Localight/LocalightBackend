@@ -12,6 +12,7 @@ var db = require('./models/db');
 var users = require('./models/users');
 var giftcards = require('./models/giftcards');
 var locations = require('./models/locations');
+var transactions = require('./models/transactions');
 var owners = require('./models/owners');
 var sessions = require('./models/sessions');
 
