@@ -114,7 +114,7 @@ router.post('/', function(req, res) {
             stripeOrderId: charge.id,
             sendDate: req.body.sendDate,
             sent: sent
-        }).save(function(err) {
+        }).save(function(err, giftcard) {
             if (err) {
                 res.status(500).json({
                     msg: "Error saving giftcard to database!"
