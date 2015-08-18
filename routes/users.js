@@ -108,11 +108,6 @@ router.post('/twilio', function(req, res) {
     }
 });
 
-/* Reset Password */
-router.post('/reset', function(req, res) {
-    //Logic goes here
-});
-
 /* Update a user */
 router.put('/', function(req, res, next) {
     //Check if required was sent
