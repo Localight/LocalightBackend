@@ -42,7 +42,7 @@ router.post('/', function(req, res) {
                 .select('_id')
                 .exec(function(err, user) {
                     if (err) {
-                        return res.status().json({
+                        return res.status(500).json({
                             msg: "Couldn't search the database for user!"
                         });
                     } else if (!user) {
@@ -114,7 +114,7 @@ router.post('/', function(req, res) {
             stripeOrderId: charge.id,
             sendDate: req.body.sendDate,
             sent: sent
-        }).save(function(err) {
+        }).save(function(err, giftcard) {
             if (err) {
                 res.status(500).json({
                     msg: "Error saving giftcard to database!"
@@ -133,7 +133,7 @@ router.post('/', function(req, res) {
                             console.log(err);
                         } else {
                             client.messages.create({
-                                body: "You have a new giftcard on lbgift! http://lbgift.com/#/giftcards/receive/" + token,
+                                body: "You have a new giftcard on lbgift! http://lbgift.com/#/giftcards/" + giftcard._id + "?sessionToken=" + token,
                                 to: "+1" + req.body.phone,
                                 from: config.twilio.number
                             }, function(err, message) {
