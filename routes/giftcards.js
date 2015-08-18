@@ -104,7 +104,7 @@ router.post('/', function(req, res) {
             sendDate = Date.now();
         }
 
-        new Giftcard({
+        var giftcard = new Giftcard({
             fromId: accountId,
             toId: toId,
             amount: req.body.amount,
@@ -132,7 +132,7 @@ router.post('/', function(req, res) {
                             console.log(err);
                         } else {
                             client.messages.create({
-                                body: "You have a new giftcard on lbgift! http://lbgift.com/#/giftcards/receive/" + token,
+                                body: "You have a new giftcard on lbgift! http://lbgift.com/#/giftcards/" + giftcard._id + "?sessionToken=" + token,
                                 to: "+1" + req.body.phone,
                                 from: config.twilio.number
                             }, function(err, message) {
