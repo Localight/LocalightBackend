@@ -104,7 +104,7 @@ router.post('/', function(req, res) {
             sendDate = Date.now();
         }
 
-        var giftcard = new Giftcard({
+        new Giftcard({
             fromId: accountId,
             toId: toId,
             amount: req.body.amount,
