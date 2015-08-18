@@ -42,7 +42,7 @@ router.post('/', function(req, res) {
                 .select('_id')
                 .exec(function(err, user) {
                     if (err) {
-                        return res.status().json({
+                        return res.status(500).json({
                             msg: "Couldn't search the database for user!"
                         });
                     } else if (!user) {

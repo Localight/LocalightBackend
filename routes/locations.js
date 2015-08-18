@@ -35,7 +35,7 @@ router.post('/', function(req, res) {
                         msg: "Error saving location to DB!"
                     });
                 } else {
-                    res.status(201);
+                    res.status(201).send("Created");
                 }
             });
         }
@@ -107,7 +107,7 @@ router.put('/:id', function(req, res) {
                     if (err) {
                         res.status(500).json(err);
                     } else {
-                        res.status(200);
+                        res.status(200).send("OK");
                     }
                 })
         }
