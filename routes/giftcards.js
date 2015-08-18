@@ -108,6 +108,7 @@ router.post('/', function(req, res) {
             fromId: accountId,
             toId: toId,
             amount: req.body.amount,
+            origAmount: req.body.amount,
             iconId: req.body.iconId,
             message: req.body.message,
             stripeOrderId: charge.id,
@@ -156,29 +157,25 @@ router.post('/', function(req, res) {
 router.get('/', function(req, res) {
     //Check if required was sent
     if (!req.query.sessionToken) {
-        return res.status(412).json({
-            msg: "You must provide all required fields!"
-        });
+        return res.status(412).send("Requirements Unmet");
     }
 
     //Validate session
     SessionService.validateSession(req.query.sessionToken, "user", function(err, accountId) {
         if (err) {
-            res.json(err);
+            return res.status(err.status).send("Session Error");
         } else {
             Giftcard.find({
                     toId: accountId
                 })
                 //Added toId as we need the client to know the users name
-                .select('_id toId fromId amount iconId message')
+                .select('_id toId fromId amount origAmount iconId message')
                 //use populate to also returns the users name in the giftcards object!
                 .populate('fromId', 'name') // populate the actual user and only return their name
                 .populate('toId', 'name') //populate the actual user and only return their name
                 .exec(function(err, giftcards) {
                     if (err) {
-                        return res.status(500).json({
-                            msg: "Couldn't search the database for session!"
-                        });
+                        return res.status(500).send("Error searching DB");
                     } else {
                         res.status(200).json(giftcards);
                     }
@@ -205,7 +202,7 @@ router.get('/:id', function(req, res) {
                     _id: req.params.id
                 })
                 //added the toId as we need the client to know the users name
-                .select('_id toId fromId amount iconId message')
+                .select('_id toId fromId amount origAmount iconId message')
                 //use populate to also returns the users name in the giftcards object!
                 .populate('fromId', 'name') // populate the actual user and only return their name
                 .populate('toId', 'name') //populate the actual user and only return their name
