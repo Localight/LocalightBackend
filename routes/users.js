@@ -3,6 +3,7 @@ var express = require('express'),
     mongoose = require('mongoose'),
     crypto = require('crypto'),
     SessionService = require('../services/sessions.js'),
+    nodemailer = require('nodemailer'),
     User = mongoose.model('User');
 
 /* User Login */
