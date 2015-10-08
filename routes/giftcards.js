@@ -6,6 +6,7 @@ var express = require('express'),
     stripe = require("stripe")(config.stripe.accountKey),
     client = require('twilio')(config.twilio.accountSid, config.twilio.authToken),
     Giftcard = mongoose.model('Giftcard'),
+    nodemailer = require('nodemailer'),
     SessionService = require('../services/sessions.js'),
     User = mongoose.model('User');
 
@@ -224,6 +225,71 @@ router.get('/:id', function(req, res) {
 /* Update a giftcard */
 router.put('/:id', function(req, res) {
     //Logic goes here
+});
+
+/* Save a giftcard for later (email return link) */
+router.post('/later', function(req, res) {
+    //Check if required was sent
+    if (!(req.body.sessionToken &&
+            req.body.giftcardId)) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+
+    SessionService.validateSession(req.body.sessionToken, "user", function(err, accountId) {
+        if (err) {
+            res.json(err);
+        } else {
+            User.findOne({
+                    _id: accountId
+                })
+                .select('name email phone created updated')
+                .exec(function(err, user) {
+                    if (err) {
+                        res.status(500).json({
+                            msg: "Couldn't search the database for user!"
+                        });
+                    } else if (!user) {
+                        res.status(404).json({
+                            msg: "User does not exist!"
+                        });
+                    } else {
+
+                        var messagePlain = "Hello " + user.name + ", Here is a link for the giftcard you saved: http://lbgift.com/#/giftcards/" + req.body.giftcardId + "?sessionToken=" + req.body.sessionToken + " Thanks, The Localight Team";
+                        var messageHTML = "Hello " + user.name + ",<br /><br />Here is a link for the giftcard you saved:<br /><a href='http://lbgift.com/#/giftcards/" + req.body.giftcardId + "?sessionToken=" + req.body.sessionToken + "'>http://lbgift.com/#/giftcards/" + req.body.giftcardId + "?sessionToken=" + req.body.sessionToken + "</a><br /><br />Thanks!<br />The Localight Team";
+
+                        var transporter = nodemailer.createTransport({
+                            service: 'Gmail',
+                            auth: {
+                                user: config.gmail.username,
+                                pass: config.gmail.password
+                            }
+                        });
+                        var mailOptions = {
+                            from: config.gmail.alias,
+                            to: user.email,
+                            subject: 'Your Saved Giftcard Link for LBGift',
+                            text: messagePlain,
+                            html: messageHTML
+                        }
+                        console.log(mailOptions);
+                        transporter.sendMail(mailOptions, function(error, response) {
+                            if (error) {
+                                console.log(error);
+                            } else {
+                                console.log("Message sent: " + response.message);
+                            }
+                        });
+
+                        res.status(200).json({
+                            msg: "Email was sent!"
+                        });
+
+                    }
+                });
+        }
+    });
 });
 
 module.exports = router;
