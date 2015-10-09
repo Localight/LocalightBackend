@@ -25,6 +25,10 @@ if (fs.existsSync("./config/keys.json")) {
     fs.writeFileSync('./config/keys.json', content);
 }
 
+if(process.argv[2].indexOf("http") <= -1){
+    return console.log("You must pass a valid API_BASE parameter!");
+}
+
 //Routes
 var routes = require('./routes/index');
 var users = require('./routes/users');
