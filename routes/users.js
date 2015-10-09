@@ -100,7 +100,7 @@ router.post('/twilio', function(req, res) {
                                     res.json(err);
                                 } else {
                                     //All good, give the user their token
-                                    res.send('<Response><Message>' process.argv[2] '/#/giftcards/create/' + token + '</Message></Response>');
+                                    res.send('<Response><Message>' + process.argv[2] + '/#/giftcards/create/' + token + '</Message></Response>');
                                 }
                             });
                         }
