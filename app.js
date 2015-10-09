@@ -26,7 +26,7 @@ if (fs.existsSync("./config/keys.json")) {
 }
 
 if(process.argv[2].indexOf("http") <= -1){
-    return console.log("You must pass a valid API_BASE parameter!");
+    return console.log("You must pass a valid FRONTEND_BASE parameter!");
 }
 
 //Routes
