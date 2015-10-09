@@ -255,37 +255,50 @@ router.post('/later', function(req, res) {
                             msg: "User does not exist!"
                         });
                     } else {
+                        Giftcard.findOne({
+                                toId: accountId,
+                                _id: req.body.giftcardId
+                            }).exec(function(err, giftcard) {
+                                if (err) {
+                                    res.status(500).json({
+                                        msg: "Couldn't search the database for giftcard!"
+                                    });
+                                } else if (!giftcard) {
+                                    res.status(404).json({
+                                        msg: "No giftard with that ID!"
+                                    });
+                                } else {
+                                    var messagePlain = "Hello " + user.name + ", Here is a link for the giftcard you saved: " + process.argv[2] + "/#/giftcards/" + req.body.giftcardId + "?sessionToken=" + req.body.sessionToken + " Thanks, The Localight Team";
+                                    var messageHTML = "Hello " + user.name + ",<br /><br />Here is a link for the giftcard you saved:<br /><a href='" + process.argv[2] + "/#/giftcards/" + req.body.giftcardId + "?sessionToken=" + req.body.sessionToken + "'>" + process.argv[2] + "/#/giftcards/" + req.body.giftcardId + "?sessionToken=" + req.body.sessionToken + "</a><br /><br />Thanks!<br />The Localight Team";
 
-                        var messagePlain = "Hello " + user.name + ", Here is a link for the giftcard you saved: " + process.argv[2] + "/#/giftcards/" + req.body.giftcardId + "?sessionToken=" + req.body.sessionToken + " Thanks, The Localight Team";
-                        var messageHTML = "Hello " + user.name + ",<br /><br />Here is a link for the giftcard you saved:<br /><a href='" + process.argv[2] + "/#/giftcards/" + req.body.giftcardId + "?sessionToken=" + req.body.sessionToken + "'>" + process.argv[2] + "/#/giftcards/" + req.body.giftcardId + "?sessionToken=" + req.body.sessionToken + "</a><br /><br />Thanks!<br />The Localight Team";
+                                    var transporter = nodemailer.createTransport({
+                                        service: 'Gmail',
+                                        auth: {
+                                            user: config.gmail.username,
+                                            pass: config.gmail.password
+                                        }
+                                    });
+                                    var mailOptions = {
+                                        from: config.gmail.alias,
+                                        to: user.email,
+                                        subject: 'Your Saved Giftcard Link for LBGift',
+                                        text: messagePlain,
+                                        html: messageHTML
+                                    }
+                                    console.log(mailOptions);
+                                    transporter.sendMail(mailOptions, function(error, response) {
+                                        if (error) {
+                                            console.log(error);
+                                        } else {
+                                            console.log("Message sent!");
+                                        }
+                                    });
 
-                        var transporter = nodemailer.createTransport({
-                            service: 'Gmail',
-                            auth: {
-                                user: config.gmail.username,
-                                pass: config.gmail.password
-                            }
-                        });
-                        var mailOptions = {
-                            from: config.gmail.alias,
-                            to: user.email,
-                            subject: 'Your Saved Giftcard Link for LBGift',
-                            text: messagePlain,
-                            html: messageHTML
-                        }
-                        console.log(mailOptions);
-                        transporter.sendMail(mailOptions, function(error, response) {
-                            if (error) {
-                                console.log(error);
-                            } else {
-                                console.log("Message sent: " + response.message);
-                            }
-                        });
-
-                        res.status(200).json({
-                            msg: "Email was sent!"
-                        });
-
+                                    res.status(200).json({
+                                        msg: "Email was sent!"
+                                    });
+                                }
+                            });
                     }
                 });
         }
