@@ -14,7 +14,9 @@ var express = require('express'),
 router.post('/', function(req, res) {
     //Check if required was sent
     if (!(req.body.sessionToken &&
-            req.body.name &&
+            req.body.toName &&
+            req.body.fromName &&
+            req.body.email &&
             req.body.phone &&
             req.body.amount && req.body.amount > 0 && req.body.amount < 50000 &&
             req.body.iconId &&
@@ -48,7 +50,7 @@ router.post('/', function(req, res) {
                         });
                     } else if (!user) {
                         var user = new User({
-                            name: req.body.name,
+                            name: req.body.toName,
                             phone: req.body.phone
                         }).save(function(err, user) {
                             if (err) {
@@ -126,7 +128,31 @@ router.post('/', function(req, res) {
                     msg: "Giftcard was created!"
                 });
 
-                //Email receipt
+                var messagePlain = "Hello " + req.body.fromName + ", Here is a receipt for your LBGift order. $" + req.body.amount + " sent to " + req.body.toName + " " + req.body.phone + ". Thank you!, LBGift.";
+                var messageHTML = "Hello " + req.body.fromName + ",<br /><br />Here is a receipt for your LBGift order:<br /><br />$" + req.body.amount + " sent to " + req.body.toName + " " + req.body.phone + ".<br /><br />Thank you!, LBGift.";
+
+                var transporter = nodemailer.createTransport({
+                    service: 'Gmail',
+                    auth: {
+                        user: config.gmail.username,
+                        pass: config.gmail.password
+                    }
+                });
+                var mailOptions = {
+                    from: config.gmail.alias,
+                    to: req.body.email,
+                    subject: 'Receipt for Your LBGift Order',
+                    text: messagePlain,
+                    html: messageHTML
+                }
+                console.log(mailOptions);
+                transporter.sendMail(mailOptions, function(error, response) {
+                    if (error) {
+                        console.log(error);
+                    } else {
+                        console.log("Message sent: " + response.message);
+                    }
+                });
 
                 if (sent) {
                     SessionService.generateSession(toId, "user", function(err, token) {
