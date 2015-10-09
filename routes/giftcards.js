@@ -160,7 +160,7 @@ router.post('/', function(req, res) {
                             console.log(err);
                         } else {
                             client.messages.create({
-                                body: "You have a new giftcard on lbgift! " + process.argv[2] + "/#/giftcards/" + giftcard._id + "?sessionToken=" + token,
+                                body: "You have a new giftcard on lbgift! " + process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token,
                                 to: "+1" + req.body.phone,
                                 from: config.twilio.number
                             }, function(err, message) {
@@ -296,8 +296,8 @@ router.post('/later', function(req, res) {
                                         msg: "No giftard with that ID!"
                                     });
                                 } else {
-                                    var messagePlain = "Hello " + user.name + ", Here is a link for the giftcard you saved: " + process.argv[2] + "/#/giftcards/" + req.body.giftcardId + "?sessionToken=" + req.body.sessionToken + " Thanks, The Localight Team";
-                                    var messageHTML = "Hello " + user.name + ",<br /><br />Here is a link for the giftcard you saved:<br /><a href='" + process.argv[2] + "/#/giftcards/" + req.body.giftcardId + "?sessionToken=" + req.body.sessionToken + "'>" + process.argv[2] + "/#/giftcards/" + req.body.giftcardId + "?sessionToken=" + req.body.sessionToken + "</a><br /><br />Thanks!<br />The Localight Team";
+                                    var messagePlain = "Hello " + user.name + ", Here is a link for the giftcard you saved: " + process.argv[2] + "/#/giftcards/" + req.body.giftcardId + "?token=" + req.body.sessionToken + " Thanks, The Localight Team";
+                                    var messageHTML = "Hello " + user.name + ",<br /><br />Here is a link for the giftcard you saved:<br /><a href='" + process.argv[2] + "/#/giftcards/" + req.body.giftcardId + "?token=" + req.body.sessionToken + "'>" + process.argv[2] + "/#/giftcards/" + req.body.giftcardId + "?token=" + req.body.sessionToken + "</a><br /><br />Thanks!<br />The Localight Team";
 
                                     var transporter = nodemailer.createTransport({
                                         service: 'Gmail',
