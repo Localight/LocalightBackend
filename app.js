@@ -25,6 +25,14 @@ if (fs.existsSync("./config/keys.json")) {
     fs.writeFileSync('./config/keys.json', content);
 }
 
+if(process.argv[2]){
+    if(process.argv[2].indexOf("http") <= -1 || process.argv[2].slice(-1) == "/"){
+        throw new Error("You must pass a valid FRONTEND_BASE parameter!");
+    }
+} else {
+    throw new Error("You must pass a FRONTEND_BASE parameter!");
+}
+
 //Routes
 var routes = require('./routes/index');
 var users = require('./routes/users');

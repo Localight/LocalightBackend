@@ -2,14 +2,16 @@ var express = require('express'),
     router = express.Router(),
     mongoose = require('mongoose'),
     crypto = require('crypto'),
+    config = require('../config/keys.json'),
     SessionService = require('../services/sessions.js'),
+    nodemailer = require('nodemailer'),
     User = mongoose.model('User');
 
 /* User Login */
 router.post('/login', function(req, res) {
     //Check if required was sent
     if (!(req.body.password &&
-        req.body.phone)) {
+            req.body.phone)) {
         return res.status(412).json({
             msg: "You must provide all required fields!"
         });
@@ -57,7 +59,7 @@ router.post('/login', function(req, res) {
 router.post('/twilio', function(req, res) {
     //Check if required was sent
     if (!(req.body.Body &&
-        req.body.From)) {
+            req.body.From)) {
         return res.status(412).json({
             msg: "You must provide all required fields!"
         });
@@ -78,7 +80,7 @@ router.post('/twilio', function(req, res) {
                             res.json(err);
                         } else {
                             //All good, give the user their token
-                            res.send('<Response><Message>http://lbgift.com/#/giftcards/create/' + token + '</Message></Response>');
+                            res.send('<Response><Message>' + process.argv[2] + '/#/giftcards/create/' + token + '</Message></Response>');
                         }
                     });
                 } else {
@@ -98,7 +100,7 @@ router.post('/twilio', function(req, res) {
                                     res.json(err);
                                 } else {
                                     //All good, give the user their token
-                                    res.send('<Response><Message>http://lbgift.com/#/giftcards/create/' + token + '</Message></Response>');
+                                    res.send('<Response><Message>' + process.argv[2] + '/#/giftcards/create/' + token + '</Message></Response>');
                                 }
                             });
                         }
@@ -192,6 +194,87 @@ router.get('/', function(req, res) {
 /* Delete a user */
 router.delete('/:id', function(req, res) {
     //Logic goes here
+});
+
+/* Send thank you */
+router.post('/thanks', function(req, res) {
+    //Check if required was sent
+    if (!(req.body.sessionToken &&
+            req.body.fromId &&
+            req.body.message)) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+
+    SessionService.validateSession(req.body.sessionToken, "user", function(err, accountId) {
+        if (err) {
+            res.json(err);
+        } else {
+          User.findOne({
+                  _id: accountId
+              })
+              .select('name email phone created updated')
+              .exec(function(err, user) {
+                  if (err) {
+                      res.status(500).json({
+                          msg: "Couldn't search the database for user!"
+                      });
+                  } else if (!user) {
+                      res.status(404).json({
+                          msg: "User does not exist!"
+                      });
+                  } else {
+                    User.findOne({
+                            _id: req.body.fromId
+                        })
+                        .select('name email')
+                        .exec(function(err, recipient) {
+                            if (err) {
+                                res.status(500).json({
+                                    msg: "Couldn't search the database for recipient!"
+                                });
+                            } else if (!recipient) {
+                                res.status(404).json({
+                                    msg: "Recipient does not exist!"
+                                });
+                            } else {
+                                var messagePlain = req.body.message;
+                                var messageHTML = req.body.message;
+
+                                var transporter = nodemailer.createTransport({
+                                    service: 'Gmail',
+                                    auth: {
+                                        user: config.gmail.username,
+                                        pass: config.gmail.password
+                                    }
+                                });
+                                var mailOptions = {
+                                    from: config.gmail.alias,
+                                    to: recipient.email,
+                                    subject: 'A Thank You From ' + user.name,
+                                    text: messagePlain,
+                                    html: messageHTML
+                                }
+                                console.log(mailOptions);
+                                transporter.sendMail(mailOptions, function(error, response) {
+                                    if (error) {
+                                        console.log(error);
+                                    } else {
+                                        console.log("Message sent: " + response.message);
+                                    }
+                                });
+
+                                res.status(200).json({
+                                    msg: "Email was sent!"
+                                });
+                            }
+                        });
+                  }
+              });
+
+        }
+    });
 });
 
 module.exports = router;

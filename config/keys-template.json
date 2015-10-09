@@ -6,5 +6,10 @@
     },
     "stripe": {
         "secretKey": "sk_test_GF61iHn9X33Ip9vNGCnRRZTP"
+    },
+    "gmail": {
+        "username": "",
+        "password": "",
+        "alias": "LBGift <admin@lbgift.com>"
     }
 }
