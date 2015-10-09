@@ -209,7 +209,9 @@ router.get('/:id', function(req, res) {
                 .populate('toId', 'name') //populate the actual user and only return their name
                 .exec(function(err, giftcard) {
                     if (err) {
-                        res.status(500).json(err);
+                        res.status(500).json({
+                            msg: "Couldn't search the database for giftcard!"
+                        });
                     } else if (!giftcard) {
                         res.status(404).json({
                             msg: "No giftard with that ID!"
