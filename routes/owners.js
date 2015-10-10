@@ -23,7 +23,7 @@ router.post('/join', function(req, res) {
 
     function createCode() {
         giftCode = Math.floor(Math.random()*90000) + 10000;
-        
+
         //Check if an owner with that email already exists
         Owner.findOne({
                 code: giftCode
@@ -140,8 +140,38 @@ router.post('/reset', function(req, res) {
 });
 
 /* Get an Owner */
-router.get('/:id', function(req, res) {
-    //Logic goes here
+router.get('/', function(req, res) {
+    //Check if required was sent
+    if (!(req.query.sessionToken)) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+
+    SessionService.validateSession(req.query.sessionToken, "owner", function(err, accountId) {
+        if (err) {
+            res.json(err);
+        } else {
+            Owner.findOne({
+                    _id: accountId
+                })
+                .select('name email code created updated')
+                .exec(function(err, owner) {
+                    if (err) {
+                        res.status(500).json({
+                            msg: "Couldn't search the database for owner!"
+                        });
+                    } else if (!owner) {
+                        res.status(404).json({
+                            msg: "Owner does not exist!"
+                        });
+                    } else {
+                        res.status(200).json(owner);
+                    }
+                });
+        }
+    });
+
 });
 
 /* Update an Owner */
