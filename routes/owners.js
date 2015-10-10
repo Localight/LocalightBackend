@@ -155,7 +155,7 @@ router.get('/', function(req, res) {
             Owner.findOne({
                     _id: accountId
                 })
-                .select('name email code created updated')
+                .select('name email code stripeCustomerId created updated')
                 .exec(function(err, owner) {
                     if (err) {
                         res.status(500).json({
