@@ -128,8 +128,8 @@ router.post('/', function(req, res) {
                     msg: "Giftcard was created!"
                 });
 
-                var messagePlain = "Hello " + req.body.fromName + ", Here is a receipt for your LBGift order. $" + req.body.amount + " sent to " + req.body.toName + " " + req.body.phone + ". Thank you!, LBGift.";
-                var messageHTML = "Hello " + req.body.fromName + ",<br /><br />Here is a receipt for your LBGift order:<br /><br />$" + req.body.amount + " sent to " + req.body.toName + " " + req.body.phone + ".<br /><br />Thank you!, LBGift.";
+                var messagePlain = "Hello " + req.body.fromName + ", Here is a receipt for your LBGift order. $" + (req.body.amount/100) + " sent to " + req.body.toName + " " + req.body.phone + ". Thank you!, LBGift.";
+                var messageHTML = "Hello " + req.body.fromName + ",<br /><br />Here is a receipt for your LBGift order:<br /><br />$" + (req.body.amount/100) + " sent to " + req.body.toName + " " + req.body.phone + ".<br /><br />Thank you!, LBGift.";
 
                 var transporter = nodemailer.createTransport({
                     service: 'Gmail',
