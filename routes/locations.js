@@ -21,25 +21,49 @@ router.post('/', function(req, res) {
         if (err) {
             res.json(err);
         } else {
-            new Location({
-                name: req.body.name,
-                triconKey: req.body.triconKey,
-                address1: req.body.address1,
-                address2: req.body.address2,
-                city: req.body.city,
-                state: req.body.state,
-                zipcode: req.body.zipcode,
-                ownerId: accountId
-            }).save(function(err, location) {
-                if (err) {
-                    console.log("Error saving location to DB!");
-                    res.status(500).json({
-                        msg: "Error saving location to DB!"
+            var giftCode;
+
+            createCode();
+
+            function createCode() {
+                giftCode = Math.floor(Math.random()*90000) + 10000;
+
+                //Check if an owner with that email already exists
+                Location.findOne({
+                        $or:[ {'ownerCode': giftCode}, {'subs.subCode': giftCode}]
+                    })
+                    .select('_id')
+                    .exec(function(err, owner) {
+                        if (owner) {
+                            createCode();
+                        } else {
+                            createLocation();
+                        }
                     });
-                } else {
-                    res.status(201).send("Created");
-                }
-            });
+            }
+
+            function createLocation(){
+                new Location({
+                    name: req.body.name,
+                    triconKey: req.body.triconKey,
+                    address1: req.body.address1,
+                    address2: req.body.address2,
+                    city: req.body.city,
+                    state: req.body.state,
+                    zipcode: req.body.zipcode,
+                    ownerId: accountId,
+                    ownerCode: giftCode
+                }).save(function(err, location) {
+                    if (err) {
+                        console.log("Error saving location to DB!");
+                        res.status(500).json({
+                            msg: "Error saving location to DB!"
+                        });
+                    } else {
+                        res.status(201).send("Created");
+                    }
+                });
+            }
         }
     });
 });
