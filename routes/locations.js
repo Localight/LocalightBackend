@@ -99,6 +99,56 @@ router.get('/:id', function(req, res) {
         });
 });
 
+/* Get a Location by code */
+router.get('/code', function(req, res) {
+    if (!(req.query.code)) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+
+    Location.findOne({
+            'ownerCode': req.query.code
+        })
+        .select('_id name address1 address2 city state zipcode ownerId')
+        .exec(function(err, location) {
+            if (err) {
+                return res.status(500).json({
+                    msg: "Couldn't query the database for locations!"
+                });
+            } else if(location){
+                res.status(200).json(locations);
+            } else {
+                Location.findOne({
+                        'subs.subCode': req.query.code
+                    })
+                    .select('_id name address1 address2 city state zipcode subs')
+                    .exec(function(err, location) {
+                        if (err) {
+                            return res.status(500).json({
+                                msg: "Couldn't query the database for locations!"
+                            });
+                        } else if(location){
+                            var subId = "";
+                            for(sub in location.subs){
+                                if(sub.subCode == req.query.code){
+                                    subId = sub.subId;
+                                }
+                            }
+                            locations.subs = "";
+                            locations.subId = subId;
+                            res.status(200).json(locations);
+                        } else {
+                            res.status(404).json({
+                                msg: "No location with that code"
+                            })
+                        }
+                    });
+
+            }
+        });
+});
+
 /* Get a Locations for an owner */
 router.get('/owner/:id', function(req, res) {
     Location.find({
