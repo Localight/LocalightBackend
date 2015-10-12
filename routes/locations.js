@@ -76,6 +76,23 @@ router.get('/:id', function(req, res) {
         });
 });
 
+/* Get a Locations for an owner */
+router.get('/owner/:id', function(req, res) {
+    Location.find({
+            ownerId: req.params.id
+        })
+        .select('_id name address1 address2 city state zipcode')
+        .exec(function(err, locations) {
+            if (err) {
+                return res.status(500).json({
+                    msg: "Couldn't query the database for locations!"
+                });
+            } else {
+                res.status(200).json(locations);
+            }
+        });
+});
+
 /* Update a Location */
 router.put('/:id', function(req, res) {
     //Check if required was sent
