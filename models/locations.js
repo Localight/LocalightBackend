@@ -41,7 +41,7 @@ var Location = new mongoose.Schema({
     ownerCode: {
         type: String
     },
-    subIds: [{
+    subs: [{
         subId: {
             type: String,
             ref: 'Owner'
