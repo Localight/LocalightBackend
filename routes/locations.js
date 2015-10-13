@@ -218,7 +218,42 @@ router.put('/:id', function(req, res) {
 
 /* Delete a Location */
 router.delete('/:id', function(req, res) {
-    //Logic goes here
+    //Check if required was sent
+    if (!req.body.sessionToken) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+    SessionService.validateSession(req.body.sessionToken, "owner", function(err, accountId) {
+        if (err) {
+            res.json(err);
+        } else {
+            Location.findOne({
+                    $or: [{
+                        '_id': req.params.id,
+                        'ownerId': accountId
+                    }, {
+                        '_id': req.params.id,
+                        'subs.subId': accountId
+                    }]
+                })
+                .remove(function(err, location) {
+                    if (err) {
+                        return res.status(500).json({
+                            msg: "Couldn't query the database for locations!"
+                        });
+                    } else if (!location) {
+                        res.status(409).json({
+                            msg: "Could not find a location with that id!"
+                        });
+                    } else {
+                        res.status(200).json({
+                            msg: "Deleted!"
+                        });
+                    }
+                });
+        }
+    });
 });
 
 /* Make a purchase at a location */
