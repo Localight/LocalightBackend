@@ -6,7 +6,7 @@ It's implementation will be directed by Julian, and supervised by James. Aaron w
 To start nodemon, you must enter the command: <br /><br />
 $ nodemon ./bin/www https://{{Your frontend location such as localhost}}:{{port}}<br /><br />
 So, for example:<br /><br />
-$ nodemon ./bin/www localhost:90000<br />
+$ nodemon ./bin/www localhost:9000<br />
 
 # Rules<br />
 These are the rules for this repository:<br />
