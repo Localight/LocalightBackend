@@ -2,6 +2,12 @@
 This repository will be a clean setup of the backend for Localight.<br />
 It's implementation will be directed by Julian, and supervised by James. Aaron will assist where fit.<br />
 
+# Serving the backend with nodemon<br />
+To start nodemon, you must enter the command: <br /><br />
+$ nodemon ./bin/www https://{{Your frontend location such as localhost}}:{{port}}<br /><br />
+So, for example:<br /><br />
+$ nodemon ./bin/www localhost:9000<br />
+
 # Rules<br />
 These are the rules for this repository:<br />
 > ALL pull requests must be approved by another team member. No exceptions.<br />
