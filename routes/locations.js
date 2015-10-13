@@ -23,74 +23,57 @@ router.post('/', function(req, res) {
             res.json(err);
         } else {
             createCode();
+
+            function createCode() {
+                giftCode = Math.floor(Math.random() * 90000) + 10000;
+
+                //Check if an owner with that email already exists
+                Location.findOne({
+                        $or: [{
+                            'ownerCode': giftCode
+                        }, {
+                            'subs.subCode': giftCode
+                        }]
+                    })
+                    .select('_id')
+                    .exec(function(err, owner) {
+                        if (owner) {
+                            createCode();
+                        } else {
+                            createLocation();
+                        }
+                    });
+            }
+
+            function createLocation() {
+                new Location({
+                    name: req.body.name,
+                    triconKey: req.body.triconKey,
+                    address1: req.body.address1,
+                    address2: req.body.address2,
+                    city: req.body.city,
+                    state: req.body.state,
+                    zipcode: req.body.zipcode,
+                    ownerId: accountId,
+                    ownerCode: giftCode
+                }).save(function(err, location) {
+                    if (err) {
+                        console.log("Error saving location to DB!");
+                        res.status(500).json({
+                            msg: "Error saving location to DB!"
+                        });
+                    } else {
+                        res.status(201).send("Created");
+                    }
+                });
+            }
         }
     });
-
-    function createCode() {
-        giftCode = Math.floor(Math.random() * 90000) + 10000;
-
-        //Check if an owner with that email already exists
-        Location.findOne({
-                $or: [{
-                    'ownerCode': giftCode
-                }, {
-                    'subs.subCode': giftCode
-                }]
-            })
-            .select('_id')
-            .exec(function(err, owner) {
-                if (owner) {
-                    createCode();
-                } else {
-                    createLocation();
-                }
-            });
-    }
-
-    function createLocation() {
-        new Location({
-            name: req.body.name,
-            triconKey: req.body.triconKey,
-            address1: req.body.address1,
-            address2: req.body.address2,
-            city: req.body.city,
-            state: req.body.state,
-            zipcode: req.body.zipcode,
-            ownerId: accountId,
-            ownerCode: giftCode
-        }).save(function(err, location) {
-            if (err) {
-                console.log("Error saving location to DB!");
-                res.status(500).json({
-                    msg: "Error saving location to DB!"
-                });
-            } else {
-                res.status(201).send("Created");
-            }
-        });
-    }
 });
 
 /* Get all Locations */
 router.get('/', function(req, res) {
     Location.find({})
-        .select('_id name address1 address2 city state zipcode')
-        .exec(function(err, locations) {
-            if (err) {
-                return res.status(500).json({
-                    msg: "Couldn't query the database for locations!"
-                });
-            } else {
-                res.status(200).json(locations);
-            }
-        });
-});
-
-/* Get a Location by id */
-router.get('/:id', function(req, res) {
-    Location.findOne({
-            _id: req.params.id
-        })
         .select('_id name address1 address2 city state zipcode')
         .exec(function(err, locations) {
             if (err) {
@@ -118,30 +101,31 @@ router.get('/code', function(req, res) {
         .exec(function(err, location) {
             if (err) {
                 return res.status(500).json({
-                    msg: "Couldn't query the database for locations!"
+                    msg: "Couldn't query the database for location owner!"
                 });
             } else if (location) {
-                res.status(200).json(locations);
+                res.status(200).json(location);
             } else {
                 Location.findOne({
                         'subs.subCode': req.query.code
                     })
                     .select('_id name address1 address2 city state zipcode subs')
+                    .lean()
                     .exec(function(err, location) {
                         if (err) {
                             return res.status(500).json({
-                                msg: "Couldn't query the database for locations!"
+                                msg: "Couldn't query the database for location sub!"
                             });
                         } else if (location) {
                             var subId = "";
-                            for (sub in location.subs) {
-                                if (sub.subCode == req.query.code) {
-                                    subId = sub.subId;
+                            for (var i = 0; i < location.subs.length; i++) {
+                                if (location.subs[i].subCode == req.query.code) {
+                                    subId = location.subs[i].subId;
                                 }
                             }
-                            locations.subs = "";
-                            locations.subId = subId;
-                            res.status(200).json(locations);
+                            location.subs = "";
+                            location.subId = subId;
+                            res.status(200).json(location);
                         } else {
                             res.status(404).json({
                                 msg: "No location with that code"
@@ -149,6 +133,23 @@ router.get('/code', function(req, res) {
                         }
                     });
 
+            }
+        });
+});
+
+/* Get a Location by id */
+router.get('/:id', function(req, res) {
+    Location.findOne({
+            _id: req.params.id
+        })
+        .select('_id name address1 address2 city state zipcode')
+        .exec(function(err, locations) {
+            if (err) {
+                return res.status(500).json({
+                    msg: "Couldn't query the database for locations!"
+                });
+            } else {
+                res.status(200).json(locations);
             }
         });
 });
