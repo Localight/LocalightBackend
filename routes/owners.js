@@ -190,10 +190,25 @@ router.delete('/', function(req, res) {
                     } else {
                         Owner.findOne({
                                 _id: accountId
-                            }).remove().exec();
+                            }).remove(function(err, owner) {
+                                if (err) {
+                                    return res.status(500).json({
+                                        msg: "Couldn't query the database for locations!"
+                                    });
+                                } else if (!owner) {
+                                    res.status(409).json({
+                                        msg: "Could not find an owner with that id!"
+                                    });
+                                } else {
+                                    res.status(200).json({
+                                        msg: "Deleted!"
+                                    });
+                                }
+                            });
                     }
             });
-        });
+        }
+    });
 });
 
 module.exports = router;
