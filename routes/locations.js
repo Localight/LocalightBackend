@@ -157,9 +157,13 @@ router.get('/:id', function(req, res) {
 /* Get a Locations for an owner */
 router.get('/owner/:id', function(req, res) {
     Location.find({
-            ownerId: req.params.id
+            $or: [{
+                'ownerId': req.params.id
+            }, {
+                'subs.subId': req.params.id
+            }]
         })
-        .select('_id name address1 address2 city state zipcode')
+        .select('_id name address1 address2 city state zipcode ownerId ownerCode subs')
         .exec(function(err, locations) {
             if (err) {
                 return res.status(500).json({
