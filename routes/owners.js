@@ -3,6 +3,7 @@ var express = require('express'),
     mongoose = require('mongoose'),
     crypto = require('crypto'),
     SessionService = require('../services/sessions.js'),
+    Location = mongoose.model('Location'),
     Owner = mongoose.model('Owner');
 
 /* Owner Join */
@@ -157,8 +158,42 @@ router.put('/:id', function(req, res) {
 });
 
 /* Remove an Owner */
-router.delete('/:id', function(req, res) {
-    //Logic goes here
+router.delete('/', function(req, res) {
+    //Check if required was sent
+    if (!(req.body.sessionToken)) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+
+    SessionService.validateSession(req.body.sessionToken, "owner", function(err, accountId) {
+        if (err) {
+            res.json(err);
+        } else {
+            Location.find({
+                    $or: [{
+                        'ownerId': accountId
+                    }, {
+                        'subs.subId': accountId
+                    }]
+                })
+                .select('_id')
+                .exec(function(err, locations) {
+                    if (err) {
+                        return res.status(500).json({
+                            msg: "Couldn't query the database for locations!"
+                        });
+                    } else if(locations){
+                        res.status(409).json({
+                            msg: "You still have locations in your account!"
+                        });
+                    } else {
+                        Owner.findOne({
+                                _id: accountId
+                            }).remove().exec();
+                    }
+            });
+        });
 });
 
 module.exports = router;
