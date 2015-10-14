@@ -4,9 +4,9 @@ It's implementation will be directed by Julian, and supervised by James. Aaron w
 
 # Serving the backend with nodemon<br />
 To start nodemon, you must enter the command: <br /><br />
-$ nodemon ./bin/www https://{{Your frontend location such as localhost}}:{{port}}<br /><br />
+$ nodemon ./bin/www http://{{Your frontend location such as localhost}}:{{port}}<br /><br />
 So, for example:<br /><br />
-$ nodemon ./bin/www localhost:9000<br />
+$ nodemon ./bin/www http://localhost:9000<br />
 
 # Rules<br />
 These are the rules for this repository:<br />
