@@ -20,6 +20,7 @@ router.post('/', function(req, res) {
             req.body.phone &&
             req.body.amount && req.body.amount > 0 && req.body.amount < 50000 &&
             req.body.iconId &&
+            req.body.locationId &&
             req.body.message &&
             req.body.stripeCardToken)) {
         return res.status(412).json({
@@ -115,6 +116,7 @@ router.post('/', function(req, res) {
             iconId: req.body.iconId,
             message: req.body.message,
             stripeOrderId: charge.id,
+            location: {locationId: req.body.locationId, subId: req.body.subId},
             sendDate: req.body.sendDate,
             sent: sent
         }).save(function(err, giftcard) {
@@ -196,10 +198,12 @@ router.get('/', function(req, res) {
                     toId: accountId
                 })
                 //Added toId as we need the client to know the users name
-                .select('_id toId fromId amount origAmount iconId message')
+                .select('_id toId fromId amount origAmount iconId message location')
                 //use populate to also returns the users name in the giftcards object!
                 .populate('fromId', 'name') // populate the actual user and only return their name
                 .populate('toId', 'name') //populate the actual user and only return their name
+                .populate('location.subId', '_id name')
+                .populate('location.locationId', '_id name address1 address2 city state zipcode subs')
                 .exec(function(err, giftcards) {
                     if (err) {
                         return res.status(500).send("Error searching DB");
@@ -229,10 +233,12 @@ router.get('/:id', function(req, res) {
                     _id: req.params.id
                 })
                 //added the toId as we need the client to know the users name
-                .select('_id toId fromId amount origAmount iconId message')
+                .select('_id toId fromId amount origAmount iconId message location')
                 //use populate to also returns the users name in the giftcards object!
                 .populate('fromId', 'name') // populate the actual user and only return their name
                 .populate('toId', 'name') //populate the actual user and only return their name
+                .populate('location.subId', '_id name')
+                .populate('location.locationId', '_id name address1 address2 city state zipcode subs')
                 .exec(function(err, giftcard) {
                     if (err) {
                         res.status(500).json({

@@ -39,7 +39,7 @@ var Giftcard = new mongoose.Schema({
             type: String,
             ref: 'Location'
         },
-        ownerId: {
+        subId: {
             type: String,
             ref: 'Owner'
         }
