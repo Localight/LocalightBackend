@@ -34,6 +34,16 @@ var Giftcard = new mongoose.Schema({
     stripeOrderId: {
         type: String
     },
+    location: {
+        locationId: {
+            type: String,
+            ref: 'Location'
+        },
+        subId: {
+            type: String,
+            ref: 'Owner'
+        }
+    },
     sendDate: {
         type: Date,
         default: Date.now()
