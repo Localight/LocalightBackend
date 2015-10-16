@@ -3,7 +3,7 @@ var express = require('express'),
     mongoose = require('mongoose'),
     crypto = require('crypto'),
     config = require('../config/keys.json'),
-    stripe = require("stripe")(config.stripe.accountKey),
+    stripe = require("stripe")(config.stripe.secretKey),
     client = require('twilio')(config.twilio.accountSid, config.twilio.authToken),
     Giftcard = mongoose.model('Giftcard'),
     nodemailer = require('nodemailer'),
@@ -86,11 +86,16 @@ router.post('/', function(req, res) {
             amount: req.body.amount, // amount in cents, again
             currency: "usd",
             source: stripeCardToken,
-            description: req.body.message
+            description: "LBGift Giftcard"
         }, function(err, charge) {
             if (err && err.type === 'StripeCardError') {
                 res.status(412).json({
                     msg: "Card was declined!"
+                });
+            } else if(err){
+                console.log("Stripe charge error");
+                res.status(500).json({
+                    msg: "Charge could not be completed!"
                 });
             } else {
                 var sent = !(req.body.sendDate && req.body.sendDate != Date.now());
