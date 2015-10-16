@@ -3,7 +3,7 @@ var express = require('express'),
     mongoose = require('mongoose'),
     crypto = require('crypto'),
     config = require('../config/keys.json'),
-    stripe = require("stripe")(config.stripe.accountKey),
+    stripe = require("stripe")(config.stripe.secretKey),
     client = require('twilio')(config.twilio.accountSid, config.twilio.authToken),
     Giftcard = mongoose.model('Giftcard'),
     nodemailer = require('nodemailer'),
@@ -86,99 +86,102 @@ router.post('/', function(req, res) {
             amount: req.body.amount, // amount in cents, again
             currency: "usd",
             source: stripeCardToken,
-            description: req.body.message
+            description: "LBGift Giftcard"
         }, function(err, charge) {
             if (err && err.type === 'StripeCardError') {
-                stripeError = {
+                res.status(412).json({
                     msg: "Card was declined!"
-                };
-            }
-        });
-
-        if (stripeError) {
-            return res.status(412).json(stripeError);
-        }
-
-        var sent = !(req.body.sendDate && req.body.sendDate != Date.now());
-
-        var sendDate;
-        if (req.body.sendDate) {
-            sendDate = req.body.sendDate;
-        } else {
-            sendDate = Date.now();
-        }
-
-        new Giftcard({
-            fromId: accountId,
-            toId: toId,
-            amount: req.body.amount,
-            origAmount: req.body.amount,
-            iconId: req.body.iconId,
-            message: req.body.message,
-            stripeOrderId: charge.id,
-            location: {locationId: req.body.locationId, subId: req.body.subId},
-            sendDate: req.body.sendDate,
-            sent: sent
-        }).save(function(err, giftcard) {
-            if (err) {
+                });
+            } else if(err){
+                console.log("Stripe charge error");
                 res.status(500).json({
-                    msg: "Error saving giftcard to database!"
+                    msg: "Charge could not be completed!"
                 });
             } else {
-                //All good, give basic response
-                res.status(201).json({
-                    msg: "Giftcard was created!"
-                });
+                var sent = !(req.body.sendDate && req.body.sendDate != Date.now());
 
-                var messagePlain = "Hello " + req.body.fromName + ", Here is a receipt for your LBGift order. $" + (req.body.amount/100) + " sent to " + req.body.toName + " " + req.body.phone + ". Thank you!, LBGift.";
-                var messageHTML = "Hello " + req.body.fromName + ",<br /><br />Here is a receipt for your LBGift order:<br /><br />$" + (req.body.amount/100) + " sent to " + req.body.toName + " " + req.body.phone + ".<br /><br />Thank you!, LBGift.";
-
-                var transporter = nodemailer.createTransport({
-                    service: 'Gmail',
-                    auth: {
-                        user: config.gmail.username,
-                        pass: config.gmail.password
-                    }
-                });
-                var mailOptions = {
-                    from: config.gmail.alias,
-                    to: req.body.email,
-                    subject: 'Receipt for Your LBGift Order',
-                    text: messagePlain,
-                    html: messageHTML
+                var sendDate;
+                if (req.body.sendDate) {
+                    sendDate = req.body.sendDate;
+                } else {
+                    sendDate = Date.now();
                 }
-                console.log(mailOptions);
-                transporter.sendMail(mailOptions, function(error, response) {
-                    if (error) {
-                        console.log(error);
-                    } else {
-                        console.log("Message sent: " + response.message);
-                    }
-                });
 
-                if (sent) {
-                    SessionService.generateSession(toId, "user", function(err, token) {
-                        if (err) {
-                            console.log(err);
-                        } else {
-                            client.messages.create({
-                                body: "You have a new giftcard on lbgift! " + process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token,
-                                to: "+1" + req.body.phone,
-                                from: config.twilio.number
-                            }, function(err, message) {
+                new Giftcard({
+                    fromId: accountId,
+                    toId: toId,
+                    amount: req.body.amount,
+                    origAmount: req.body.amount,
+                    iconId: req.body.iconId,
+                    message: req.body.message,
+                    stripeOrderId: charge.id,
+                    location: {locationId: req.body.locationId, subId: req.body.subId},
+                    sendDate: req.body.sendDate,
+                    sent: sent
+                }).save(function(err, giftcard) {
+                    if (err) {
+                        res.status(500).json({
+                            msg: "Error saving giftcard to database!"
+                        });
+                    } else {
+                        //All good, give basic response
+                        res.status(201).json({
+                            msg: "Giftcard was created!"
+                        });
+
+                        var messagePlain = "Hello " + req.body.fromName + ", Here is a receipt for your LBGift order. $" + (req.body.amount/100) + " sent to " + req.body.toName + " " + req.body.phone + ". Thank you!, LBGift.";
+                        var messageHTML = "Hello " + req.body.fromName + ",<br /><br />Here is a receipt for your LBGift order:<br /><br />$" + (req.body.amount/100) + " sent to " + req.body.toName + " " + req.body.phone + ".<br /><br />Thank you!, LBGift.";
+
+                        var transporter = nodemailer.createTransport({
+                            service: 'Gmail',
+                            auth: {
+                                user: config.gmail.username,
+                                pass: config.gmail.password
+                            }
+                        });
+                        var mailOptions = {
+                            from: config.gmail.alias,
+                            to: req.body.email,
+                            subject: 'Receipt for Your LBGift Order',
+                            text: messagePlain,
+                            html: messageHTML
+                        }
+                        console.log(mailOptions);
+                        transporter.sendMail(mailOptions, function(error, response) {
+                            if (error) {
+                                console.log(error);
+                            } else {
+                                console.log("Message sent: " + response.message);
+                            }
+                        });
+
+                        if (sent) {
+                            SessionService.generateSession(toId, "user", function(err, token) {
                                 if (err) {
                                     console.log(err);
                                 } else {
-                                    console.log(message.sid);
+                                    client.messages.create({
+                                        body: "You have a new giftcard on lbgift! " + process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token,
+                                        to: "+1" + req.body.phone,
+                                        from: config.twilio.number
+                                    }, function(err, message) {
+                                        if (err) {
+                                            console.log(err);
+                                        } else {
+                                            console.log(message.sid);
+                                        }
+                                    });
                                 }
                             });
+                        } else {
+                            console.log("Added giftcard to send queue");
                         }
-                    });
-                } else {
-                    console.log("Added giftcard to send queue");
-                }
+                    }
+                });
             }
         });
+
+
     }
 });
 
