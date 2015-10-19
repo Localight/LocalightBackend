@@ -200,17 +200,22 @@ router.get('/', function(req, res) {
             Giftcard.find({
                     toId: accountId
                 })
-                //Added toId as we need the client to know the users name
+                .sort('-updated_at')
+                .lean()
                 .select('_id toId fromId amount origAmount iconId message location')
-                //use populate to also returns the users name in the giftcards object!
-                .populate('fromId', 'name') // populate the actual user and only return their name
-                .populate('toId', 'name') //populate the actual user and only return their name
+                .populate('fromId', 'name')
+                .populate('toId', 'name')
                 .populate('location.subId', '_id name')
                 .populate('location.locationId', '_id name address1 address2 city state zipcode subs')
                 .exec(function(err, giftcards) {
                     if (err) {
                         return res.status(500).send("Error searching DB");
                     } else {
+                        for(var i=0;i<giftcards.length;i++){
+                            if(giftcards[i].amount == 0){
+                                giftcards.push(giftcards.splice(i, 1));
+                            }
+                        }
                         res.status(200).json(giftcards);
                     }
                 });
