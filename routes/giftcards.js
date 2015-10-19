@@ -213,7 +213,7 @@ router.get('/', function(req, res) {
                     } else {
                         for(var i=0;i<giftcards.length;i++){
                             if(giftcards[i].amount == 0){
-                                giftcards.push(giftcards.splice(i, 1));
+                                giftcards.push(giftcards.splice(i, 1)[0]);
                             }
                         }
                         res.status(200).json(giftcards);
