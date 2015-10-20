@@ -200,9 +200,9 @@ router.get('/', function(req, res) {
             Giftcard.find({
                     toId: accountId
                 })
-                .sort('-updated_at')
+                .sort('-created')
                 .lean()
-                .select('_id toId fromId amount origAmount iconId message location')
+                .select('_id toId fromId amount origAmount iconId message location created')
                 .populate('fromId', 'name')
                 .populate('toId', 'name')
                 .populate('location.subId', '_id name')
