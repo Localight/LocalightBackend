@@ -216,9 +216,16 @@ router.get('/', function(req, res) {
                         for(var i=0;i<giftcards.length;i++){
                             if(giftcards[i].amount == 0){
                                 spent.push(giftcards.splice(i, 1)[0]);
+                                if(giftcards.length > 0){
+                                    if(giftcards[i].amount == 0){
+                                        i--;
+                                    }
+                                }
                             }
                         }
-                        giftcards.push(spent);
+                        for(var j=0;j<spent.length;j++){
+                            giftcards.push(spent[j]);
+                        }
                         res.status(200).json(giftcards);
                     }
                 });
