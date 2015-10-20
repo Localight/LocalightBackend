@@ -212,17 +212,25 @@ router.get('/', function(req, res) {
                     if (err) {
                         return res.status(500).send("Error searching DB");
                     } else {
+                        //Store the spent giftcards
                         var spent = [];
+                        //Loop through giftcards
                         for(var i=0;i<giftcards.length;i++){
+                            //Find any that are zero
                             if(giftcards[i].amount == 0){
+                                //Remove from giftcards and add to spent
                                 spent.push(giftcards.splice(i, 1)[0]);
+                                //If there are still giftcards left
                                 if(giftcards.length > 0){
+                                    //Check to make sure that new giftcard at current position (from splice) is not zero
                                     if(giftcards[i].amount == 0){
+                                        //If it is, check the current position again.
                                         i--;
                                     }
                                 }
                             }
                         }
+                        //Add all spent giftcards to end of giftcards array
                         for(var j=0;j<spent.length;j++){
                             giftcards.push(spent[j]);
                         }
