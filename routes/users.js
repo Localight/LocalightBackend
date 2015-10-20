@@ -5,6 +5,7 @@ var express = require('express'),
     config = require('../config/keys.json'),
     SessionService = require('../services/sessions.js'),
     nodemailer = require('nodemailer'),
+    Giftcard = mongoose.model('Giftcard'),
     User = mongoose.model('User');
 
 /* User Login */
