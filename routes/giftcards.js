@@ -203,7 +203,7 @@ router.get('/', function(req, res) {
                 })
                 .sort('-created')
                 .lean()
-                .select('_id toId fromId amount origAmount iconId message location created')
+                .select('_id toId fromId amount origAmount iconId message location created thanked')
                 .populate('fromId', 'name')
                 .populate('toId', 'name')
                 .populate('location.subId', '_id name')
@@ -259,7 +259,7 @@ router.get('/:id', function(req, res) {
                     _id: req.params.id
                 })
                 //added the toId as we need the client to know the users name
-                .select('_id toId fromId amount origAmount iconId message location')
+                .select('_id toId fromId amount origAmount iconId message location created thanked')
                 //use populate to also returns the users name in the giftcards object!
                 .populate('fromId', 'name') // populate the actual user and only return their name
                 .populate('toId', 'name') //populate the actual user and only return their name
