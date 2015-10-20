@@ -212,7 +212,7 @@ router.get('/', function(req, res) {
                     if (err) {
                         return res.status(500).send("Error searching DB");
                     } else {
-                        var spent = {};
+                        var spent = [];
                         for(var i=0;i<giftcards.length;i++){
                             if(giftcards[i].amount == 0){
                                 spent.push(giftcards.splice(i, 1)[0]);
