@@ -116,6 +116,7 @@ router.post('/', function(req, res) {
                     message: req.body.message,
                     stripeOrderId: charge.id,
                     location: {locationId: req.body.locationId, subId: req.body.subId},
+                    created: Date.now(),
                     sendDate: req.body.sendDate,
                     sent: sent
                 }).save(function(err, giftcard) {
@@ -214,6 +215,7 @@ router.get('/', function(req, res) {
                         for(var i=0;i<giftcards.length;i++){
                             if(giftcards[i].amount == 0){
                                 giftcards.push(giftcards.splice(i, 1)[0]);
+                                i--;
                             }
                         }
                         res.status(200).json(giftcards);
