@@ -5,6 +5,7 @@ var express = require('express'),
     config = require('../config/keys.json'),
     SessionService = require('../services/sessions.js'),
     nodemailer = require('nodemailer'),
+    Giftcard = mongoose.model('Giftcard'),
     User = mongoose.model('User');
 
 /* User Login */
@@ -268,6 +269,23 @@ router.post('/thanks', function(req, res) {
                                 res.status(200).json({
                                     msg: "Email was sent!"
                                 });
+
+                                var setGC = {
+                                    $set: { thanked: true }
+                                }
+
+                                Giftcard.update({
+                                        toId: accountId,
+                                        fromId: req.body.fromId,
+                                        thanked: false
+                                    }, setGC)
+                                    .exec(function(err, user) {
+                                        if (err) {
+                                            console.log({
+                                                msg: "Could not update GC as thanked"
+                                            });
+                                        }
+                                    })
                             }
                         });
                   }
