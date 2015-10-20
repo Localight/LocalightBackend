@@ -116,6 +116,7 @@ router.post('/', function(req, res) {
                     message: req.body.message,
                     stripeOrderId: charge.id,
                     location: {locationId: req.body.locationId, subId: req.body.subId},
+                    created: Date.now(),
                     sendDate: req.body.sendDate,
                     sent: sent
                 }).save(function(err, giftcard) {
@@ -200,17 +201,39 @@ router.get('/', function(req, res) {
             Giftcard.find({
                     toId: accountId
                 })
-                //Added toId as we need the client to know the users name
-                .select('_id toId fromId amount origAmount iconId message location')
-                //use populate to also returns the users name in the giftcards object!
-                .populate('fromId', 'name') // populate the actual user and only return their name
-                .populate('toId', 'name') //populate the actual user and only return their name
+                .sort('-created')
+                .lean()
+                .select('_id toId fromId amount origAmount iconId message location created')
+                .populate('fromId', 'name')
+                .populate('toId', 'name')
                 .populate('location.subId', '_id name')
                 .populate('location.locationId', '_id name address1 address2 city state zipcode subs')
                 .exec(function(err, giftcards) {
                     if (err) {
                         return res.status(500).send("Error searching DB");
                     } else {
+                        //Store the spent giftcards
+                        var spent = [];
+                        //Loop through giftcards
+                        for(var i=0;i<giftcards.length;i++){
+                            //Find any that are zero
+                            if(giftcards[i].amount == 0){
+                                //Remove from giftcards and add to spent
+                                spent.push(giftcards.splice(i, 1)[0]);
+                                //If there are still giftcards left
+                                if(giftcards.length > 0){
+                                    //Check to make sure that new giftcard at current position (from splice) is not zero
+                                    if(giftcards[i].amount == 0){
+                                        //If it is, check the current position again.
+                                        i--;
+                                    }
+                                }
+                            }
+                        }
+                        //Add all spent giftcards to end of giftcards array
+                        for(var j=0;j<spent.length;j++){
+                            giftcards.push(spent[j]);
+                        }
                         res.status(200).json(giftcards);
                     }
                 });

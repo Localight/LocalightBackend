@@ -44,6 +44,10 @@ var Giftcard = new mongoose.Schema({
             ref: 'Owner'
         }
     },
+    created: {
+        type: Date,
+        default: Date.now()
+    },
     sendDate: {
         type: Date,
         default: Date.now()
