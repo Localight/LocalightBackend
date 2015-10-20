@@ -212,12 +212,13 @@ router.get('/', function(req, res) {
                     if (err) {
                         return res.status(500).send("Error searching DB");
                     } else {
+                        var spent;
                         for(var i=0;i<giftcards.length;i++){
                             if(giftcards[i].amount == 0){
-                                giftcards.push(giftcards.splice(i, 1)[0]);
-                                i--;
+                                spent.push(giftcards.splice(i, 1)[0]);
                             }
                         }
+                        giftcards.push(spent);
                         res.status(200).json(giftcards);
                     }
                 });
