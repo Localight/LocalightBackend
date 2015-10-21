@@ -223,7 +223,8 @@ router.get('/', function(req, res) {
                                 //If there are still giftcards left
                                 if(giftcards.length > 0){
                                     //Check to make sure that new giftcard at current position (from splice) is not zero
-                                    if(giftcards[i].amount == 0){
+                                    //And also that it exists
+                                    if(giftcards[i] && giftcards[i].amount == 0){
                                         //If it is, check the current position again.
                                         i--;
                                     }
