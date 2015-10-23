@@ -13,7 +13,7 @@ exports.create = function(url, callback) {
             if(err){
                 console.log("problem accessing url shortner");
             } else {
-                callback(JSON.parse(body));
+                callback(JSON.parse(body).url);
             }
         });
 

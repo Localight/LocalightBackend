@@ -162,9 +162,9 @@ router.post('/', function(req, res) {
                                 if (err) {
                                     console.log(err);
                                 } else {
-                                    shortURLService.create(process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token, function(body){
+                                    shortURLService.create(process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token, function(url){
                                         client.messages.create({
-                                            body: "You have a new giftcard on lbgift! " + body.url,
+                                            body: "You have a new giftcard on lbgift! " + url,
                                             to: "+1" + req.body.phone,
                                             from: config.twilio.number
                                         }, function(err, message) {
@@ -331,9 +331,9 @@ router.post('/later', function(req, res) {
                                         msg: "No giftard with that ID!"
                                     });
                                 } else {
-                                    shortURLService.create(process.argv[2] + "/#/giftcards/" + req.body.giftcardId + "?token=" + req.body.sessionToken, function(body){
-                                        var messagePlain = "Hello " + user.name + ", Here is a link for the giftcard you saved: " + body.url + " Thanks, The Localight Team";
-                                        var messageHTML = "Hello " + user.name + ",<br /><br />Here is a link for the giftcard you saved:<br /><a href='" + body.url + "'>" + body.url + "</a><br /><br />Thanks!<br />The Localight Team";
+                                    shortURLService.create(process.argv[2] + "/#/giftcards/" + req.body.giftcardId + "?token=" + req.body.sessionToken, function(url){
+                                        var messagePlain = "Hello " + user.name + ", Here is a link for the giftcard you saved: " + url + " Thanks, The Localight Team";
+                                        var messageHTML = "Hello " + user.name + ",<br /><br />Here is a link for the giftcard you saved:<br /><a href='" + url + "'>" + url + "</a><br /><br />Thanks!<br />The Localight Team";
 
                                         var transporter = nodemailer.createTransport({
                                             service: 'Gmail',

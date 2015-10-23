@@ -81,9 +81,9 @@ router.post('/twilio', function(req, res) {
                         if (err) {
                             res.json(err);
                         } else {
-                            shortURLService.create(process.argv[2] + '/#/giftcards/create?token=' + token, function(body){
+                            shortURLService.create(process.argv[2] + '/#/giftcards/create?token=' + token, function(url){
                                 //All good, give the user their token
-                                res.send('<Response><Message>' + body.token + '</Message></Response>');
+                                res.send('<Response><Message>' + url + '</Message></Response>');
                             });
                         }
                     });
@@ -103,9 +103,9 @@ router.post('/twilio', function(req, res) {
                                 if (err) {
                                     res.json(err);
                                 } else {
-                                    shortURLService.create(process.argv[2] + '/#/giftcards/create?token=' + token, function(body){
+                                    shortURLService.create(process.argv[2] + '/#/giftcards/create?token=' + token, function(url){
                                         //All good, give the user their token
-                                        res.send('<Response><Message>' + body.url + '</Message></Response>');
+                                        res.send('<Response><Message>' + url + '</Message></Response>');
                                     });
                                 }
                             });
