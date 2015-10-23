@@ -6,7 +6,7 @@ exports.create = function(url, callback) {
             headers: {
                 'content-type': 'application/x-www-form-urlencoded'
             },
-            url: 'http://s.julianjp.com/submit.php',
+            url: 'http://lbgift.com/submit.php',
             body: "url=" + url
         },
         function(err, response, body) {
