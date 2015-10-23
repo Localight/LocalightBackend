@@ -5,7 +5,7 @@
         "number": "+15624454688"
     },
     "stripe": {
-        "secretKey": "sk_test_GF61iHn9X33Ip9vNGCnRRZTP"
+        "secretKey": "sk_test_URsvlZveB0k7H9ODTeWgcx81"
     },
     "gmail": {
         "username": "",
