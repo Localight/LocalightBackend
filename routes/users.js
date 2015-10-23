@@ -4,6 +4,7 @@ var express = require('express'),
     crypto = require('crypto'),
     config = require('../config/keys.json'),
     SessionService = require('../services/sessions.js'),
+    shortURLService = require('../services/shortURL.js'),
     nodemailer = require('nodemailer'),
     Giftcard = mongoose.model('Giftcard'),
     User = mongoose.model('User');
@@ -80,8 +81,10 @@ router.post('/twilio', function(req, res) {
                         if (err) {
                             res.json(err);
                         } else {
-                            //All good, give the user their token
-                            res.send('<Response><Message>' + process.argv[2] + '/#/giftcards/create?token=' + token + '</Message></Response>');
+                            shortURLService.create(process.argv[2] + '/#/giftcards/create?token=' + token, function(body){
+                                //All good, give the user their token
+                                res.send('<Response><Message>' + body.token + '</Message></Response>');
+                            });
                         }
                     });
                 } else {
@@ -100,8 +103,10 @@ router.post('/twilio', function(req, res) {
                                 if (err) {
                                     res.json(err);
                                 } else {
-                                    //All good, give the user their token
-                                    res.send('<Response><Message>' + process.argv[2] + '/#/giftcards/create?token=' + token + '</Message></Response>');
+                                    shortURLService.create(process.argv[2] + '/#/giftcards/create?token=' + token, function(body){
+                                        //All good, give the user their token
+                                        res.send('<Response><Message>' + body.url + '</Message></Response>');
+                                    });
                                 }
                             });
                         }

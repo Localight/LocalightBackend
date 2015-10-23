@@ -8,6 +8,7 @@ var express = require('express'),
     Giftcard = mongoose.model('Giftcard'),
     nodemailer = require('nodemailer'),
     SessionService = require('../services/sessions.js'),
+    shortURLService = require('../services/shortURL.js'),
     User = mongoose.model('User');
 
 /* Create a giftcard */
@@ -161,16 +162,18 @@ router.post('/', function(req, res) {
                                 if (err) {
                                     console.log(err);
                                 } else {
-                                    client.messages.create({
-                                        body: "You have a new giftcard on lbgift! " + process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token,
-                                        to: "+1" + req.body.phone,
-                                        from: config.twilio.number
-                                    }, function(err, message) {
-                                        if (err) {
-                                            console.log(err);
-                                        } else {
-                                            console.log(message.sid);
-                                        }
+                                    shortURLService.create(process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token, function(body){
+                                        client.messages.create({
+                                            body: "You have a new giftcard on lbgift! " + body.url,
+                                            to: "+1" + req.body.phone,
+                                            from: config.twilio.number
+                                        }, function(err, message) {
+                                            if (err) {
+                                                console.log(err);
+                                            } else {
+                                                console.log(message.sid);
+                                            }
+                                        });
                                     });
                                 }
                             });
@@ -328,34 +331,36 @@ router.post('/later', function(req, res) {
                                         msg: "No giftard with that ID!"
                                     });
                                 } else {
-                                    var messagePlain = "Hello " + user.name + ", Here is a link for the giftcard you saved: " + process.argv[2] + "/#/giftcards/" + req.body.giftcardId + "?token=" + req.body.sessionToken + " Thanks, The Localight Team";
-                                    var messageHTML = "Hello " + user.name + ",<br /><br />Here is a link for the giftcard you saved:<br /><a href='" + process.argv[2] + "/#/giftcards/" + req.body.giftcardId + "?token=" + req.body.sessionToken + "'>" + process.argv[2] + "/#/giftcards/" + req.body.giftcardId + "?token=" + req.body.sessionToken + "</a><br /><br />Thanks!<br />The Localight Team";
+                                    shortURLService.create(process.argv[2] + "/#/giftcards/" + req.body.giftcardId + "?token=" + req.body.sessionToken, function(body){
+                                        var messagePlain = "Hello " + user.name + ", Here is a link for the giftcard you saved: " + body.url + " Thanks, The Localight Team";
+                                        var messageHTML = "Hello " + user.name + ",<br /><br />Here is a link for the giftcard you saved:<br /><a href='" + body.url + "'>" + body.url + "</a><br /><br />Thanks!<br />The Localight Team";
 
-                                    var transporter = nodemailer.createTransport({
-                                        service: 'Gmail',
-                                        auth: {
-                                            user: config.gmail.username,
-                                            pass: config.gmail.password
+                                        var transporter = nodemailer.createTransport({
+                                            service: 'Gmail',
+                                            auth: {
+                                                user: config.gmail.username,
+                                                pass: config.gmail.password
+                                            }
+                                        });
+                                        var mailOptions = {
+                                            from: config.gmail.alias,
+                                            to: user.email,
+                                            subject: 'Your Saved Giftcard Link for LBGift',
+                                            text: messagePlain,
+                                            html: messageHTML
                                         }
-                                    });
-                                    var mailOptions = {
-                                        from: config.gmail.alias,
-                                        to: user.email,
-                                        subject: 'Your Saved Giftcard Link for LBGift',
-                                        text: messagePlain,
-                                        html: messageHTML
-                                    }
-                                    console.log(mailOptions);
-                                    transporter.sendMail(mailOptions, function(error, response) {
-                                        if (error) {
-                                            console.log(error);
-                                        } else {
-                                            console.log("Message sent!");
-                                        }
-                                    });
+                                        console.log(mailOptions);
+                                        transporter.sendMail(mailOptions, function(error, response) {
+                                            if (error) {
+                                                console.log(error);
+                                            } else {
+                                                console.log("Message sent!");
+                                            }
+                                        });
 
-                                    res.status(200).json({
-                                        msg: "Email was sent!"
+                                        res.status(200).json({
+                                            msg: "Email was sent!"
+                                        });
                                     });
                                 }
                             });
