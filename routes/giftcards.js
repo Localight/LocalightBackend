@@ -245,6 +245,39 @@ router.get('/', function(req, res) {
     });
 });
 
+/* Get given giftcards */
+router.get('/given', function(req, res) {
+    //Check if required was sent
+    if (!req.query.sessionToken) {
+        return res.status(412).send("Requirements Unmet");
+    }
+
+    //Validate session
+    SessionService.validateSession(req.query.sessionToken, "user", function(err, accountId) {
+        if (err) {
+            return res.status(err.status).send("Session Error");
+        } else {
+            Giftcard.find({
+                    fromId: accountId
+                })
+                .sort('-created')
+                .lean()
+                .select('_id toId fromId origAmount iconId message location created')
+                .populate('fromId', 'name')
+                .populate('toId', 'name')
+                .populate('location.subId', '_id name')
+                .populate('location.locationId', '_id name address1 address2 city state zipcode subs')
+                .exec(function(err, giftcards) {
+                    if (err) {
+                        return res.status(500).send("Error searching DB");
+                    } else {
+                        res.status(200).json(giftcards);
+                    }
+                });
+        }
+    });
+});
+
 /* Get a giftcard */
 router.get('/:id', function(req, res) {
     //Check if required was sent
