@@ -163,7 +163,7 @@ router.get('/owner/:id', function(req, res) {
                 'subs.subId': req.params.id
             }]
         })
-        .select('_id name address1 address2 city state zipcode ownerId ownerCode subs')
+        .select('_id name triconKey address1 address2 city state zipcode ownerId ownerCode subs')
         .exec(function(err, locations) {
             if (err) {
                 return res.status(500).json({
