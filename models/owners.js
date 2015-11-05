@@ -9,8 +9,7 @@ var Owner = new mongoose.Schema({
         require: 'Please provide the type of owner'
     },
     stripeCustomerId: {
-        type: String,
-        require: 'Please provide the Stripe customer id of the owner'
+        type: String
     },
     email: {
         type: String,
