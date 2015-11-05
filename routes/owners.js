@@ -53,7 +53,8 @@ router.post('/join', function(req, res) {
                             } else {
                                 //All good, give the owner their token
                                 res.status(201).json({
-                                    token: token
+                                    token: token,
+                                    verified: owner.verified
                                 });
                             }
                         });
