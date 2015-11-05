@@ -11,8 +11,7 @@ router.post('/join', function(req, res) {
     //Check if required was sent
     if (!(req.body.email &&
             req.body.password &&
-            req.body.name &&
-            req.body.stripeCustomerId)) {
+            req.body.name)) {
         return res.status(412).json({
             msg: "You must provide all required fields!"
         });
@@ -36,7 +35,7 @@ router.post('/join', function(req, res) {
                 //Create a new owner with the assembled information
                 new Owner({
                     name: req.body.name,
-                    stripeCustomerId: req.body.stripeCustomerId,
+                    company: req.body.company,
                     email: req.body.email,
                     password: hash,
                     salt: salt,
