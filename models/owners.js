@@ -27,7 +27,7 @@ var Owner = new mongoose.Schema({
         require: 'Please provde the salt for the owner'
     },
     verified: {
-        tyle: Boolean,
+        type: Boolean,
         default: false
     },
     created: {
