@@ -8,6 +8,9 @@ var Owner = new mongoose.Schema({
         type: String,
         require: 'Please provide the type of owner'
     },
+    company: {
+        type: String
+    },
     stripeCustomerId: {
         type: String
     },
