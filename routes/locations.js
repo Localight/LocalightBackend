@@ -36,8 +36,8 @@ router.post('/', function(req, res) {
                         }]
                     })
                     .select('_id')
-                    .exec(function(err, owner) {
-                        if (owner) {
+                    .exec(function(err, location) {
+                        if (location) {
                             createCode();
                         } else {
                             createLocation();

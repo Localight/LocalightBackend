@@ -8,9 +8,11 @@ var Owner = new mongoose.Schema({
         type: String,
         require: 'Please provide the type of owner'
     },
+    company: {
+        type: String
+    },
     stripeCustomerId: {
-        type: String,
-        require: 'Please provide the Stripe customer id of the owner'
+        type: String
     },
     email: {
         type: String,
@@ -23,6 +25,10 @@ var Owner = new mongoose.Schema({
     salt: {
         type: String,
         require: 'Please provde the salt for the owner'
+    },
+    verified: {
+        type: Boolean,
+        default: false
     },
     created: {
         type: Date,
