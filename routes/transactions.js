@@ -24,14 +24,27 @@ router.get('/', function(req, res) {
 
     Transaction.find(query)
         .select('_id userId locationId amount errs')
+        .populate('userId')
+        .populate('locationId', '-triconKey')
         .exec(function(err, transactions) {
-            if (err) {
-                return res.status(500).json({
-                    msg: "Couldn't query the database for locations!"
-                });
-            } else {
-                res.status(200).json(transactions);
-            }
+            var popOptions = {
+              path: 'locationId.ownerId',
+              model: 'Owner',
+              select: '-password -salt'
+            };
+
+            if (err) return res.json(500);
+            Transaction.populate(transactions, popOptions, function (err, transactions) {
+                if (err) {
+                    return res.status(500).json({
+                        msg: "Couldn't query the database for locations!"
+                    });
+                } else {
+                    res.status(200).json(transactions);
+                }
+            });
+
+
         });
 });
 
