@@ -41,6 +41,7 @@ var owners = require('./routes/owners');
 var admins = require('./routes/admins');
 var locations = require('./routes/locations');
 var giftcards = require('./routes/giftcards');
+var transactions = require('./routes/transactions');
 
 //services
 var cron = require('./services/cron.js');
@@ -70,6 +71,7 @@ app.use('/locations', locations);
 app.use('/owners', owners);
 app.use('/admins', admins);
 app.use('/giftcards', giftcards);
+app.use('/transactions', transactions);
 
 cron.start();
 
