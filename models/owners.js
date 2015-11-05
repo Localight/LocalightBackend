@@ -23,6 +23,10 @@ var Owner = new mongoose.Schema({
         type: String,
         require: 'Please provde the salt for the owner'
     },
+    verified: {
+        tyle: Boolean,
+        default: false
+    },
     created: {
         type: Date,
         default: Date.now
