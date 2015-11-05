@@ -18,7 +18,15 @@ var Transaction = new mongoose.Schema({
         err: {
             type: String
         }
-    }]
+    }],
+    paid: {
+        type: Boolean,
+        default: false
+    },
+    created: {
+        type: Date,
+        default: Date.now
+    }
 });
 
 mongoose.model('Transaction', Transaction);
