@@ -50,7 +50,7 @@ router.get('/', function(req, res) {
 });
 
 /* Mark Transactions */
-router.post('/payout', function(req, res) {
+router.post('/payouts', function(req, res) {
     if(req.body.transactions && req.body.method){
         if(Object.prototype.toString.call( someVar ) === '[object Array]'){
             Transaction.update({
@@ -87,6 +87,34 @@ router.post('/payout', function(req, res) {
             msg: "You must provide all required fields!"
         });
     }
+});
+
+/* Get Payouts */
+router.get('/payouts', function(req, res) {
+    Payout.find({})
+        .select()
+        .sort('-created')
+        .populate('transactions')
+        .exec(function(err, payouts) {
+            var popOptions = {
+              path: 'transactions.locationId.ownerId',
+              model: 'Owner',
+              select: '-password -salt'
+            };
+
+            if (err) return res.json(500);
+            Transaction.populate(payouts, popOptions, function (err, payouts) {
+                if (err) {
+                    return res.status(500).json({
+                        msg: "Couldn't query the database for locations!"
+                    });
+                } else {
+                    res.status(200).json(payouts);
+                }
+            });
+
+
+        });
 });
 
 module.exports = router;
