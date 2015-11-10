@@ -23,7 +23,7 @@ router.get('/', function(req, res) {
     }
 
     Transaction.find(query)
-        .select('_id userId locationId amount errs paid created')
+        .select('_id userId locationId amount errs paidOut created')
         .populate('userId')
         .populate('locationId', '-triconKey')
         .exec(function(err, transactions) {
@@ -46,6 +46,29 @@ router.get('/', function(req, res) {
 
 
         });
+});
+
+/* Mark Transactions */
+router.post('/payout', function(req, res) {
+    if(req.body.transactions){
+        if(Object.prototype.toString.call( someVar ) === '[object Array]'){
+            Transaction.find({
+                    '_id': { $in: req.body.transactions }
+                })
+                .exec(function(err, transactions) {
+                    if (err) return res.status(500).json({
+                        msg: "Error querying transactions"
+                    });
+                });
+        } else {
+            return res.status(400).json({
+                msg: "Transactions must be an array of objects"
+            });
+        }
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
 });
 
 module.exports = router;
