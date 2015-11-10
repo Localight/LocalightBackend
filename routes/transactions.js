@@ -97,9 +97,9 @@ router.get('/payouts', function(req, res) {
         .populate('transactions')
         .exec(function(err, payouts) {
             var popOptions = {
-              path: 'transactions.locationId.ownerId',
+              path: 'transactions.locationId',
               model: 'Owner',
-              select: '-password -salt'
+              select: '-triconKey'
             };
 
             if (err) return res.json(500);
@@ -110,6 +110,68 @@ router.get('/payouts', function(req, res) {
                     });
                 } else {
                     res.status(200).json(payouts);
+                }
+            });
+
+
+        });
+});
+
+/* Get Payout */
+router.get('/payouts/:id', function(req, res) {
+    Payout.find({ _id: req.params.id })
+        .select()
+        .sort('-created')
+        .populate('transactions')
+        .exec(function(err, payouts) {
+            //Get location subdoc
+            var popOptions = {
+              path: 'transactions.locationId',
+              model: 'Location',
+              select: '-triconKey'
+            };
+
+            if (err) return res.json(500);
+            Payout.populate(payouts, popOptions, function (err, payouts) {
+                if (err) {
+                    return res.status(500).json({
+                        msg: "Couldn't query the database for locations!"
+                    });
+                } else {
+                    //Get owner subdoc
+                    var popOptions = {
+                      path: 'transactions.locationId.ownerId',
+                      model: 'Owner',
+                      select: '-password -salt'
+                    };
+
+                    if (err) return res.json(500);
+                    Payout.populate(payouts, popOptions, function (err, payouts) {
+                        if (err) {
+                            return res.status(500).json({
+                                msg: "Couldn't query the database for locations!"
+                            });
+                        } else {
+                            var popOptions = {
+                              path: 'transactions.userId',
+                              model: 'User',
+                              select: ''
+                            };
+
+                            if (err) return res.json(500);
+                            Payout.populate(payouts, popOptions, function (err, payouts) {
+                                if (err) {
+                                    return res.status(500).json({
+                                        msg: "Couldn't query the database for locations!"
+                                    });
+                                } else {
+                                    res.status(200).json(payouts);
+                                }
+                            });
+
+                        }
+                    });
+
                 }
             });
 
