@@ -49,17 +49,19 @@ router.get('/', function(req, res) {
         });
 });
 
-/* Mark Transactions */
+/* Create a payout */
 router.post('/payouts', function(req, res) {
     if(req.body.transactions && req.body.method){
-        if(Object.prototype.toString.call( someVar ) === '[object Array]'){
-            Transaction.update({
-                    '_id': { $in: req.body.transactions }
-                }, { $set: { paidOut: true } })
+        if(Object.prototype.toString.call(req.body.transactions) === '[object Array]'){
+            Transaction.find({
+                    '_id': { $in: req.body.transactions.$ }
+                )
+                .populate('transactions')
                 .exec(function(err, transactions) {
                     if (err) return res.status(500).json({
                         msg: "Error querying transactions"
                     });
+
                     var totalPayout = 0;
                     for(var i=0; i<transactions.length;i++){
                         totalPayout = totalPayout + transactions[i].amount;
@@ -83,6 +85,7 @@ router.post('/payouts', function(req, res) {
                 msg: "Transactions must be an array of objects"
             });
         }
+    } else {
         return res.status(412).json({
             msg: "You must provide all required fields!"
         });
@@ -98,7 +101,7 @@ router.get('/payouts', function(req, res) {
         .exec(function(err, payouts) {
             var popOptions = {
               path: 'transactions.locationId',
-              model: 'Owner',
+              model: 'Location',
               select: '-triconKey'
             };
 
