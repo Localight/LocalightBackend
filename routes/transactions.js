@@ -51,7 +51,7 @@ router.get('/', function(req, res) {
 
 /* Mark Transactions */
 router.post('/payout', function(req, res) {
-    if(req.body.transactions){
+    if(req.body.transactions && req.body.method){
         if(Object.prototype.toString.call( someVar ) === '[object Array]'){
             Transaction.update({
                     '_id': { $in: req.body.transactions }
@@ -59,6 +59,23 @@ router.post('/payout', function(req, res) {
                 .exec(function(err, transactions) {
                     if (err) return res.status(500).json({
                         msg: "Error querying transactions"
+                    });
+                    var totalPayout = 0;
+                    for(var i=0; i<transactions.length;i++){
+                        totalPayout = totalPayout + transactions[i].amount;
+                    }
+                    new Payout({
+                        transactions: req.body.transactions,
+                        amount: totalPayout,
+                        method: req.body.method
+                    }).save(function(err, payout) {
+                        if (err) {
+                            res.status(500).json({
+                                msg: "Error saving giftcard to database!"
+                            });
+                        } else {
+                            res.status(201).json(payout);
+                        }
                     });
                 });
         } else {
