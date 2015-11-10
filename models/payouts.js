@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var Transaction = new mongoose.Schema({
+var Payout = new mongoose.Schema({
     transactions: [{
         type: String,
         ref: 'Transaction'
@@ -16,4 +16,4 @@ var Transaction = new mongoose.Schema({
     }
 });
 
-mongoose.model('Transaction', Transaction);
+mongoose.model('Payout', Payout);
