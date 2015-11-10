@@ -23,7 +23,7 @@ router.get('/', function(req, res) {
     }
 
     Transaction.find(query)
-        .select('_id userId locationId amount errs')
+        .select('_id userId locationId amount errs paid created')
         .populate('userId')
         .populate('locationId', '-triconKey')
         .exec(function(err, transactions) {
