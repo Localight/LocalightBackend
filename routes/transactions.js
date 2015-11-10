@@ -53,9 +53,9 @@ router.get('/', function(req, res) {
 router.post('/payout', function(req, res) {
     if(req.body.transactions){
         if(Object.prototype.toString.call( someVar ) === '[object Array]'){
-            Transaction.find({
+            Transaction.update({
                     '_id': { $in: req.body.transactions }
-                })
+                }, { $set: { paidOut: true } })
                 .exec(function(err, transactions) {
                     if (err) return res.status(500).json({
                         msg: "Error querying transactions"
