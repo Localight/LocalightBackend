@@ -2,24 +2,21 @@ var mongoose = require('mongoose');
 var Transaction = new mongoose.Schema({
     userId: {
         type: String,
-        ref: 'User',
-        require:'Please provide the id of the user account'
+        ref: 'User'
     },
     locationId: {
         type: String,
-        ref: 'Location',
-        require:'Please provide the id of the location account'
+        ref: 'Location'
     },
     amount: {
-        type: String,
-        require:'Please provide the session token'
+        type: Number
     },
     errs: [{
         err: {
             type: String
         }
     }],
-    paid: {
+    paidOut: {
         type: Boolean,
         default: false
     },
