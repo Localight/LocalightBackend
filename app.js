@@ -14,6 +14,7 @@ var users = require('./models/users');
 var giftcards = require('./models/giftcards');
 var locations = require('./models/locations');
 var transactions = require('./models/transactions');
+var payouts = require('./models/payouts');
 var owners = require('./models/owners');
 var admins = require('./models/admins');
 var sessions = require('./models/sessions');

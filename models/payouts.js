@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 var Transaction = new mongoose.Schema({
     transactions: [{
         type: String,
-        ref: 'User'
+        ref: 'Transaction'
     }],
     amount: {
         type: Number

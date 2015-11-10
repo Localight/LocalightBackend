@@ -4,6 +4,7 @@ var express = require('express'),
     SessionService = require('../services/sessions.js'),
     Location = mongoose.model('Location'),
     Transaction = mongoose.model('Transaction'),
+    Payout = mongoose.model('Payout'),
     Giftcard = mongoose.model('Giftcard');
 
 /* Get Transactions */
