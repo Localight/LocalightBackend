@@ -55,18 +55,47 @@ router.post('/payouts', function(req, res) {
         if (Object.prototype.toString.call(req.body.transactions) === '[object Array]') {
             Transaction.find({
                     '_id': {
-                        $in: req.body.transactions.$
+                        $in: req.body.transactions
                     }
                 })
                 .populate('transactions')
+                .lean()
                 .exec(function(err, transactions) {
                     if (err) return res.status(500).json({
                         msg: "Error querying transactions"
                     });
 
+                    //Calculate the total expendature for Localight account and remove any transactions that have paidOut:true
                     var totalPayout = 0;
                     for (var i = 0; i < transactions.length; i++) {
+                        //Check if transaction has already been paidOut
+                        if(transactions[i].paidOut){
+                            //Remove paid element from payout
+                            transactions.splice(i, 1);
+                            //Revisit this element in loop due to splice()
+                            i--;
+                            //Check if array length is zero
+                            if(transactions.length == 0){
+                                //Break away from rest of route
+                                return res.status(404).json({
+                                    msg: "No unpaid transactions specified!"
+                                });
+                            }
+                            continue;
+                        }
+
                         totalPayout = totalPayout + transactions[i].amount;
+                    }
+                    console.log(transactions);
+                    //Calculate the individual payout for each location using a JavaScript hashmap
+                    var locationPayout = {};
+                    for (var i = 0; i < transactions.length; i++) {
+                        //If hashmap key not found, initialize it
+                        if(!locationPayout[transactions[i].locationId]){
+                            locationPayout[transactions[i].locationId] = 0;
+                        }
+                        //Add current transaction value to hashmap key of locationId
+                        locationPayout[transactions[i].locationId] = locationPayout[transactions[i].locationId] + transactions[i].amount;
                     }
                     new Payout({
                         transactions: req.body.transactions,
