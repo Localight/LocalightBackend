@@ -55,7 +55,7 @@ router.post('/payouts', function(req, res) {
         if(Object.prototype.toString.call(req.body.transactions) === '[object Array]'){
             Transaction.find({
                     '_id': { $in: req.body.transactions.$ }
-                )
+                })
                 .populate('transactions')
                 .exec(function(err, transactions) {
                     if (err) return res.status(500).json({
@@ -79,6 +79,23 @@ router.post('/payouts', function(req, res) {
                             res.status(201).json(payout);
                         }
                     });
+
+                    for(var i=0;i<transactions.length;i++){
+
+                        User.update({
+                         _id: transactions[i]._id
+                        }, {$set: { paidOut: true }})
+                       .exec(function(err, user) {
+                         if (err) {
+                           res.status(500).json({
+                             msg: "Could not update user"
+                           });
+                         } else {
+                           res.status(200).json(user);
+                         }
+                       });
+                    }
+
                 });
         } else {
             return res.status(400).json({
