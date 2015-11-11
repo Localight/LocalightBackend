@@ -53,6 +53,7 @@ router.get('/', function(req, res) {
 router.post('/payouts', function(req, res) {
     if (req.body.transactions && req.body.method) {
         if (Object.prototype.toString.call(req.body.transactions) === '[object Array]') {
+            //Find all transactions provided to the server in transactions ID array
             Transaction.find({
                     '_id': {
                         $in: req.body.transactions
@@ -74,7 +75,7 @@ router.post('/payouts', function(req, res) {
                             transactions.splice(i, 1);
                             //Revisit this element in loop due to splice()
                             i--;
-                            //Check if array length is zero
+                            //Check if there are still transactions left
                             if(transactions.length == 0){
                                 //Break away from rest of route
                                 return res.status(404).json({
@@ -111,8 +112,8 @@ router.post('/payouts', function(req, res) {
                         }
                     });
 
+                    //Update all recently paid transactions with payedOut:true
                     for (var i = 0; i < transactions.length; i++) {
-
                         Transaction.update({
                                 _id: transactions[i]._id
                             }, {
@@ -126,7 +127,6 @@ router.post('/payouts', function(req, res) {
                                 }
                             });
                     }
-
                 });
         } else {
             return res.status(400).json({
