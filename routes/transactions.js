@@ -10,16 +10,16 @@ var express = require('express'),
 /* Get Transactions */
 router.get('/', function(req, res) {
     var query = {};
-    if(req.query.paid === "true"){
+    if (req.query.paid === "true") {
         query.paid = true;
-    } else if(req.query.paid === "false") {
+    } else if (req.query.paid === "false") {
         query.paid = false;
     }
 
-    if(req.query.created_after){
+    if (req.query.created_after) {
         query.created.$gte = req.query.created_after;
     }
-    if(req.query.created_before){
+    if (req.query.created_before) {
         query.created.$lt = req.query.created_before;
     }
 
@@ -29,13 +29,13 @@ router.get('/', function(req, res) {
         .populate('locationId', '-triconKey')
         .exec(function(err, transactions) {
             var popOptions = {
-              path: 'locationId.ownerId',
-              model: 'Owner',
-              select: '-password -salt'
+                path: 'locationId.ownerId',
+                model: 'Owner',
+                select: '-password -salt'
             };
 
             if (err) return res.json(500);
-            Transaction.populate(transactions, popOptions, function (err, transactions) {
+            Transaction.populate(transactions, popOptions, function(err, transactions) {
                 if (err) {
                     return res.status(500).json({
                         msg: "Couldn't query the database for locations!"
@@ -51,10 +51,12 @@ router.get('/', function(req, res) {
 
 /* Create a payout */
 router.post('/payouts', function(req, res) {
-    if(req.body.transactions && req.body.method){
-        if(Object.prototype.toString.call(req.body.transactions) === '[object Array]'){
+    if (req.body.transactions && req.body.method) {
+        if (Object.prototype.toString.call(req.body.transactions) === '[object Array]') {
             Transaction.find({
-                    '_id': { $in: req.body.transactions.$ }
+                    '_id': {
+                        $in: req.body.transactions.$
+                    }
                 })
                 .populate('transactions')
                 .exec(function(err, transactions) {
@@ -63,7 +65,7 @@ router.post('/payouts', function(req, res) {
                     });
 
                     var totalPayout = 0;
-                    for(var i=0; i<transactions.length;i++){
+                    for (var i = 0; i < transactions.length; i++) {
                         totalPayout = totalPayout + transactions[i].amount;
                     }
                     new Payout({
@@ -80,20 +82,24 @@ router.post('/payouts', function(req, res) {
                         }
                     });
 
-                    for(var i=0;i<transactions.length;i++){
+                    for (var i = 0; i < transactions.length; i++) {
 
                         User.update({
-                         _id: transactions[i]._id
-                        }, {$set: { paidOut: true }})
-                       .exec(function(err, user) {
-                         if (err) {
-                           res.status(500).json({
-                             msg: "Could not update user"
-                           });
-                         } else {
-                           res.status(200).json(user);
-                         }
-                       });
+                                _id: transactions[i]._id
+                            }, {
+                                $set: {
+                                    paidOut: true
+                                }
+                            })
+                            .exec(function(err, user) {
+                                if (err) {
+                                    res.status(500).json({
+                                        msg: "Could not update user"
+                                    });
+                                } else {
+                                    res.status(200).json(user);
+                                }
+                            });
                     }
 
                 });
@@ -117,13 +123,13 @@ router.get('/payouts', function(req, res) {
         .populate('transactions')
         .exec(function(err, payouts) {
             var popOptions = {
-              path: 'transactions.locationId',
-              model: 'Location',
-              select: '-triconKey'
+                path: 'transactions.locationId',
+                model: 'Location',
+                select: '-triconKey'
             };
 
             if (err) return res.json(500);
-            Transaction.populate(payouts, popOptions, function (err, payouts) {
+            Transaction.populate(payouts, popOptions, function(err, payouts) {
                 if (err) {
                     return res.status(500).json({
                         msg: "Couldn't query the database for locations!"
@@ -139,20 +145,22 @@ router.get('/payouts', function(req, res) {
 
 /* Get Payout */
 router.get('/payouts/:id', function(req, res) {
-    Payout.find({ _id: req.params.id })
+    Payout.find({
+            _id: req.params.id
+        })
         .select()
         .sort('-created')
         .populate('transactions')
         .exec(function(err, payouts) {
             //Get location subdoc
             var popOptions = {
-              path: 'transactions.locationId',
-              model: 'Location',
-              select: '-triconKey'
+                path: 'transactions.locationId',
+                model: 'Location',
+                select: '-triconKey'
             };
 
             if (err) return res.json(500);
-            Payout.populate(payouts, popOptions, function (err, payouts) {
+            Payout.populate(payouts, popOptions, function(err, payouts) {
                 if (err) {
                     return res.status(500).json({
                         msg: "Couldn't query the database for locations!"
@@ -160,26 +168,26 @@ router.get('/payouts/:id', function(req, res) {
                 } else {
                     //Get owner subdoc
                     var popOptions = {
-                      path: 'transactions.locationId.ownerId',
-                      model: 'Owner',
-                      select: '-password -salt'
+                        path: 'transactions.locationId.ownerId',
+                        model: 'Owner',
+                        select: '-password -salt'
                     };
 
                     if (err) return res.json(500);
-                    Payout.populate(payouts, popOptions, function (err, payouts) {
+                    Payout.populate(payouts, popOptions, function(err, payouts) {
                         if (err) {
                             return res.status(500).json({
                                 msg: "Couldn't query the database for locations!"
                             });
                         } else {
                             var popOptions = {
-                              path: 'transactions.userId',
-                              model: 'User',
-                              select: ''
+                                path: 'transactions.userId',
+                                model: 'User',
+                                select: ''
                             };
 
                             if (err) return res.json(500);
-                            Payout.populate(payouts, popOptions, function (err, payouts) {
+                            Payout.populate(payouts, popOptions, function(err, payouts) {
                                 if (err) {
                                     return res.status(500).json({
                                         msg: "Couldn't query the database for locations!"

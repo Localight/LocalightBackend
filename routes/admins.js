@@ -19,7 +19,7 @@ router.post('/join', function(req, res) {
     }
 
     var sk = config.admin.sk;
-    if(req.body.sk != sk){
+    if (req.body.sk != sk) {
         res.status(401).json({
             msg: "SK is incorrect!"
         });
