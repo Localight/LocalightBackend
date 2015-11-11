@@ -9,7 +9,9 @@ var express = require('express'),
 
 /* Get Transactions */
 router.get('/', function(req, res) {
+    //Adaptive query object
     var query = {};
+    //Find the various query options and set them
     if (req.query.paid === "true") {
         query.paid = true;
     } else if (req.query.paid === "false") {
@@ -23,11 +25,14 @@ router.get('/', function(req, res) {
         query.created.$lt = req.query.created_before;
     }
 
+    //Find all transactions matching the query
     Transaction.find(query)
         .select('_id userId locationId amount errs paidOut created')
         .populate('userId')
         .populate('locationId', '-triconKey')
         .exec(function(err, transactions) {
+            //PopOptions will populate the deep referenced owner object.
+            //Populate normally can only go 1 layer deep, however using .populate, deeper population is possible
             var popOptions = {
                 path: 'locationId.ownerId',
                 model: 'Owner',
@@ -35,6 +40,7 @@ router.get('/', function(req, res) {
             };
 
             if (err) return res.json(500);
+            //Deep populate the ownerId field
             Transaction.populate(transactions, popOptions, function(err, transactions) {
                 if (err) {
                     return res.status(500).json({
