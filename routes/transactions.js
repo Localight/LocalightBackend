@@ -84,20 +84,16 @@ router.post('/payouts', function(req, res) {
 
                     for (var i = 0; i < transactions.length; i++) {
 
-                        User.update({
+                        Transaction.update({
                                 _id: transactions[i]._id
                             }, {
                                 $set: {
                                     paidOut: true
                                 }
                             })
-                            .exec(function(err, user) {
+                            .exec(function(err, transaction) {
                                 if (err) {
-                                    res.status(500).json({
-                                        msg: "Could not update user"
-                                    });
-                                } else {
-                                    res.status(200).json(user);
+                                    console.log("Error updating transaction paidOut:true")
                                 }
                             });
                     }
