@@ -13,7 +13,8 @@ var Payout = new mongoose.Schema({
     },
     method: {
         type: String
-    }
+    },
+    merchants: [{}]
 });
 
 mongoose.model('Payout', Payout);

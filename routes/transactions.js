@@ -93,7 +93,7 @@ router.post('/payouts', function(req, res) {
 
                         totalPayout = totalPayout + transactions[i].amount;
                     }
-                    console.log(transactions);
+
                     //Calculate the individual payout for each location using a JavaScript hashmap
                     var locationPayout = {};
                     for (var i = 0; i < transactions.length; i++) {
@@ -104,10 +104,29 @@ router.post('/payouts', function(req, res) {
                         //Add current transaction value to hashmap key of locationId
                         locationPayout[transactions[i].locationId] = locationPayout[transactions[i].locationId] + transactions[i].amount;
                     }
+
+                    //Get transaction ids only
+                    var transactionIds = [];
+                    for (var i = 0; i < transactions.length; i++){
+                        transactionIds.push(transactions[i]._id);
+                    }
+
+                    //Assemble merchants array to be inserted with merchantId and amount to each respective merchant
+                    var merchants = [];
+                    //Get the keys from the hashmap
+                    var locationPayoutKeys = Object.keys(locationPayout);
+                    for (var i = 0; i < locationPayoutKeys.length; i++){
+                        merchants.push({
+                            merchant: locationPayoutKeys[i],
+                            amount: locationPayout[locationPayoutKeys[i]]
+                        });
+                    }
+
                     new Payout({
-                        transactions: req.body.transactions,
+                        transactions: transactionIds,
                         amount: totalPayout,
-                        method: req.body.method
+                        method: req.body.method,
+                        merchants: merchants
                     }).save(function(err, payout) {
                         if (err) {
                             res.status(500).json({
