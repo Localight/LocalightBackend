@@ -135,7 +135,7 @@ router.get('/', function(req, res) {
             Owner.findOne({
                     _id: accountId
                 })
-                .select('_id name email code verified created updated')
+                .select('_id name email code verified created updated dob')
                 .exec(function(err, owner) {
                     if (err) {
                         res.status(500).json({
