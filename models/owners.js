@@ -14,6 +14,9 @@ var Owner = new mongoose.Schema({
     stripeCustomerId: {
         type: String
     },
+    dob: {
+        type: String
+    },
     email: {
         type: String,
         require: 'Please provide the email of the owner'

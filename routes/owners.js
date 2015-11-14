@@ -78,7 +78,7 @@ router.post('/login', function(req, res) {
     Owner.findOne({
             email: req.body.email
         })
-        .select('password salt _id verified')
+        .select('password salt _id verified dob')
         .exec(function(err, owner) {
             if (err) {
                 res.status(500).json({
@@ -100,7 +100,8 @@ router.post('/login', function(req, res) {
                             //All good, give the owner their token
                             res.status(200).json({
                                 token: token,
-                                verified: owner.verified
+                                verified: owner.verified,
+                                dob: owner.dob
                             });
                         }
                     });
