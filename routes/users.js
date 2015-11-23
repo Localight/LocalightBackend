@@ -81,7 +81,7 @@ router.post('/twilio', function(req, res) {
                         if (err) {
                             res.json(err);
                         } else {
-                            shortURLService.create(process.argv[2] + '/#/giftcards/create?token=' + token, function(url){
+                            shortURLService.create(process.argv[2] + '/#/giftcards/create?token=' + token, function(url) {
                                 //All good, give the user their token
                                 res.send('<Response><Message>' + url + '</Message></Response>');
                             });
@@ -103,7 +103,7 @@ router.post('/twilio', function(req, res) {
                                 if (err) {
                                     res.json(err);
                                 } else {
-                                    shortURLService.create(process.argv[2] + '/#/giftcards/create?token=' + token, function(url){
+                                    shortURLService.create(process.argv[2] + '/#/giftcards/create?token=' + token, function(url) {
                                         //All good, give the user their token
                                         res.send('<Response><Message>' + url + '</Message></Response>');
                                     });
@@ -217,84 +217,86 @@ router.post('/thanks', function(req, res) {
         if (err) {
             res.json(err);
         } else {
-          User.findOne({
-                  _id: accountId
-              })
-              .select('name email phone created updated')
-              .exec(function(err, user) {
-                  if (err) {
-                      res.status(500).json({
-                          msg: "Couldn't search the database for user!"
-                      });
-                  } else if (!user) {
-                      res.status(404).json({
-                          msg: "User does not exist!"
-                      });
-                  } else {
-                    User.findOne({
-                            _id: req.body.fromId
-                        })
-                        .select('name email')
-                        .exec(function(err, recipient) {
-                            if (err) {
-                                res.status(500).json({
-                                    msg: "Couldn't search the database for recipient!"
-                                });
-                            } else if (!recipient) {
-                                res.status(404).json({
-                                    msg: "Recipient does not exist!"
-                                });
-                            } else {
-                                var messagePlain = req.body.message;
-                                var messageHTML = req.body.message;
-
-                                var transporter = nodemailer.createTransport({
-                                    service: 'Gmail',
-                                    auth: {
-                                        user: config.gmail.username,
-                                        pass: config.gmail.password
-                                    }
-                                });
-                                var mailOptions = {
-                                    from: config.gmail.alias,
-                                    to: recipient.email,
-                                    subject: 'A Thank You From ' + user.name,
-                                    text: messagePlain,
-                                    html: messageHTML
-                                }
-                                console.log(mailOptions);
-                                transporter.sendMail(mailOptions, function(error, response) {
-                                    if (error) {
-                                        console.log(error);
-                                    } else {
-                                        console.log("Message sent: " + response.message);
-                                    }
-                                });
-
-                                res.status(200).json({
-                                    msg: "Email was sent!"
-                                });
-
-                                var setGC = {
-                                    $set: { thanked: true }
-                                }
-
-                                Giftcard.update({
-                                        toId: accountId,
-                                        fromId: req.body.fromId,
-                                        thanked: false
-                                    }, setGC)
-                                    .exec(function(err, user) {
-                                        if (err) {
-                                            console.log({
-                                                msg: "Could not update GC as thanked"
-                                            });
-                                        }
-                                    })
-                            }
+            User.findOne({
+                    _id: accountId
+                })
+                .select('name email phone created updated')
+                .exec(function(err, user) {
+                    if (err) {
+                        res.status(500).json({
+                            msg: "Couldn't search the database for user!"
                         });
-                  }
-              });
+                    } else if (!user) {
+                        res.status(404).json({
+                            msg: "User does not exist!"
+                        });
+                    } else {
+                        User.findOne({
+                                _id: req.body.fromId
+                            })
+                            .select('name email')
+                            .exec(function(err, recipient) {
+                                if (err) {
+                                    res.status(500).json({
+                                        msg: "Couldn't search the database for recipient!"
+                                    });
+                                } else if (!recipient) {
+                                    res.status(404).json({
+                                        msg: "Recipient does not exist!"
+                                    });
+                                } else {
+                                    var messagePlain = req.body.message;
+                                    var messageHTML = req.body.message;
+
+                                    var transporter = nodemailer.createTransport({
+                                        service: 'Gmail',
+                                        auth: {
+                                            user: config.gmail.username,
+                                            pass: config.gmail.password
+                                        }
+                                    });
+                                    var mailOptions = {
+                                        from: config.gmail.alias,
+                                        to: recipient.email,
+                                        subject: 'A Thank You From ' + user.name,
+                                        text: messagePlain,
+                                        html: messageHTML
+                                    }
+                                    console.log(mailOptions);
+                                    transporter.sendMail(mailOptions, function(error, response) {
+                                        if (error) {
+                                            console.log(error);
+                                        } else {
+                                            console.log("Message sent: " + response.message);
+                                        }
+                                    });
+
+                                    res.status(200).json({
+                                        msg: "Email was sent!"
+                                    });
+
+                                    var setGC = {
+                                        $set: {
+                                            thanked: true
+                                        }
+                                    }
+
+                                    Giftcard.update({
+                                            toId: accountId,
+                                            fromId: req.body.fromId,
+                                            thanked: false
+                                        }, setGC)
+                                        .exec(function(err, user) {
+                                            if (err) {
+                                                console.log({
+                                                    msg: "Could not update GC as thanked"
+                                                });
+                                            }
+                                        })
+                                }
+                            });
+                    }
+                });
 
         }
     });

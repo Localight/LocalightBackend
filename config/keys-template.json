@@ -11,5 +11,8 @@
         "username": "",
         "password": "",
         "alias": "LBGift <admin@lbgift.com>"
+    },
+    "admin": {
+        "sk": "test"
     }
 }
