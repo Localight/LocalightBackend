@@ -114,6 +114,42 @@ router.post('/twilio', function(req, res) {
                 }
             });
     }
+    if (req.body.Body == "Gift") {
+        //Check if a user with that username already exists
+        User.findOne({
+                phone: phone
+            })
+            .select('_id')
+            .exec(function(err, user) {
+                if (user) {
+                    res.send('<Response><Message>You have already used Localight before! Please text "Gift" to send a giftcard to someone.</Message></Response>');
+                    });
+                } else {
+                    //Create a new user with the assembled information
+                    var user = new User({
+                        phone: phone
+                    }).save(function(err, user) {
+                        if (err) {
+                            console.log("Error saving user to DB!");
+                            res.status(500).json({
+                                msg: "Error saving user to DB!"
+                            });
+                        } else {
+                            SessionService.generateSession(user._id, "user", function(err, token) {
+                                if (err) {
+                                    res.json(err);
+                                } else {
+                                    shortURLService.create(process.argv[2] + '/#/giftcards/create?token=' + token, function(url) {
+                                        //All good, give the user their token
+                                        res.send('<Response><Message>' + url + '</Message></Response>');
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+    }
 });
 
 /* Update a user */
