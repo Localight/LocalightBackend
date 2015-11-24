@@ -3,6 +3,7 @@ var mongoose = require('mongoose'),
     config = require('../config/keys.json'),
     client = require('twilio')(config.twilio.accountSid, config.twilio.authToken),
     SessionService = require('../services/sessions.js'),
+    shortURLService = require('../services/shortURL.js'),
     Giftcard = mongoose.model('Giftcard');
 
 //Send current giftcards that have today's sendDate
@@ -36,39 +37,41 @@ exports.sendCurrent = function(callback) {
                         if (err) {
                             console.log(err);
                         } else {
-                            client.messages.create({
-                                body: "You have a new giftcard on lbgift! http://lbgift.com/#/giftcards/receive/" + token,
-                                to: "+1" + toPhone,
-                                from: config.twilio.number
-                            }, function(err, message) {
-                                if (err) {
-                                    console.log(err);
-                                } else {
-                                    var sentGiftcard = {};
+                            shortURLService.create(process.argv[2] + "/#/giftcards/" + giftcardId + "?token=" + token, function(url) {
+                                client.messages.create({
+                                    body: "You have a new giftcard on lbgift! " + url,
+                                    to: "+1" + toPhone,
+                                    from: config.twilio.number
+                                }, function(err, message) {
+                                    if (err) {
+                                        console.log(err);
+                                    } else {
+                                        var sentGiftcard = {};
 
-                                    sentGiftcard.sent = true;
+                                        sentGiftcard.sent = true;
 
-                                    var setGiftcard = {
-                                        $set: sentGiftcard
+                                        var setGiftcard = {
+                                            $set: sentGiftcard
+                                        }
+
+                                        Giftcard.update({
+                                                _id: giftcardId
+                                            }, setGiftcard)
+                                            .exec(function(err, giftcard) {
+                                                if (err) {
+                                                    console.log({
+                                                        msg: "Could not save sent giftcard",
+                                                        status: 500
+                                                    });
+                                                } else {
+                                                    console.log({
+                                                        status: 200
+                                                    });
+                                                }
+                                            })
+                                        console.log(message.sid);
                                     }
-
-                                    Giftcard.update({
-                                            _id: giftcardId
-                                        }, setGiftcard)
-                                        .exec(function(err, giftcard) {
-                                            if (err) {
-                                                console.log({
-                                                    msg: "Could not save sent giftcard",
-                                                    status: 500
-                                                });
-                                            } else {
-                                                console.log({
-                                                    status: 200
-                                                });
-                                            }
-                                        })
-                                    console.log(message.sid);
-                                }
+                                });
                             });
                         }
                     });
