@@ -19,7 +19,7 @@ router.post('/', function(req, res) {
             req.body.fromName &&
             req.body.email &&
             req.body.phone &&
-            req.body.amount && req.body.amount > 0 && req.body.amount < 50000 &&
+            req.body.amount && req.body.amount > 0 && req.body.amount <= 50000 &&
             req.body.iconId &&
             req.body.locationId &&
             req.body.message &&
@@ -75,7 +75,7 @@ router.post('/', function(req, res) {
     function createGift(accountId, toId, req) {
         if (!accountId || !toId) {
             return res.status(412).json({
-                msg: "You must provide toId, 0<amount<50000, iconId and message."
+                msg: "You must provide toId, 0<amount<=50000, iconId and message."
             });
         }
 
