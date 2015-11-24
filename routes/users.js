@@ -339,7 +339,7 @@ router.post('/thanks', function(req, res) {
             User.findOne({
                     _id: accountId
                 })
-                .select('name email phone created updated')
+                .select('_id name email phone created updated')
                 .exec(function(err, user) {
                     if (err) {
                         res.status(500).json({
@@ -366,8 +366,8 @@ router.post('/thanks', function(req, res) {
                                 } else {
                                     if(recipient.phone == "0000000000"){
 
-                                        var messagePlain = req.body.message + " Giftcard recipient phone number: " + recipient.phone + " and userId: " + recipient._id;
-                                        var messageHTML = req.body.message + " Giftcard recipient phone number: " + recipient.phone + " and userId: " + recipient._id;
+                                        var messagePlain = req.body.message + " Giftcard recipient phone number: " + user.phone + " and userId: " + user._id;
+                                        var messageHTML = req.body.message + " Giftcard recipient phone number: " + user.phone + " and userId: " + user._id;
 
                                         var transporter = nodemailer.createTransport({
                                             service: 'Gmail',
@@ -397,9 +397,22 @@ router.post('/thanks', function(req, res) {
                                                 console.log(err);
                                             } else {
                                                 shortURLService.create(process.argv[2] + "/#/giftcards/create?token=" + token, function(url) {
+                                                    //Send actual thankyou
                                                     client.messages.create({
                                                         body: "A message from " + user.name + ": " + req.body.message,
                                                         to: "+1" + recipient.phone,
+                                                        from: config.twilio.number
+                                                    }, function(err, message) {
+                                                        if (err) {
+                                                            console.log(err);
+                                                        } else {
+                                                            console.log(message.sid);
+                                                        }
+                                                    });
+                                                    //Send suggestion to send a giftcard back!
+                                                    client.messages.create({
+                                                        body: "Do you want to send another giftcard? If so, just tap here " + url,
+                                                        to: "+1" + user.phone,
                                                         from: config.twilio.number
                                                     }, function(err, message) {
                                                         if (err) {
