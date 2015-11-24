@@ -408,18 +408,18 @@ router.post('/thanks', function(req, res) {
                                                         } else {
                                                             console.log(message.sid);
                                                         }
-                                                    });
-                                                    //Send suggestion to send a giftcard back!
-                                                    client.messages.create({
-                                                        body: "Do you want to send another giftcard? If so, just tap here " + url,
-                                                        to: "+1" + user.phone,
-                                                        from: config.twilio.number
-                                                    }, function(err, message) {
-                                                        if (err) {
-                                                            console.log(err);
-                                                        } else {
-                                                            console.log(message.sid);
-                                                        }
+                                                        //Send suggestion to send a giftcard back!
+                                                        client.messages.create({
+                                                            body: "Do you want to send another giftcard? If so, just tap here " + url,
+                                                            to: "+1" + user.phone,
+                                                            from: config.twilio.number
+                                                        }, function(err, message) {
+                                                            if (err) {
+                                                                console.log(err);
+                                                            } else {
+                                                                console.log(message.sid);
+                                                            }
+                                                        });
                                                     });
                                                 });
                                             }
