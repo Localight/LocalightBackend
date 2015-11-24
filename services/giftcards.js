@@ -15,7 +15,8 @@ exports.sendCurrent = function(callback) {
             sent: false
         })
         .select('toId')
-        .populate('toId', 'phone') // populate the actual user and only return their name
+        .populate('toId')
+        .populate('fromId')
         .exec(function(err, giftcards) {
             if (err) {
                 callback({
@@ -33,13 +34,29 @@ exports.sendCurrent = function(callback) {
                     console.log(giftcards[i]);
                     var toPhone = giftcards[i].toId.phone;
                     var giftcardId = giftcards[i]._id;
+                    var giftcard = giftcards[i];
                     SessionService.generateSession(giftcards[i].toId._id, "user", function(err, token) {
                         if (err) {
                             console.log(err);
                         } else {
+                            var toName = giftcard.toId.name;
+                            var fromName = giftcard.fromId.name;
+                            var amount = giftcard.origAmount;
+                            var messages = [
+                                ":cake: " + toName + ", " + fromName + " has sent you a $" + amount + " gift for your birthday! View it here: ",
+                                ":ring: " + toName + ", " + fromName + " has sent you a $" + amount + " wedding gift card! View it here: ",
+                                ":revolving_hearts: " + toName + ", " + fromName + " has sent you a $" + amount + " gift for your anniversary! View it here: ",
+                                ":baby_bottle: " + toName + ", " + fromName + " has sent you a $" + amount + " gift for your baby! View it here:",
+                                ":gift_heart: " + toName + ", " + fromName + " has sent you a $" + amount + " gift! View it here: ",
+                                ":bouquet: " + toName + ", " + fromName + " has sent you a $" + amount + " gift to cheer you up. View it here: ",
+                                ":ambulance: " + toName + ", " + fromName + " has sent you a $" + amount + " gift and a note. View it here: ",
+                                ":blush: " + toName + ", " + fromName + " has sent you a $" + amount + " gift to say thank you! View it here: ",
+                                ":trophy: " + toName + ", " + fromName + " has sent you a $" + amount + " gift to congratulate you! View it here: ",
+                                ":gift: " + toName + ", " + fromName + " has sent you a $" + amount + " gift! View it here: ",
+                            ];
                             shortURLService.create(process.argv[2] + "/#/giftcards/" + giftcardId + "?token=" + token, function(url) {
                                 client.messages.create({
-                                    body: "You have a new giftcard on lbgift! " + url,
+                                    body: messages[giftcard.iconId] + url,
                                     to: "+1" + toPhone,
                                     from: config.twilio.number
                                 }, function(err, message) {

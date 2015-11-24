@@ -160,6 +160,22 @@ router.post('/', function(req, res) {
                             }
                         });
 
+                        var toName = req.body.toName;
+                        var fromName = req.body.fromName;
+                        var amount = req.body.amount;
+                        var messages = [
+                            ":cake: " + toName + ", " + fromName + " has sent you a $" + amount + " gift for your birthday! View it here: ",
+                            ":ring: " + toName + ", " + fromName + " has sent you a $" + amount + " wedding gift card! View it here: ",
+                            ":revolving_hearts: " + toName + ", " + fromName + " has sent you a $" + amount + " gift for your anniversary! View it here: ",
+                            ":baby_bottle: " + toName + ", " + fromName + " has sent you a $" + amount + " gift for your baby! View it here:",
+                            ":gift_heart: " + toName + ", " + fromName + " has sent you a $" + amount + " gift! View it here: ",
+                            ":bouquet: " + toName + ", " + fromName + " has sent you a $" + amount + " gift to cheer you up. View it here: ",
+                            ":ambulance: " + toName + ", " + fromName + " has sent you a $" + amount + " gift and a note. View it here: ",
+                            ":blush: " + toName + ", " + fromName + " has sent you a $" + amount + " gift to say thank you! View it here: ",
+                            ":trophy: " + toName + ", " + fromName + " has sent you a $" + amount + " gift to congratulate you! View it here: ",
+                            ":gift: " + toName + ", " + fromName + " has sent you a $" + amount + " gift! View it here: ",
+                        ];
+
                         if (sent) {
                             SessionService.generateSession(toId, "user", function(err, token) {
                                 if (err) {
@@ -167,7 +183,7 @@ router.post('/', function(req, res) {
                                 } else {
                                     shortURLService.create(process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token, function(url) {
                                         client.messages.create({
-                                            body: "You have a new giftcard on lbgift! " + url,
+                                            body: messages[req.body.iconId] + url,
                                             to: "+1" + req.body.phone,
                                             from: config.twilio.number
                                         }, function(err, message) {
