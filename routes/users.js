@@ -7,6 +7,7 @@ var express = require('express'),
     shortURLService = require('../services/shortURL.js'),
     nodemailer = require('nodemailer'),
     Giftcard = mongoose.model('Giftcard'),
+    Location = mongoose.model('Location'),
     User = mongoose.model('User');
 
 /* User Login */
@@ -126,7 +127,8 @@ router.post('/twilio', function(req, res) {
                 } else {
                     //Create a new user with the assembled information
                     var user = new User({
-                        phone: phone
+                        phone: phone,
+                        name: phone
                     }).save(function(err, user) {
                         if (err) {
                             console.log("Error saving user to DB!");
@@ -134,32 +136,75 @@ router.post('/twilio', function(req, res) {
                                 msg: "Error saving user to DB!"
                             });
                         } else {
-                            SessionService.generateSession(user._id, "user", function(err, token) {
-                                if (err) {
-                                    res.json(err);
-                                } else {
-                                    var gcDetails = {};
-                                    gcDetails.phone = "";
-                                    gcDetails.toName = "Phone number";
-                                    gcDetails.fromName = "Localight";
-                                    gcDetails.email = "hello@localight.com";
-                                    gcDetails.amount = 500;
-                                    gcDetails.iconId = 1;
-                                    gcDetails.locationId = 10000;
-                                    gcDetails.message = "A free trial Giftcard from Localight Black Friday!";
-                                    gcDetails.stripeCardToken = "None";
+                            //Assemble created information
+                            var gcDetails = {};
+                            gcDetails.toId = user._id;
+                            gcDetails.amount = 500;
+                            gcDetails.iconId = 8;
+                            gcDetails.locationId = 10000;
+                            gcDetails.message = "A free trial Giftcard from Localight Black Friday!";
+                            gcDetails.stripeCardToken = "None";
 
+                            User.findOne({
+                                    phone: "0000000000"
+                                })
+                                .select('_id')
+                                .exec(function(err, user) {
+                                    if (user) {
+                                        gcDetails.fromId = user._id;
+                                        //Continue promotional process
+                                        continuePromo(gcDetails, res);
+                                    } else {
+                                        //Create a new user with the assembled information
+                                        var user = new User({
+                                            phone: "0000000000",
+                                            name: "Localight",
+                                            email: "hello@localight.com"
+                                        }).save(function(err, user) {
+                                            if (err) {
+                                                console.log("Error saving fakeuser to DB!");
+                                                res.status(500).json({
+                                                    msg: "Error saving fakeuser to DB!"
+                                                });
+                                            } else {
+                                                gcDetails.fromId = user._id;
+                                                //Continue promotional process
+                                                continuePromo(gcDetails, res);
+                                            }
+                                        });
+                                    }
+                                });
+                        }
+                    });
+                }
+            });
+
+
+            function continuePromo(gcDetails, res){
+                SessionService.generateSession(gcDetails.toId, "user", function(err, token) {
+                    if (err) {
+                        res.json(err);
+                    } else {
+                        Location.findOne({
+                                ownerCode: "10000"
+                            })
+                            .select('_id')
+                            .exec(function(err, location) {
+                                if (err) {
+                                    return res.status(500).json({
+                                        msg: "Couldn't query the database for location owner!"
+                                    });
+                                } else if (location) {
                                     new Giftcard({
-                                        fromId: accountId,
-                                        toId: toId,
-                                        amount: req.body.amount,
-                                        origAmount: req.body.amount,
-                                        iconId: req.body.iconId,
-                                        message: req.body.message,
-                                        stripeOrderId: charge.id,
+                                        fromId: gcDetails.fromId,
+                                        toId: gcDetails.toId,
+                                        amount: gcDetails.amount,
+                                        origAmount: gcDetails.amount,
+                                        iconId: gcDetails.iconId,
+                                        message: gcDetails.message,
+                                        stripeOrderId: "",
                                         location: {
-                                            locationId: req.body.locationId,
-                                            subId: req.body.subId
+                                            locationId: location._id
                                         },
                                         created: Date.now(),
                                         sendDate: Date.now(),
@@ -172,16 +217,20 @@ router.post('/twilio', function(req, res) {
                                         } else {
                                             shortURLService.create(process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token, function(url) {
                                                 //All good, give the user their card
-                                                res.send('<Response><Message>Your Localight giftcard: ' + url + '</Message></Response>');
+                                                res.send('<Response><Message>Your promo Localight giftcard: ' + url + '</Message></Response>');
                                             });
                                         }
                                     });
+                                } else {
+                                    console.log("Couldn't query the database for MADE location 10000! Perhaps it doesn't exist?");
+                                    res.status(500).json({
+                                        msg: "Couldn't query the database for MADE location!"
+                                    });
                                 }
                             });
-                        }
-                    });
-                }
-            });
+                    }
+                });
+            }
     }
 });
 
