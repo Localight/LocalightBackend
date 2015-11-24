@@ -69,7 +69,7 @@ router.post('/twilio', function(req, res) {
 
     //Trim phone number
     var phone = req.body.From.substring(2);
-    if (req.body.Body == "Gift") {
+    if (req.body.Body.toLowerCase() === "gift") {
         //Check if a user with that username already exists
         User.findOne({
                 phone: phone
@@ -114,7 +114,7 @@ router.post('/twilio', function(req, res) {
                 }
             });
     }
-    if (req.body.Body == "Gift") {
+    if (req.body.Body.toLowerCase() === "lbpost" || req.body.Body.toLowerCase() === "csulb") {
         //Check if a user with that username already exists
         User.findOne({
                 phone: phone
@@ -123,7 +123,6 @@ router.post('/twilio', function(req, res) {
             .exec(function(err, user) {
                 if (user) {
                     res.send('<Response><Message>You have already used Localight before! Please text "Gift" to send a giftcard to someone.</Message></Response>');
-                    });
                 } else {
                     //Create a new user with the assembled information
                     var user = new User({
@@ -139,9 +138,43 @@ router.post('/twilio', function(req, res) {
                                 if (err) {
                                     res.json(err);
                                 } else {
-                                    shortURLService.create(process.argv[2] + '/#/giftcards/create?token=' + token, function(url) {
-                                        //All good, give the user their token
-                                        res.send('<Response><Message>' + url + '</Message></Response>');
+                                    var gcDetails = {};
+                                    gcDetails.phone = "";
+                                    gcDetails.toName = "Phone number";
+                                    gcDetails.fromName = "Localight";
+                                    gcDetails.email = "hello@localight.com";
+                                    gcDetails.amount = 500;
+                                    gcDetails.iconId = 1;
+                                    gcDetails.locationId = 10000;
+                                    gcDetails.message = "A free trial Giftcard from Localight Black Friday!";
+                                    gcDetails.stripeCardToken = "None";
+
+                                    new Giftcard({
+                                        fromId: accountId,
+                                        toId: toId,
+                                        amount: req.body.amount,
+                                        origAmount: req.body.amount,
+                                        iconId: req.body.iconId,
+                                        message: req.body.message,
+                                        stripeOrderId: charge.id,
+                                        location: {
+                                            locationId: req.body.locationId,
+                                            subId: req.body.subId
+                                        },
+                                        created: Date.now(),
+                                        sendDate: Date.now(),
+                                        sent: true
+                                    }).save(function(err, giftcard) {
+                                        if (err) {
+                                            res.status(500).json({
+                                                msg: "Error saving giftcard to database!"
+                                            });
+                                        } else {
+                                            shortURLService.create(process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token, function(url) {
+                                                //All good, give the user their card
+                                                res.send('<Response><Message>Your Localight giftcard: ' + url + '</Message></Response>');
+                                            });
+                                        }
                                     });
                                 }
                             });
