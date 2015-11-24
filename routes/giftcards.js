@@ -95,6 +95,7 @@ router.post('/', function(req, res) {
                 });
             } else if (err) {
                 console.log("Stripe charge error");
+                console.log(err);
                 res.status(500).json({
                     msg: "Charge could not be completed!"
                 });
@@ -162,18 +163,18 @@ router.post('/', function(req, res) {
 
                         var toName = req.body.toName;
                         var fromName = req.body.fromName;
-                        var amount = req.body.amount;
+                        var amount = req.body.amount/100;
                         var messages = [
-                            ":cake: " + toName + ", " + fromName + " has sent you a $" + amount + " gift for your birthday! View it here: ",
-                            ":ring: " + toName + ", " + fromName + " has sent you a $" + amount + " wedding gift card! View it here: ",
-                            ":revolving_hearts: " + toName + ", " + fromName + " has sent you a $" + amount + " gift for your anniversary! View it here: ",
-                            ":baby_bottle: " + toName + ", " + fromName + " has sent you a $" + amount + " gift for your baby! View it here:",
-                            ":gift_heart: " + toName + ", " + fromName + " has sent you a $" + amount + " gift! View it here: ",
-                            ":bouquet: " + toName + ", " + fromName + " has sent you a $" + amount + " gift to cheer you up. View it here: ",
-                            ":ambulance: " + toName + ", " + fromName + " has sent you a $" + amount + " gift and a note. View it here: ",
-                            ":blush: " + toName + ", " + fromName + " has sent you a $" + amount + " gift to say thank you! View it here: ",
-                            ":trophy: " + toName + ", " + fromName + " has sent you a $" + amount + " gift to congratulate you! View it here: ",
-                            ":gift: " + toName + ", " + fromName + " has sent you a $" + amount + " gift! View it here: ",
+                            "\uD83C\uDF70 " + toName + ", " + fromName + " has sent you a $" + amount + " gift for your birthday! View it here: ",
+                            "\uD83D\uDC8D " + toName + ", " + fromName + " has sent you a $" + amount + " wedding gift card! View it here: ",
+                            "\uD83D\uDC9E " + toName + ", " + fromName + " has sent you a $" + amount + " gift for your anniversary! View it here: ",
+                            "\uD83C\uDF7C " + toName + ", " + fromName + " has sent you a $" + amount + " gift for your baby! View it here:",
+                            "\uD83D\uDC9D " + toName + ", " + fromName + " has sent you a $" + amount + " gift! View it here: ",
+                            "\uD83D\uDC90 " + toName + ", " + fromName + " has sent you a $" + amount + " gift to cheer you up. View it here: ",
+                            "\uD83D\uDE91 " + toName + ", " + fromName + " has sent you a $" + amount + " gift and a note. View it here: ",
+                            "\uD83D\uDE0A " + toName + ", " + fromName + " has sent you a $" + amount + " gift to say thank you! View it here: ",
+                            "\uD83C\uDFC6 " + toName + ", " + fromName + " has sent you a $" + amount + " gift to congratulate you! View it here: ",
+                            "\uD83C\uDF81 " + toName + ", " + fromName + " has sent you a $" + amount + " gift! View it here: "
                         ];
 
                         if (sent) {
