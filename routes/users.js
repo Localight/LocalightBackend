@@ -84,7 +84,7 @@ router.post('/twilio', function(req, res) {
                         } else {
                             shortURLService.create(process.argv[2] + '/#/giftcards/create?token=' + token, function(url) {
                                 //All good, give the user their token
-                                res.send('<Response><Message>' + url + '</Message></Response>');
+                                res.send('<Response><Message>Send a new Localight giftcard here: ' + url + '</Message></Response>');
                             });
                         }
                     });
@@ -106,7 +106,7 @@ router.post('/twilio', function(req, res) {
                                 } else {
                                     shortURLService.create(process.argv[2] + '/#/giftcards/create?token=' + token, function(url) {
                                         //All good, give the user their token
-                                        res.send('<Response><Message>' + url + '</Message></Response>');
+                                        res.send('<Response><Message>Send a new Localight giftcard here: ' + url + '</Message></Response>');
                                     });
                                 }
                             });
