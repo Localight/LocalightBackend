@@ -6,7 +6,8 @@ var express = require('express'),
     SessionService = require('../services/sessions.js'),
     shortURLService = require('../services/shortURL.js'),
     client = require('twilio')(config.twilio.accountSid, config.twilio.authToken),
-    nodemailer = require('nodemailer'),
+    mailgun = require('mailgun-js')({apiKey: config.mailgun.apiKey, domain: config.mailgun.domain}),
+    mailcomposer = require('mailcomposer'),
     Giftcard = mongoose.model('Giftcard'),
     Location = mongoose.model('Location'),
     User = mongoose.model('User');
@@ -369,27 +370,27 @@ router.post('/thanks', function(req, res) {
                                         var messagePlain = req.body.message + " Giftcard recipient phone number: " + user.phone + " and userId: " + user._id;
                                         var messageHTML = req.body.message + " Giftcard recipient phone number: " + user.phone + " and userId: " + user._id;
 
-                                        var transporter = nodemailer.createTransport({
-                                            service: 'Gmail',
-                                            auth: {
-                                                user: config.gmail.username,
-                                                pass: config.gmail.password
-                                            }
-                                        });
-                                        var mailOptions = {
-                                            from: config.gmail.alias,
+                                        var mail = mailcomposer({
+                                            from: config.mailgun.alias,
                                             to: recipient.email,
                                             subject: 'Suggestions from promotional giftcard user: ' + user.name,
-                                            text: messagePlain,
+                                            body: messagePlain,
                                             html: messageHTML
-                                        }
-                                        console.log(mailOptions);
-                                        transporter.sendMail(mailOptions, function(error, response) {
-                                            if (error) {
-                                                console.log(error);
-                                            } else {
-                                                console.log("Message sent: " + response.message);
-                                            }
+                                        });
+
+                                        mail.build(function(mailBuildError, message) {
+
+                                            var dataToSend = {
+                                                to: recipient.email,
+                                                message: message.toString('ascii')
+                                            };
+
+                                            mailgun.messages().sendMime(dataToSend, function (sendError, body) {
+                                                if (sendError) {
+                                                    console.log(sendError);
+                                                    return;
+                                                }
+                                            });
                                         });
                                     } else {
                                         SessionService.generateSession(accountId, "user", function(err, token) {

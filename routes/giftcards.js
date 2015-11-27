@@ -6,7 +6,8 @@ var express = require('express'),
     stripe = require("stripe")(config.stripe.secretKey),
     client = require('twilio')(config.twilio.accountSid, config.twilio.authToken),
     Giftcard = mongoose.model('Giftcard'),
-    nodemailer = require('nodemailer'),
+    mailgun = require('mailgun-js')({apiKey: config.mailgun.apiKey, domain: config.mailgun.domain}),
+    mailcomposer = require('mailcomposer'),
     SessionService = require('../services/sessions.js'),
     shortURLService = require('../services/shortURL.js'),
     User = mongoose.model('User');
@@ -138,27 +139,27 @@ router.post('/', function(req, res) {
                         var messagePlain = "Hello " + req.body.fromName + ", Here is a receipt for your LBGift order. $" + (req.body.amount / 100) + " sent to " + req.body.toName + " " + req.body.phone + ". Thank you!, LBGift.";
                         var messageHTML = "Hello " + req.body.fromName + ",<br /><br />Here is a receipt for your LBGift order:<br /><br />$" + (req.body.amount / 100) + " sent to " + req.body.toName + " " + req.body.phone + ".<br /><br />Thank you!, LBGift.";
 
-                        var transporter = nodemailer.createTransport({
-                            service: 'Gmail',
-                            auth: {
-                                user: config.gmail.username,
-                                pass: config.gmail.password
-                            }
-                        });
-                        var mailOptions = {
-                            from: config.gmail.alias,
+                        var mail = mailcomposer({
+                            from: config.mailgun.alias,
                             to: req.body.email,
                             subject: 'Receipt for Your LBGift Order',
-                            text: messagePlain,
+                            body: messagePlain,
                             html: messageHTML
-                        }
-                        console.log(mailOptions);
-                        transporter.sendMail(mailOptions, function(error, response) {
-                            if (error) {
-                                console.log(error);
-                            } else {
-                                console.log("Message sent: " + response.message);
-                            }
+                        });
+
+                        mail.build(function(mailBuildError, message) {
+
+                            var dataToSend = {
+                                to: req.body.email,
+                                message: message.toString('ascii')
+                            };
+
+                            mailgun.messages().sendMime(dataToSend, function (sendError, body) {
+                                if (sendError) {
+                                    console.log(sendError);
+                                    return;
+                                }
+                            });
                         });
 
                         var toName = req.body.toName;
@@ -389,31 +390,27 @@ router.post('/later', function(req, res) {
                                     var messagePlain = "Hello " + user.name + ", Here is a link for the giftcard you saved: " + url + " Thanks, The Localight Team";
                                     var messageHTML = "Hello " + user.name + ",<br /><br />Here is a link for the giftcard you saved:<br /><a href='" + url + "'>" + url + "</a><br /><br />Thanks!<br />The Localight Team";
 
-                                    var transporter = nodemailer.createTransport({
-                                        service: "Gmail",
-                                          auth: {
-                                            XOAuth2: {
-                                              user: config.gmail.username, // Your gmail address.
-                                                                                    // Not @developer.gserviceaccount.com
-                                              clientId: config.gmail.clientId,
-                                              clientSecret: config.gmail.clientSecret
-                                            }
-                                      }
-                                    });
-                                    var mailOptions = {
-                                        from: config.gmail.alias,
-                                        to: user.email,
+                                    var mail = mailcomposer({
+                                        from: config.mailgun.alias,
+                                        to: req.body.email,
                                         subject: 'Your Saved Giftcard Link for LBGift',
-                                        text: messagePlain,
+                                        body: messagePlain,
                                         html: messageHTML
-                                    }
-                                    console.log(mailOptions);
-                                    transporter.sendMail(mailOptions, function(error, response) {
-                                        if (error) {
-                                            console.log(error);
-                                        } else {
-                                            console.log("Message sent!");
-                                        }
+                                    });
+
+                                    mail.build(function(mailBuildError, message) {
+
+                                        var dataToSend = {
+                                            to: req.body.email,
+                                            message: message.toString('ascii')
+                                        };
+
+                                        mailgun.messages().sendMime(dataToSend, function (sendError, body) {
+                                            if (sendError) {
+                                                console.log(sendError);
+                                                return;
+                                            }
+                                        });
                                     });
 
                                     res.status(200).json({
