@@ -166,15 +166,15 @@ router.post('/', function(req, res) {
                         var amount = req.body.amount/100;
                         var messages = [
                             "\uD83C\uDF70 " + toName + ", " + fromName + " has sent you a $" + amount + " gift for your birthday! View it here: ",
-                            "\uD83D\uDC8D " + toName + ", " + fromName + " has sent you a $" + amount + " wedding gift card! View it here: ",
                             "\uD83D\uDC9E " + toName + ", " + fromName + " has sent you a $" + amount + " gift for your anniversary! View it here: ",
-                            "\uD83C\uDF7C " + toName + ", " + fromName + " has sent you a $" + amount + " gift for your baby! View it here:",
-                            "\uD83D\uDC9D " + toName + ", " + fromName + " has sent you a $" + amount + " gift! View it here: ",
-                            "\uD83D\uDC90 " + toName + ", " + fromName + " has sent you a $" + amount + " gift to cheer you up. View it here: ",
-                            "\uD83D\uDE91 " + toName + ", " + fromName + " has sent you a $" + amount + " gift and a note. View it here: ",
-                            "\uD83D\uDE0A " + toName + ", " + fromName + " has sent you a $" + amount + " gift to say thank you! View it here: ",
+                            "\uD83D\uDC9D " + toName + ", " + fromName + " has sent you a $" + amount + " gift! View it here: ", //Love you
+                            "\uD83D\uDE91 " + toName + ", " + fromName + " has sent you a $" + amount + " gift and a note. View it here: ", //Hurt/getwell
                             "\uD83C\uDFC6 " + toName + ", " + fromName + " has sent you a $" + amount + " gift to congratulate you! View it here: ",
-                            "\uD83C\uDF81 " + toName + ", " + fromName + " has sent you a $" + amount + " gift! View it here: "
+                            "\uD83D\uDC8D " + toName + ", " + fromName + " has sent you a $" + amount + " wedding gift card! View it here: ",
+                            "\uD83C\uDF7C " + toName + ", " + fromName + " has sent you a $" + amount + " gift for your baby! View it here:",
+                            "\uD83D\uDC90 " + toName + ", " + fromName + " has sent you a $" + amount + " gift to cheer you up. View it here: ",
+                            "\uD83D\uDE0A " + toName + ", " + fromName + " has sent you a $" + amount + " gift to say thank you! View it here: ",
+                            "\uD83C\uDF81 " + toName + ", " + fromName + " has sent you a $" + amount + " gift! View it here: " //Custom
                         ];
 
                         if (sent) {
@@ -390,11 +390,15 @@ router.post('/later', function(req, res) {
                                     var messageHTML = "Hello " + user.name + ",<br /><br />Here is a link for the giftcard you saved:<br /><a href='" + url + "'>" + url + "</a><br /><br />Thanks!<br />The Localight Team";
 
                                     var transporter = nodemailer.createTransport({
-                                        service: 'Gmail',
-                                        auth: {
-                                            user: config.gmail.username,
-                                            pass: config.gmail.password
-                                        }
+                                        service: "Gmail",
+                                          auth: {
+                                            XOAuth2: {
+                                              user: config.gmail.username, // Your gmail address.
+                                                                                    // Not @developer.gserviceaccount.com
+                                              clientId: config.gmail.clientId,
+                                              clientSecret: config.gmail.clientSecret
+                                            }
+                                      }
                                     });
                                     var mailOptions = {
                                         from: config.gmail.alias,
