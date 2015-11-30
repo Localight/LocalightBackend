@@ -5,7 +5,9 @@ var express = require('express'),
     config = require('../config/keys.json'),
     SessionService = require('../services/sessions.js'),
     shortURLService = require('../services/shortURL.js'),
-    nodemailer = require('nodemailer'),
+    client = require('twilio')(config.twilio.accountSid, config.twilio.authToken),
+    mailgun = require('mailgun-js')({apiKey: config.mailgun.apiKey, domain: config.mailgun.domain}),
+    mailcomposer = require('mailcomposer'),
     Giftcard = mongoose.model('Giftcard'),
     Location = mongoose.model('Location'),
     User = mongoose.model('User');
@@ -84,7 +86,7 @@ router.post('/twilio', function(req, res) {
                         } else {
                             shortURLService.create(process.argv[2] + '/#/giftcards/create?token=' + token, function(url) {
                                 //All good, give the user their token
-                                res.send('<Response><Message>' + url + '</Message></Response>');
+                                res.send('<Response><Message>Send a new Localight giftcard here: ' + url + '</Message></Response>');
                             });
                         }
                     });
@@ -106,7 +108,7 @@ router.post('/twilio', function(req, res) {
                                 } else {
                                     shortURLService.create(process.argv[2] + '/#/giftcards/create?token=' + token, function(url) {
                                         //All good, give the user their token
-                                        res.send('<Response><Message>' + url + '</Message></Response>');
+                                        res.send('<Response><Message>Send a new Localight giftcard here: ' + url + '</Message></Response>');
                                     });
                                 }
                             });
@@ -338,7 +340,7 @@ router.post('/thanks', function(req, res) {
             User.findOne({
                     _id: accountId
                 })
-                .select('name email phone created updated')
+                .select('_id name email phone created updated')
                 .exec(function(err, user) {
                     if (err) {
                         res.status(500).json({
@@ -352,7 +354,7 @@ router.post('/thanks', function(req, res) {
                         User.findOne({
                                 _id: req.body.fromId
                             })
-                            .select('name email')
+                            .select('_id name email phone')
                             .exec(function(err, recipient) {
                                 if (err) {
                                     res.status(500).json({
@@ -363,31 +365,67 @@ router.post('/thanks', function(req, res) {
                                         msg: "Recipient does not exist!"
                                     });
                                 } else {
-                                    var messagePlain = req.body.message;
-                                    var messageHTML = req.body.message;
+                                    if(recipient.phone == "0000000000"){
 
-                                    var transporter = nodemailer.createTransport({
-                                        service: 'Gmail',
-                                        auth: {
-                                            user: config.gmail.username,
-                                            pass: config.gmail.password
-                                        }
-                                    });
-                                    var mailOptions = {
-                                        from: config.gmail.alias,
-                                        to: recipient.email,
-                                        subject: 'A Thank You From ' + user.name,
-                                        text: messagePlain,
-                                        html: messageHTML
+                                        var messagePlain = req.body.message + " Giftcard recipient phone number: " + user.phone + " and userId: " + user._id;
+                                        var messageHTML = req.body.message + " Giftcard recipient phone number: " + user.phone + " and userId: " + user._id;
+
+                                        var mail = mailcomposer({
+                                            from: config.mailgun.alias,
+                                            to: recipient.email,
+                                            subject: 'Suggestions from promotional giftcard user: ' + user.name,
+                                            body: messagePlain,
+                                            html: messageHTML
+                                        });
+
+                                        mail.build(function(mailBuildError, message) {
+
+                                            var dataToSend = {
+                                                to: recipient.email,
+                                                message: message.toString('ascii')
+                                            };
+
+                                            mailgun.messages().sendMime(dataToSend, function (sendError, body) {
+                                                if (sendError) {
+                                                    console.log(sendError);
+                                                    return;
+                                                }
+                                            });
+                                        });
+                                    } else {
+                                        SessionService.generateSession(accountId, "user", function(err, token) {
+                                            if (err) {
+                                                console.log(err);
+                                            } else {
+                                                shortURLService.create(process.argv[2] + "/#/giftcards/create?token=" + token, function(url) {
+                                                    //Send actual thankyou
+                                                    client.messages.create({
+                                                        body: "A message from " + user.name + ": " + req.body.message,
+                                                        to: "+1" + recipient.phone,
+                                                        from: config.twilio.number
+                                                    }, function(err, message) {
+                                                        if (err) {
+                                                            console.log(err);
+                                                        } else {
+                                                            console.log(message.sid);
+                                                        }
+                                                        //Send suggestion to send a giftcard back!
+                                                        client.messages.create({
+                                                            body: "Do you want to send another giftcard? If so, just tap here " + url,
+                                                            to: "+1" + user.phone,
+                                                            from: config.twilio.number
+                                                        }, function(err, message) {
+                                                            if (err) {
+                                                                console.log(err);
+                                                            } else {
+                                                                console.log(message.sid);
+                                                            }
+                                                        });
+                                                    });
+                                                });
+                                            }
+                                        });
                                     }
-                                    console.log(mailOptions);
-                                    transporter.sendMail(mailOptions, function(error, response) {
-                                        if (error) {
-                                            console.log(error);
-                                        } else {
-                                            console.log("Message sent: " + response.message);
-                                        }
-                                    });
 
                                     res.status(200).json({
                                         msg: "Email was sent!"
