@@ -18,6 +18,10 @@ router.get('/', function(req, res) {
         query.paid = false;
     }
 
+    if(req.query.created_after || req.query.created_before){
+        query.created = {};
+    }
+
     if (req.query.created_after) {
         query.created.$gte = req.query.created_after;
     }
@@ -39,7 +43,11 @@ router.get('/', function(req, res) {
                 select: '-password -salt'
             };
 
-            if (err) return res.json(500);
+            if (err) return res.status(500).json({
+                msg: "Transaction query failed",
+                dberr: err,
+                query: query
+            });
             //Deep populate the ownerId field
             Transaction.populate(transactions, popOptions, function(err, transactions) {
                 if (err) {
