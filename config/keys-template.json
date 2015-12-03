@@ -12,6 +12,18 @@
         "password": "",
         "alias": "LBGift <admin@lbgift.com>"
     },
+    "gmail": {
+        "username": "hello@localight.com",
+        "password": "",
+        "alias": "Localight <hello@localight.com>",
+        "clientId": "",
+        "clientSecret": ""
+    },
+    "mailgun": {
+        "apiKey": "",
+        "domain": "localight.com",
+        "alias": "hello@localight.com"
+    },
     "admin": {
         "sk": "test"
     }
