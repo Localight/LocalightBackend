@@ -218,7 +218,7 @@ router.get('/payouts', function(req, res) {
 
 /* Get Payout */
 router.get('/payouts/:id', function(req, res) {
-    Payout.find({
+    Payout.findOne({
             _id: req.params.id
         })
         .select()
