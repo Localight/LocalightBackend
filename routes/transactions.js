@@ -266,7 +266,22 @@ router.get('/payouts/:id', function(req, res) {
                                         msg: "Couldn't query the database for locations!"
                                     });
                                 } else {
-                                    res.status(200).json(payouts);
+                                    var popOptions = {
+                                        path: 'locations.location',
+                                        model: 'Location',
+                                        select: '-triconKey'
+                                    };
+
+                                    if (err) return res.json(500);
+                                    Transaction.populate(payouts, popOptions, function(err, payouts) {
+                                        if (err) {
+                                            return res.status(500).json({
+                                                msg: "Couldn't query the database for locations!"
+                                            });
+                                        } else {
+                                            res.status(200).json(payouts);
+                                        }
+                                    });
                                 }
                             });
 
