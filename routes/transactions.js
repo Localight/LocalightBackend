@@ -141,7 +141,25 @@ router.post('/payouts', function(req, res) {
                                 msg: "Error saving giftcard to database!"
                             });
                         } else {
-                            res.status(201).json(payout);
+                            payout = payout.lean();
+                            var popOptions = {
+                                path: '',
+                                model: 'Location',
+                                select: '-triconKey'
+                            };
+
+                            //Deep populate the ownerId field
+                            Payout.populate(merchants.merchant, popOptions, function(err, payout) {
+                                if (err) {
+                                    return res.status(500).json({
+                                        msg: "Couldn't query the database for locations!"
+                                    });
+                                } else {
+                                    payout.merchants = payout;
+                                    res.status(201).json(payout);
+                                }
+                            });
+                            //res.status(201).json(payout);
                         }
                     });
 
