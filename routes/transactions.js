@@ -119,13 +119,13 @@ router.post('/payouts', function(req, res) {
                         transactionIds.push(transactions[i]._id);
                     }
 
-                    //Assemble merchants array to be inserted with merchantId and amount to each respective merchant
-                    var merchants = [];
+                    //Assemble locations array to be inserted with locationId and amount to each respective location
+                    var locations = [];
                     //Get the keys from the hashmap
                     var locationPayoutKeys = Object.keys(locationPayout);
                     for (var i = 0; i < locationPayoutKeys.length; i++){
-                        merchants.push({
-                            merchant: locationPayoutKeys[i],
+                        locations.push({
+                            location: locationPayoutKeys[i],
                             amount: locationPayout[locationPayoutKeys[i]]
                         });
                     }
@@ -134,32 +134,14 @@ router.post('/payouts', function(req, res) {
                         transactions: transactionIds,
                         amount: totalPayout,
                         method: req.body.method,
-                        merchants: merchants
+                        locations: locations
                     }).save(function(err, payout) {
                         if (err) {
                             res.status(500).json({
                                 msg: "Error saving giftcard to database!"
                             });
                         } else {
-                            payout = payout.lean();
-                            var popOptions = {
-                                path: '',
-                                model: 'Location',
-                                select: '-triconKey'
-                            };
-
-                            //Deep populate the ownerId field
-                            Payout.populate(merchants.merchant, popOptions, function(err, payout) {
-                                if (err) {
-                                    return res.status(500).json({
-                                        msg: "Couldn't query the database for locations!"
-                                    });
-                                } else {
-                                    payout.merchants = payout;
-                                    res.status(201).json(payout);
-                                }
-                            });
-                            //res.status(201).json(payout);
+                            res.status(201).json(payout);
                         }
                     });
 
