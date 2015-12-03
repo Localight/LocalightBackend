@@ -12,10 +12,10 @@ router.get('/', function(req, res) {
     //Adaptive query object
     var query = {};
     //Find the various query options and set them
-    if (req.query.paid === "true") {
-        query.paid = true;
-    } else if (req.query.paid === "false") {
-        query.paid = false;
+    if (req.query.paidOut === "true") {
+        query.paidOut = true;
+    } else if (req.query.paidOut === "false") {
+        query.paidOut = false;
     }
 
     if(req.query.created_after || req.query.created_before){
