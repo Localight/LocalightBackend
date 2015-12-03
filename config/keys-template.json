@@ -8,11 +8,6 @@
         "secretKey": "sk_test_URsvlZveB0k7H9ODTeWgcx81"
     },
     "gmail": {
-        "username": "",
-        "password": "",
-        "alias": "LBGift <admin@lbgift.com>"
-    },
-    "gmail": {
         "username": "hello@localight.com",
         "password": "",
         "alias": "Localight <hello@localight.com>",
