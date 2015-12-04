@@ -63,6 +63,42 @@ router.get('/', function(req, res) {
         });
 });
 
+/* Get Transaction by ID */
+router.get('/:id', function(req, res) {
+    //Find transaction by id
+    Transaction.findOne({
+        _id: req.params.id
+    })
+        .select('_id userId locationId amount errs paidOut created')
+        .populate('userId')
+        .populate('locationId', '-triconKey')
+        .exec(function(err, transaction) {
+            //PopOptions will populate the deep referenced owner object.
+            //Populate normally can only go 1 layer deep, however using .populate, deeper population is possible
+            var popOptions = {
+                path: 'locationId.ownerId',
+                model: 'Owner',
+                select: '-password -salt'
+            };
+
+            if (err) return res.status(500).json({
+                msg: "Transaction query failed",
+                dberr: err,
+                query: query
+            });
+            //Deep populate the ownerId field
+            Transaction.populate(transaction, popOptions, function(err, transaction) {
+                if (err) {
+                    return res.status(500).json({
+                        msg: "Couldn't query the database for locations!"
+                    });
+                } else {
+                    res.status(200).json(transaction);
+                }
+            });
+        });
+});
+
 /* Create a payout */
 router.post('/payouts', function(req, res) {
     if (req.body.transactions && req.body.method) {
