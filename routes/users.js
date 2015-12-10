@@ -144,8 +144,15 @@ router.post('/twilio', function(req, res) {
                             gcDetails.amount = 500;
                             gcDetails.iconId = 8;
                             gcDetails.locationId = 10000;
-                            gcDetails.message = "A free trial Giftcard from Localight Black Friday!";
+                            gcDetails.message = "A free trial Giftcard from Localight!";
                             gcDetails.stripeCardToken = "None";
+                            gcDetails.notes = "";
+                            if(req.body.Body.toLowerCase() === "lbpost"){
+                                gcDetails.notes = "LBPOST promotional";
+                            }
+                            if(req.body.Body.toLowerCase() === "csulb"){
+                                gcDetails.notes = "CSULB";
+                            }
 
                             User.findOne({
                                     phone: "0000000000"
@@ -210,7 +217,8 @@ router.post('/twilio', function(req, res) {
                                         },
                                         created: Date.now(),
                                         sendDate: Date.now(),
-                                        sent: true
+                                        sent: true,
+                                        notes: gcDetails.notes
                                     }).save(function(err, giftcard) {
                                         if (err) {
                                             res.status(500).json({
