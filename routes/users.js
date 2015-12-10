@@ -148,7 +148,7 @@ router.post('/twilio', function(req, res) {
                             gcDetails.stripeCardToken = "None";
                             gcDetails.notes = "";
                             if(req.body.Body.toLowerCase() === "lbpost"){
-                                gcDetails.notes = "LBPOST promotional";
+                                gcDetails.notes = "LBPOST";
                             }
                             if(req.body.Body.toLowerCase() === "csulb"){
                                 gcDetails.notes = "CSULB";
