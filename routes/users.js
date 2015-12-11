@@ -125,7 +125,7 @@ router.post('/twilio', function(req, res) {
             .select('_id')
             .exec(function(err, user) {
                 if (user) {
-                    res.send('<Response><Message>You have already used Localight before! Please text "Gift" to send a giftcard to someone.</Message></Response>');
+                    res.send('<Response><Message>You have already used Localight before. Please text "Gift" to send a giftcard to someone.</Message></Response>');
                 } else {
                     //Create a new user with the assembled information
                     var user = new User({
@@ -138,13 +138,14 @@ router.post('/twilio', function(req, res) {
                                 msg: "Error saving user to DB!"
                             });
                         } else {
+                            var promoText = (req.body.Body.toLowerCase() === "lbpost") ? "A $10 giftcard towards your purchase of $30 or more at MADE in Long Beach." : "A promotional giftcard from Localight for Beta testing!";
                             //Assemble created information
                             var gcDetails = {};
                             gcDetails.toId = user._id;
                             gcDetails.amount = 500;
                             gcDetails.iconId = 8;
                             gcDetails.locationId = 10000;
-                            gcDetails.message = "A free trial Giftcard from Localight!";
+                            gcDetails.message = promoText;
                             gcDetails.stripeCardToken = "None";
                             gcDetails.notes = "";
                             if(req.body.Body.toLowerCase() === "lbpost"){
@@ -227,7 +228,8 @@ router.post('/twilio', function(req, res) {
                                         } else {
                                             shortURLService.create(process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token, function(url) {
                                                 //All good, give the user their card
-                                                res.send('<Response><Message>Your promo Localight giftcard: ' + url + '</Message></Response>');
+                                                var promoText = (req.body.Body.toLowerCase() === "lbpost") ? "A $10 giftcard towards your purchase of $30 or more at MADE in Long Beach: " : "A $5 Localight Beta giftcard valid at MADE in Long Beach: ";
+                                                res.send('<Response><Message>' + promoText + url + '</Message></Response>');
                                             });
                                         }
                                     });
