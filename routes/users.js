@@ -138,11 +138,12 @@ router.post('/twilio', function(req, res) {
                                 msg: "Error saving user to DB!"
                             });
                         } else {
-                            var promoText = (req.body.Body.toLowerCase() === "lbpost") ? "A $10 giftcard towards your purchase of $30 or more at MADE in Long Beach." : "A promotional giftcard from Localight for Beta testing!";
+                            var promoText = (req.body.Body.toLowerCase() === "lbpost") ? "As a thank you to readers like you, please enjoy $10 towards your purchase of $30 or more to #shoplocal at MADE in Long Beach, with products from over 100 local makers." : "A promotional giftcard for CSULB students like you to beta test The Local Giftcard!";
+                            var promoAmount = (req.body.Body.toLowerCase() === "lbpost") ? 1000 : 500;
                             //Assemble created information
                             var gcDetails = {};
                             gcDetails.toId = user._id;
-                            gcDetails.amount = 500;
+                            gcDetails.amount = promoAmount;
                             gcDetails.iconId = 8;
                             gcDetails.locationId = 10000;
                             gcDetails.message = promoText;
@@ -155,8 +156,10 @@ router.post('/twilio', function(req, res) {
                                 gcDetails.notes = "CSULB";
                             }
 
+                            var promoSender = (req.body.Body.toLowerCase() === "lbpost") ? "Long Beach Post" : "Localight";
+                            var promoPhone = (req.body.Body.toLowerCase() === "lbpost") ? "0000000001" : "0000000000";
                             User.findOne({
-                                    phone: "0000000000"
+                                    phone: promoPhone
                                 })
                                 .select('_id')
                                 .exec(function(err, user) {
@@ -167,8 +170,8 @@ router.post('/twilio', function(req, res) {
                                     } else {
                                         //Create a new user with the assembled information
                                         var user = new User({
-                                            phone: "0000000000",
-                                            name: "Localight",
+                                            phone: promoPhone,
+                                            name: promoSender,
                                             email: "hello@localight.com"
                                         }).save(function(err, user) {
                                             if (err) {
@@ -228,7 +231,7 @@ router.post('/twilio', function(req, res) {
                                         } else {
                                             shortURLService.create(process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token, function(url) {
                                                 //All good, give the user their card
-                                                var promoText = (req.body.Body.toLowerCase() === "lbpost") ? "A $10 giftcard towards your purchase of $30 or more at MADE in Long Beach: " : "A $5 Localight Beta giftcard valid at MADE in Long Beach: ";
+                                                var promoText = (req.body.Body.toLowerCase() === "lbpost") ? "Enjoy this $10 giftcard towards your purchase of $30 or more at MADE in Long Beach: " : "Enjoy this $5 giftcard for CSULB students like you, valid at MADE in Long Beach: ";
                                                 res.send('<Response><Message>' + promoText + url + '</Message></Response>');
                                             });
                                         }
