@@ -147,7 +147,7 @@ router.post('/twilio', function(req, res) {
                             var gcDetails = {};
                             gcDetails.toId = user._id;
                             gcDetails.amount = promoAmount;
-                            gcDetails.iconId = 8;
+                            gcDetails.iconId = 9;
                             gcDetails.locationId = 10000;
                             gcDetails.message = promoText;
                             gcDetails.stripeCardToken = "None";
@@ -234,7 +234,7 @@ router.post('/twilio', function(req, res) {
                                         } else {
                                             shortURLService.create(process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token, function(url) {
                                                 //All good, give the user their card
-                                                var promoText = lbpost12 ? "Enjoy this $10 giftcard towards your purchase of $30 or more at MADE in Long Beach: " : "Enjoy this $5 giftcard for CSULB students like you, valid at MADE in Long Beach: ";
+                                                var promoText = lbpost12 ? "\uD83C\uDF81 Enjoy this $10 giftcard towards your purchase of $30 or more at MADE in Long Beach: " : "Enjoy this $5 giftcard for CSULB students like you, valid at MADE in Long Beach: ";
                                                 res.send('<Response><Message>' + promoText + url + '</Message></Response>');
                                             });
                                         }
