@@ -117,7 +117,10 @@ router.post('/twilio', function(req, res) {
                 }
             });
     }
-    if (req.body.Body.toLowerCase() === "lbpost" || req.body.Body.toLowerCase() === "csulb") {
+    var message = (req.body.Body.toLowerCase()).trim();
+    var lbpost12 = message === "lbpost12";
+    var csulb = message === "csulb";
+    if (lbpost12 || csulb) {
         //Check if a user with that username already exists
         User.findOne({
                 phone: phone
@@ -138,8 +141,8 @@ router.post('/twilio', function(req, res) {
                                 msg: "Error saving user to DB!"
                             });
                         } else {
-                            var promoText = (req.body.Body.toLowerCase() === "lbpost") ? "As a thank you to readers like you, please enjoy $10 towards your purchase of $30 or more to #shoplocal at MADE in Long Beach, with products from over 100 local makers." : "A promotional giftcard for CSULB students like you to beta test The Local Giftcard!";
-                            var promoAmount = (req.body.Body.toLowerCase() === "lbpost") ? 1000 : 500;
+                            var promoText = lbpost12 ? "As a thank you to readers like you, please enjoy $10 towards your purchase of $30 or more to #shoplocal at MADE in Long Beach, with products from over 100 local makers." : "A promotional giftcard for CSULB students like you to beta test The Local Giftcard!";
+                            var promoAmount = lbpost12 ? 1000 : 500;
                             //Assemble created information
                             var gcDetails = {};
                             gcDetails.toId = user._id;
@@ -149,15 +152,15 @@ router.post('/twilio', function(req, res) {
                             gcDetails.message = promoText;
                             gcDetails.stripeCardToken = "None";
                             gcDetails.notes = "";
-                            if(req.body.Body.toLowerCase() === "lbpost"){
-                                gcDetails.notes = "LBPOST";
+                            if(lbpost12){
+                                gcDetails.notes = "LBPOST12";
                             }
-                            if(req.body.Body.toLowerCase() === "csulb"){
+                            if(csulb){
                                 gcDetails.notes = "CSULB";
                             }
 
-                            var promoSender = (req.body.Body.toLowerCase() === "lbpost") ? "Long Beach Post" : "Localight";
-                            var promoPhone = (req.body.Body.toLowerCase() === "lbpost") ? "0000000001" : "0000000000";
+                            var promoSender = lbpost12 ? "Long Beach Post" : "Localight";
+                            var promoPhone = lbpost12 ? "0000000001" : "0000000000";
                             User.findOne({
                                     phone: promoPhone
                                 })
@@ -231,7 +234,7 @@ router.post('/twilio', function(req, res) {
                                         } else {
                                             shortURLService.create(process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token, function(url) {
                                                 //All good, give the user their card
-                                                var promoText = (req.body.Body.toLowerCase() === "lbpost") ? "Enjoy this $10 giftcard towards your purchase of $30 or more at MADE in Long Beach: " : "Enjoy this $5 giftcard for CSULB students like you, valid at MADE in Long Beach: ";
+                                                var promoText = lbpost12 ? "Enjoy this $10 giftcard towards your purchase of $30 or more at MADE in Long Beach: " : "Enjoy this $5 giftcard for CSULB students like you, valid at MADE in Long Beach: ";
                                                 res.send('<Response><Message>' + promoText + url + '</Message></Response>');
                                             });
                                         }
