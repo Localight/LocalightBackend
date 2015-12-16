@@ -141,7 +141,7 @@ router.post('/twilio', function(req, res) {
                                 msg: "Error saving user to DB!"
                             });
                         } else {
-                            var promoText = lbpost12 ? "As a thank you to readers like you, please enjoy $10 towards your purchase of $30 or more to #shoplocal at MADE in Long Beach, with products from over 100 local makers." : "A promotional giftcard for CSULB students like you to beta test The Local Giftcard!";
+                            var promoText = lbpost12 ? "As a thank you for reading the post this year, enjoy $10 towards a purchase of $30 or more at MADE in Long Beach, with products from over 100 local makers. #shoplocal" : "A promotional giftcard for CSULB students like you to beta test The Local Giftcard!";
                             var promoAmount = lbpost12 ? 1000 : 500;
                             //Assemble created information
                             var gcDetails = {};
