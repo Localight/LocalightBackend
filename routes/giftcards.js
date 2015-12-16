@@ -102,7 +102,7 @@ router.post('/', function(req, res) {
                 });
             } else {
                 var d1 = new Date(req.body.sendDate);
-                var d2 = Date.now();
+                var d2 = new Date();
                 var sendToday = d1.getFullYear() == d2.getFullYear()
                     && d1.getMonth() == d2.getMonth()
                     && d1.getDate() == d2.getDate();
@@ -113,7 +113,7 @@ router.post('/', function(req, res) {
                 if (req.body.sendDate) {
                     sendDate = new Date(req.body.sendDate);
                 } else {
-                    sendDate = Date.now();
+                    sendDate = new Date();
                 }
 
                 new Giftcard({
