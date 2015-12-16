@@ -93,13 +93,14 @@ router.post('/login', function(req, res) {
                 var hash = crypto.pbkdf2Sync(req.body.password, owner.salt, 10000, 512);
                 //Compare to stored hash
                 if (hash == owner.password) {
-                    SessionService.generateSession(owner._id, "owner", function(err, token) {
+                    SessionService.generateSession(owner._id, "owner", function(err, token, verified) {
                         if (err) {
                             res.json(err);
                         } else {
                             //All good, give the owner their token
                             res.status(200).json({
-                                token: token
+                                token: token,
+                                verified: verified
                             });
                         }
                     });
@@ -133,7 +134,7 @@ router.get('/', function(req, res) {
             Owner.findOne({
                     _id: accountId
                 })
-                .select('_id name email code stripeCustomerId created updated')
+                .select('_id name email code stripeCustomerId created updated verified')
                 .exec(function(err, owner) {
                     if (err) {
                         res.status(500).json({
