@@ -14,7 +14,7 @@ exports.sendCurrent = function(callback) {
             },
             sent: false
         })
-        .select('toId')
+        .select()
         .populate('toId')
         .populate('fromId')
         .exec(function(err, giftcards) {
