@@ -101,11 +101,17 @@ router.post('/', function(req, res) {
                     msg: "Charge could not be completed!"
                 });
             } else {
-                var sent = !(req.body.sendDate && req.body.sendDate != Date.now());
+                var d1 = new Date(req.body.sendDate);
+                var d2 = Date.now();
+                var sendToday = d1.getFullYear() == d2.getFullYear()
+                    && d1.getMonth() == d2.getMonth()
+                    && d1.getDate() == d2.getDate();
+                var pastDate = d1 < d2;
+                var sent = sendToday || pastDate;
 
                 var sendDate;
                 if (req.body.sendDate) {
-                    sendDate = req.body.sendDate;
+                    sendDate = new Date(req.body.sendDate);
                 } else {
                     sendDate = Date.now();
                 }
@@ -123,7 +129,7 @@ router.post('/', function(req, res) {
                         subId: req.body.subId
                     },
                     created: Date.now(),
-                    sendDate: req.body.sendDate,
+                    sendDate: sendDate,
                     sent: sent
                 }).save(function(err, giftcard) {
                     if (err) {
