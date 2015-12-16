@@ -116,6 +116,8 @@ router.post('/', function(req, res) {
                     sendDate = new Date();
                 }
 
+                console.log(d2);
+
                 new Giftcard({
                     fromId: accountId,
                     toId: toId,
@@ -128,7 +130,7 @@ router.post('/', function(req, res) {
                         locationId: req.body.locationId,
                         subId: req.body.subId
                     },
-                    created: Date.now(),
+                    created: d2,
                     sendDate: sendDate,
                     sent: sent
                 }).save(function(err, giftcard) {
