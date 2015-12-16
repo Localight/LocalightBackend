@@ -116,8 +116,6 @@ router.post('/', function(req, res) {
                     sendDate = new Date();
                 }
 
-                console.log(d2);
-
                 new Giftcard({
                     fromId: accountId,
                     toId: toId,
