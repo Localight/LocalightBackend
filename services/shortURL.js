@@ -13,9 +13,9 @@ exports.create = function(url, callback) {
             if (err) {
                 console.log("problem accessing url shortner");
             } else if (!body || body == null) {
-                console.log("Error generating url");
+                console.log("Error generating url. Error 1");
             } else if (!JSON.parse(body).url) {
-                console.log("Error generating url");
+                console.log("Error generating url. Error 2");
             } else {
                 callback(JSON.parse(body).url);
             }
