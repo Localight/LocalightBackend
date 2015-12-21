@@ -33,7 +33,8 @@ exports.generateSession = function(accountId, type, callback) {
     new Session({
         accountId: accountId,
         type: type,
-        token: token
+        token: token,
+        created: Date.now()
     }).save(function(err) {
         if (err) {
             callback({

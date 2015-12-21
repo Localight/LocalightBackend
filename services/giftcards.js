@@ -14,7 +14,7 @@ exports.sendCurrent = function(callback) {
             },
             sent: false
         })
-        .select('toId')
+        .select()
         .populate('toId')
         .populate('fromId')
         .exec(function(err, giftcards) {
@@ -41,7 +41,7 @@ exports.sendCurrent = function(callback) {
                         } else {
                             var toName = giftcard.toId.name;
                             var fromName = giftcard.fromId.name;
-                            var amount = giftcard.origAmount;
+                            var amount = giftcard.origAmount / 100;
                             var messages = [
                                 "\uD83C\uDF70 " + toName + ", " + fromName + " has sent you a $" + amount + " gift for your birthday! View it here: ",
                                 "\uD83D\uDC9E " + toName + ", " + fromName + " has sent you a $" + amount + " gift for your anniversary! View it here: ",

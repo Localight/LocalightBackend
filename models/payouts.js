@@ -14,7 +14,15 @@ var Payout = new mongoose.Schema({
     method: {
         type: String
     },
-    merchants: [{}]
+    locations: [{
+        amount: {
+            type: Number
+        },
+        location: {
+            type: String,
+            ref: 'Location'
+        }
+    }]
 });
 
 mongoose.model('Payout', Payout);

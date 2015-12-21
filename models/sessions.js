@@ -11,6 +11,10 @@ var Session = new mongoose.Schema({
     token: {
         type: String,
         require: "Please provide the session token"
+    },
+    created: {
+        type: Date,
+        default: Date.now
     }
 });
 
