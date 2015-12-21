@@ -2,7 +2,6 @@ var request = require('request');
 
 //Checks if a token exists, and returns the corrosponding accountId
 exports.create = function(url, callback) {
-    console.log("Url submitted: " + url);
     request.post({
             headers: {
                 'content-type': 'application/x-www-form-urlencoded'
