@@ -10,12 +10,12 @@ exports.create = function(url, callback) {
             body: "url=" + url
         },
         function(err, response, body) {
-            if(err){
+            if (err) {
                 console.log("problem accessing url shortner");
-            } else if(!body || body == null){
-                console.log("Error generating url");
-            } else if(!JSON.parse(body).url){
-                console.log("Error generating url");
+            } else if (!body || body == null) {
+                console.log("Error generating url. Error: 1, Response: " + response);
+            } else if (!JSON.parse(body).url) {
+                console.log("Error generating url. Error: 2, Response: " + response);
             } else {
                 callback(JSON.parse(body).url);
             }

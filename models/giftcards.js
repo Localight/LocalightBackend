@@ -59,6 +59,9 @@ var Giftcard = new mongoose.Schema({
     thanked: {
         type: Boolean,
         default: false
+    },
+    notes: {
+        type: String
     }
 });
 

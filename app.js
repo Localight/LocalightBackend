@@ -14,7 +14,9 @@ var users = require('./models/users');
 var giftcards = require('./models/giftcards');
 var locations = require('./models/locations');
 var transactions = require('./models/transactions');
+var payouts = require('./models/payouts');
 var owners = require('./models/owners');
+var admins = require('./models/admins');
 var sessions = require('./models/sessions');
 
 
@@ -37,8 +39,10 @@ if(process.argv[2]){
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var owners = require('./routes/owners');
+var admins = require('./routes/admins');
 var locations = require('./routes/locations');
 var giftcards = require('./routes/giftcards');
+var transactions = require('./routes/transactions');
 
 //services
 var cron = require('./services/cron.js');
@@ -66,7 +70,9 @@ app.use('/', routes);
 app.use('/users', users);
 app.use('/locations', locations);
 app.use('/owners', owners);
+app.use('/admins', admins);
 app.use('/giftcards', giftcards);
+app.use('/transactions', transactions);
 
 cron.start();
 

@@ -8,8 +8,18 @@
         "secretKey": "sk_test_URsvlZveB0k7H9ODTeWgcx81"
     },
     "gmail": {
-        "username": "",
+        "username": "hello@localight.com",
         "password": "",
-        "alias": "LBGift <admin@lbgift.com>"
+        "alias": "Localight <hello@localight.com>",
+        "clientId": "",
+        "clientSecret": ""
+    },
+    "mailgun": {
+        "apiKey": "",
+        "domain": "localight.com",
+        "alias": "hello@localight.com"
+    },
+    "admin": {
+        "sk": "test"
     }
 }

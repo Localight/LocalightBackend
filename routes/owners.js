@@ -135,7 +135,7 @@ router.get('/', function(req, res) {
             Owner.findOne({
                     _id: accountId
                 })
-                .select('_id name email code verified created updated dob')
+                .select('_id name email code stripeCustomerId created updated verified dob')
                 .exec(function(err, owner) {
                     if (err) {
                         res.status(500).json({
@@ -155,8 +155,40 @@ router.get('/', function(req, res) {
 });
 
 /* Update an Owner */
-router.put('/:id', function(req, res) {
-    //Logic goes here
+router.put('/', function(req, res) {
+    //Check if required was sent
+    if (!req.body.sessionToken) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+    SessionService.validateSession(req.body.sessionToken, "owner", function(err, accountId) {
+        if (err) {
+            res.json(err);
+        } else {
+            var updatedOwner = {};
+
+            if (req.body.name && typeof req.body.name === 'string') updatedOwner.name = req.body.name;
+            if (req.body.email && typeof req.body.email === 'string') updatedOwner.email = req.body.email;
+            updatedOwner.updated = Date.now();
+
+
+            var setOwner = {
+                $set: updatedOwner
+            }
+
+            Owner.update({
+                    _id: accountId
+                }, setOwner)
+                .exec(function(err, owner) {
+                    if (err) {
+                        res.status(500).json(err);
+                    } else {
+                        res.status(200).send("OK");
+                    }
+                })
+        }
+    });
 });
 
 /* Remove an Owner */
@@ -185,30 +217,30 @@ router.delete('/', function(req, res) {
                         return res.status(500).json({
                             msg: "Couldn't query the database for locations!"
                         });
-                    } else if(locations){
+                    } else if (locations) {
                         res.status(409).json({
                             msg: "You still have locations in your account!"
                         });
                     } else {
                         Owner.findOne({
-                                _id: accountId
-                            }).remove(function(err, owner) {
-                                if (err) {
-                                    return res.status(500).json({
-                                        msg: "Couldn't query the database for locations!"
-                                    });
-                                } else if (!owner) {
-                                    res.status(409).json({
-                                        msg: "Could not find an owner with that id!"
-                                    });
-                                } else {
-                                    res.status(200).json({
-                                        msg: "Deleted!"
-                                    });
-                                }
-                            });
+                            _id: accountId
+                        }).remove(function(err, owner) {
+                            if (err) {
+                                return res.status(500).json({
+                                    msg: "Couldn't query the database for locations!"
+                                });
+                            } else if (!owner) {
+                                res.status(409).json({
+                                    msg: "Could not find an owner with that id!"
+                                });
+                            } else {
+                                res.status(200).json({
+                                    msg: "Deleted!"
+                                });
+                            }
+                        });
                     }
-            });
+                });
         }
     });
 });

@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 var Session = new mongoose.Schema({
     accountId: {
         type: String,
-        require:'Please provide the id of the account'
+        require: 'Please provide the id of the account'
     },
     type: {
         type: String,
@@ -11,6 +11,10 @@ var Session = new mongoose.Schema({
     token: {
         type: String,
         require: "Please provide the session token"
+    },
+    created: {
+        type: Date,
+        default: Date.now
     }
 });
 
