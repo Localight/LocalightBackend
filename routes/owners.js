@@ -11,8 +11,7 @@ router.post('/join', function(req, res) {
     //Check if required was sent
     if (!(req.body.email &&
             req.body.password &&
-            req.body.name &&
-            req.body.stripeCustomerId)) {
+            req.body.name)) {
         return res.status(412).json({
             msg: "You must provide all required fields!"
         });
@@ -36,7 +35,7 @@ router.post('/join', function(req, res) {
                 //Create a new owner with the assembled information
                 new Owner({
                     name: req.body.name,
-                    stripeCustomerId: req.body.stripeCustomerId,
+                    company: req.body.company,
                     email: req.body.email,
                     password: hash,
                     salt: salt,
@@ -54,7 +53,8 @@ router.post('/join', function(req, res) {
                             } else {
                                 //All good, give the owner their token
                                 res.status(201).json({
-                                    token: token
+                                    token: token,
+                                    verified: owner.verified
                                 });
                             }
                         });
@@ -78,7 +78,7 @@ router.post('/login', function(req, res) {
     Owner.findOne({
             email: req.body.email
         })
-        .select('password salt _id')
+        .select('password salt _id verified dob')
         .exec(function(err, owner) {
             if (err) {
                 res.status(500).json({
@@ -99,7 +99,9 @@ router.post('/login', function(req, res) {
                         } else {
                             //All good, give the owner their token
                             res.status(200).json({
-                                token: token
+                                token: token,
+                                verified: owner.verified,
+                                dob: owner.dob
                             });
                         }
                     });
@@ -133,7 +135,7 @@ router.get('/', function(req, res) {
             Owner.findOne({
                     _id: accountId
                 })
-                .select('_id name email code stripeCustomerId created updated verified')
+                .select('_id name email code stripeCustomerId created updated verified dob')
                 .exec(function(err, owner) {
                     if (err) {
                         res.status(500).json({
@@ -215,30 +217,30 @@ router.delete('/', function(req, res) {
                         return res.status(500).json({
                             msg: "Couldn't query the database for locations!"
                         });
-                    } else if(locations){
+                    } else if (locations) {
                         res.status(409).json({
                             msg: "You still have locations in your account!"
                         });
                     } else {
                         Owner.findOne({
-                                _id: accountId
-                            }).remove(function(err, owner) {
-                                if (err) {
-                                    return res.status(500).json({
-                                        msg: "Couldn't query the database for locations!"
-                                    });
-                                } else if (!owner) {
-                                    res.status(409).json({
-                                        msg: "Could not find an owner with that id!"
-                                    });
-                                } else {
-                                    res.status(200).json({
-                                        msg: "Deleted!"
-                                    });
-                                }
-                            });
+                            _id: accountId
+                        }).remove(function(err, owner) {
+                            if (err) {
+                                return res.status(500).json({
+                                    msg: "Couldn't query the database for locations!"
+                                });
+                            } else if (!owner) {
+                                res.status(409).json({
+                                    msg: "Could not find an owner with that id!"
+                                });
+                            } else {
+                                res.status(200).json({
+                                    msg: "Deleted!"
+                                });
+                            }
+                        });
                     }
-            });
+                });
         }
     });
 });

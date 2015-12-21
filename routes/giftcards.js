@@ -6,7 +6,8 @@ var express = require('express'),
     stripe = require("stripe")(config.stripe.secretKey),
     client = require('twilio')(config.twilio.accountSid, config.twilio.authToken),
     Giftcard = mongoose.model('Giftcard'),
-    nodemailer = require('nodemailer'),
+    mailgun = require('mailgun-js')({apiKey: config.mailgun.apiKey, domain: config.mailgun.domain}),
+    mailcomposer = require('mailcomposer'),
     SessionService = require('../services/sessions.js'),
     shortURLService = require('../services/shortURL.js'),
     User = mongoose.model('User');
@@ -19,7 +20,7 @@ router.post('/', function(req, res) {
             req.body.fromName &&
             req.body.email &&
             req.body.phone &&
-            req.body.amount && req.body.amount > 0 && req.body.amount < 50000 &&
+            req.body.amount && req.body.amount > 0 && req.body.amount <= 50000 &&
             req.body.iconId &&
             req.body.locationId &&
             req.body.message &&
@@ -75,7 +76,7 @@ router.post('/', function(req, res) {
     function createGift(accountId, toId, req) {
         if (!accountId || !toId) {
             return res.status(412).json({
-                msg: "You must provide toId, 0<amount<50000, iconId and message."
+                msg: "You must provide toId, 0<amount<=50000, iconId and message."
             });
         }
 
@@ -93,8 +94,9 @@ router.post('/', function(req, res) {
                 res.status(412).json({
                     msg: "Card was declined!"
                 });
-            } else if(err){
+            } else if (err) {
                 console.log("Stripe charge error");
+                console.log(err);
                 res.status(500).json({
                     msg: "Charge could not be completed!"
                 });
@@ -116,7 +118,10 @@ router.post('/', function(req, res) {
                     iconId: req.body.iconId,
                     message: req.body.message,
                     stripeOrderId: charge.id,
-                    location: {locationId: req.body.locationId, subId: req.body.subId},
+                    location: {
+                        locationId: req.body.locationId,
+                        subId: req.body.subId
+                    },
                     created: Date.now(),
                     sendDate: req.body.sendDate,
                     sent: sent
@@ -131,40 +136,56 @@ router.post('/', function(req, res) {
                             msg: "Giftcard was created!"
                         });
 
-                        var messagePlain = "Hello " + req.body.fromName + ", Here is a receipt for your LBGift order. $" + (req.body.amount/100) + " sent to " + req.body.toName + " " + req.body.phone + ". Thank you!, LBGift.";
-                        var messageHTML = "Hello " + req.body.fromName + ",<br /><br />Here is a receipt for your LBGift order:<br /><br />$" + (req.body.amount/100) + " sent to " + req.body.toName + " " + req.body.phone + ".<br /><br />Thank you!, LBGift.";
+                        var messagePlain = "Hello " + req.body.fromName + ", Here is a receipt for your LBGift order. $" + (req.body.amount / 100) + " sent to " + req.body.toName + " " + req.body.phone + ". Thank you!, LBGift.";
+                        var messageHTML = "Hello " + req.body.fromName + ",<br /><br />Here is a receipt for your LBGift order:<br /><br />$" + (req.body.amount / 100) + " sent to " + req.body.toName + " " + req.body.phone + ".<br /><br />Thank you!, LBGift.";
 
-                        var transporter = nodemailer.createTransport({
-                            service: 'Gmail',
-                            auth: {
-                                user: config.gmail.username,
-                                pass: config.gmail.password
-                            }
-                        });
-                        var mailOptions = {
-                            from: config.gmail.alias,
+                        var mail = mailcomposer({
+                            from: config.mailgun.alias,
                             to: req.body.email,
                             subject: 'Receipt for Your LBGift Order',
-                            text: messagePlain,
+                            body: messagePlain,
                             html: messageHTML
-                        }
-                        console.log(mailOptions);
-                        transporter.sendMail(mailOptions, function(error, response) {
-                            if (error) {
-                                console.log(error);
-                            } else {
-                                console.log("Message sent: " + response.message);
-                            }
                         });
+
+                        mail.build(function(mailBuildError, message) {
+
+                            var dataToSend = {
+                                to: req.body.email,
+                                message: message.toString('ascii')
+                            };
+
+                            mailgun.messages().sendMime(dataToSend, function (sendError, body) {
+                                if (sendError) {
+                                    console.log(sendError);
+                                    return;
+                                }
+                            });
+                        });
+
+                        var toName = req.body.toName;
+                        var fromName = req.body.fromName;
+                        var amount = req.body.amount/100;
+                        var messages = [
+                            "\uD83C\uDF70 " + toName + ", " + fromName + " has sent you a $" + amount + " gift for your birthday! View it here: ",
+                            "\uD83D\uDC9E " + toName + ", " + fromName + " has sent you a $" + amount + " gift for your anniversary! View it here: ",
+                            "\uD83D\uDC9D " + toName + ", " + fromName + " has sent you a $" + amount + " gift! View it here: ", //Love you
+                            "\uD83D\uDE91 " + toName + ", " + fromName + " has sent you a $" + amount + " gift and a note. View it here: ", //Hurt/getwell
+                            "\uD83C\uDFC6 " + toName + ", " + fromName + " has sent you a $" + amount + " gift to congratulate you! View it here: ",
+                            "\uD83D\uDC8D " + toName + ", " + fromName + " has sent you a $" + amount + " wedding gift card! View it here: ",
+                            "\uD83C\uDF7C " + toName + ", " + fromName + " has sent you a $" + amount + " gift for your baby! View it here:",
+                            "\uD83D\uDC90 " + toName + ", " + fromName + " has sent you a $" + amount + " gift to cheer you up. View it here: ",
+                            "\uD83D\uDE0A " + toName + ", " + fromName + " has sent you a $" + amount + " gift to say thank you! View it here: ",
+                            "\uD83C\uDF81 " + toName + ", " + fromName + " has sent you a $" + amount + " gift! View it here: " //Custom
+                        ];
 
                         if (sent) {
                             SessionService.generateSession(toId, "user", function(err, token) {
                                 if (err) {
                                     console.log(err);
                                 } else {
-                                    shortURLService.create(process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token, function(url){
+                                    shortURLService.create(process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token, function(url) {
                                         client.messages.create({
-                                            body: "You have a new giftcard on lbgift! " + url,
+                                            body: messages[req.body.iconId] + url,
                                             to: "+1" + req.body.phone,
                                             from: config.twilio.number
                                         }, function(err, message) {
@@ -218,16 +239,16 @@ router.get('/', function(req, res) {
                         //Store the spent giftcards
                         var spent = [];
                         //Loop through giftcards
-                        for(var i=0;i<giftcards.length;i++){
+                        for (var i = 0; i < giftcards.length; i++) {
                             //Find any that are zero
-                            if(giftcards[i].amount == 0){
+                            if (giftcards[i].amount == 0) {
                                 //Remove from giftcards and add to spent
                                 spent.push(giftcards.splice(i, 1)[0]);
                                 //If there are still giftcards left
-                                if(giftcards.length > 0){
+                                if (giftcards.length > 0) {
                                     //Check to make sure that new giftcard at current position (from splice) is not zero
                                     //And also that it exists
-                                    if(giftcards[i] && giftcards[i].amount == 0){
+                                    if (giftcards[i] && giftcards[i].amount == 0) {
                                         //If it is, check the current position again.
                                         i--;
                                     }
@@ -235,7 +256,7 @@ router.get('/', function(req, res) {
                             }
                         }
                         //Add all spent giftcards to end of giftcards array
-                        for(var j=0;j<spent.length;j++){
+                        for (var j = 0; j < spent.length; j++) {
                             giftcards.push(spent[j]);
                         }
                         res.status(200).json(giftcards);
@@ -353,51 +374,51 @@ router.post('/later', function(req, res) {
                         });
                     } else {
                         Giftcard.findOne({
-                                toId: accountId,
-                                _id: req.body.giftcardId
-                            }).exec(function(err, giftcard) {
-                                if (err) {
-                                    res.status(500).json({
-                                        msg: "Couldn't search the database for giftcard!"
-                                    });
-                                } else if (!giftcard) {
-                                    res.status(404).json({
-                                        msg: "No giftard with that ID!"
-                                    });
-                                } else {
-                                    shortURLService.create(process.argv[2] + "/#/giftcards/" + req.body.giftcardId + "?token=" + req.body.sessionToken, function(url){
-                                        var messagePlain = "Hello " + user.name + ", Here is a link for the giftcard you saved: " + url + " Thanks, The Localight Team";
-                                        var messageHTML = "Hello " + user.name + ",<br /><br />Here is a link for the giftcard you saved:<br /><a href='" + url + "'>" + url + "</a><br /><br />Thanks!<br />The Localight Team";
+                            toId: accountId,
+                            _id: req.body.giftcardId
+                        }).exec(function(err, giftcard) {
+                            if (err) {
+                                res.status(500).json({
+                                    msg: "Couldn't search the database for giftcard!"
+                                });
+                            } else if (!giftcard) {
+                                res.status(404).json({
+                                    msg: "No giftard with that ID!"
+                                });
+                            } else {
+                                shortURLService.create(process.argv[2] + "/#/giftcards/" + req.body.giftcardId + "?token=" + req.body.sessionToken, function(url) {
+                                    var messagePlain = "Hello " + user.name + ", Here is a link for the giftcard you saved: " + url + " Thanks, The Localight Team";
+                                    var messageHTML = "Hello " + user.name + ",<br /><br />Here is a link for the giftcard you saved:<br /><a href='" + url + "'>" + url + "</a><br /><br />Thanks!<br />The Localight Team";
 
-                                        var transporter = nodemailer.createTransport({
-                                            service: 'Gmail',
-                                            auth: {
-                                                user: config.gmail.username,
-                                                pass: config.gmail.password
+                                    var mail = mailcomposer({
+                                        from: config.mailgun.alias,
+                                        to: req.body.email,
+                                        subject: 'Your Saved Giftcard Link for LBGift',
+                                        body: messagePlain,
+                                        html: messageHTML
+                                    });
+
+                                    mail.build(function(mailBuildError, message) {
+
+                                        var dataToSend = {
+                                            to: req.body.email,
+                                            message: message.toString('ascii')
+                                        };
+
+                                        mailgun.messages().sendMime(dataToSend, function (sendError, body) {
+                                            if (sendError) {
+                                                console.log(sendError);
+                                                return;
                                             }
                                         });
-                                        var mailOptions = {
-                                            from: config.gmail.alias,
-                                            to: user.email,
-                                            subject: 'Your Saved Giftcard Link for LBGift',
-                                            text: messagePlain,
-                                            html: messageHTML
-                                        }
-                                        console.log(mailOptions);
-                                        transporter.sendMail(mailOptions, function(error, response) {
-                                            if (error) {
-                                                console.log(error);
-                                            } else {
-                                                console.log("Message sent!");
-                                            }
-                                        });
-
-                                        res.status(200).json({
-                                            msg: "Email was sent!"
-                                        });
                                     });
-                                }
-                            });
+
+                                    res.status(200).json({
+                                        msg: "Email was sent!"
+                                    });
+                                });
+                            }
+                        });
                     }
                 });
         }
