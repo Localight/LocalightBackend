@@ -4,10 +4,20 @@ var mongoose = require('mongoose'),
 
 //Checks if a token exists, and returns the corrosponding accountId
 exports.validateSession = function(token, type, callback) {
-    Session.findOne({
+    var query;
+    if(typeof type == "string"){
+        query = {
             token: token,
             type: type
-        }).select('accountId')
+        }
+    } else {
+        query = {
+            token: token,
+            type: { $in : type }
+        }
+    }
+    Session.findOne(query)
+        .select('accountId')
         .exec(function(err, session) {
             if (err) {
                 callback({
