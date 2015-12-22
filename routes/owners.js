@@ -191,6 +191,41 @@ router.put('/', function(req, res) {
     });
 });
 
+/* Verify/Unverify an Owner */
+router.put('/verify', function(req, res) {
+    //Check if required was sent
+    if (!req.body.ownerId) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+    SessionService.validateSession(req.body.sessionToken, "admin", function(err, accountId) {
+        if (err) {
+            res.json(err);
+        } else {
+            var updatedOwner = {};
+
+            if (req.body.verified && typeof req.body.verified === 'string') updatedOwner.verified = req.body.verified;
+            updatedOwner.updated = Date.now();
+
+            var setOwner = {
+                $set: updatedOwner
+            }
+
+            Owner.update({
+                    _id: req.body.ownerId
+                }, setOwner)
+                .exec(function(err, owner) {
+                    if (err) {
+                        res.status(500).json(err);
+                    } else {
+                        res.status(200).send("OK");
+                    }
+                })
+        }
+    });
+});
+
 /* Remove an Owner */
 router.delete('/', function(req, res) {
     //Check if required was sent
