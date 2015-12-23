@@ -156,11 +156,12 @@ router.put('/', function(req, res) {
             msg: "You must provide all required fields!"
         });
     }
-    SessionService.validateSession(req.body.sessionToken, "owner", function(accountId){
+    SessionService.validateSession(req.body.sessionToken, ["owner", "admin"], function(accountId, session){
         var updatedOwner = {};
 
         if (req.body.name && typeof req.body.name === 'string') updatedOwner.name = req.body.name;
         if (req.body.email && typeof req.body.email === 'string') updatedOwner.email = req.body.email;
+        if (req.body.verified && typeof req.body.verified === 'string' && session.type == "admin") updatedOwner.verified = req.body.verified;
         updatedOwner.updated = Date.now();
 
 
@@ -168,9 +169,19 @@ router.put('/', function(req, res) {
             $set: updatedOwner
         }
 
-        Owner.update({
+        var query = {
+            null: "findNone"
+        };
+        if(session.type == "owner"){
+            query = {
                 _id: accountId
-            }, setOwner)
+            }
+        } else if(session.type == "admin" && req.body.accountId){
+            query = {
+                _id: req.body.accountId
+            }
+        }
+        Owner.update(query, setOwner)
             .exec(function(err, owner) {
                 if (err) {
                     res.status(500).json(err);
