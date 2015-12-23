@@ -122,7 +122,7 @@ router.post('/twilio', function(req, res) {
     var csulb = message === "csulb";
     var woodenmap17 = message === "woodenmap17" || message === "woodmap17";
     var promoSMS = "";
-    if (lbpost12 || csulb) {
+    if (lbpost12 || csulb || woodenmap17) {
         //Check if a user with that username already exists
         User.findOne({
                 phone: phone
