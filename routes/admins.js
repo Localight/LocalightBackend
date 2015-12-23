@@ -95,15 +95,13 @@ router.post('/login', function(req, res) {
                 var hash = crypto.pbkdf2Sync(req.body.password, admin.salt, 10000, 512);
                 //Compare to stored hash
                 if (hash == admin.password) {
-                    SessionService.generateSession(admin._id, "admin", function(err, token) {
-                        if (err) {
-                            res.json(err);
-                        } else {
-                            //All good, give the admin their token
-                            res.status(200).json({
-                                token: token
-                            });
-                        }
+                    SessionService.generateSession(admin._id, "admin", function(token) {
+                        //All good, give the admin their token
+                        res.status(200).json({
+                            token: token
+                        });
+                    }, function(err){
+                        res.status(err.status).json(err);
                     });
                 } else {
                     res.status(401).json({
