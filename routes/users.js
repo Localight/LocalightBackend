@@ -120,6 +120,8 @@ router.post('/twilio', function(req, res) {
     var message = (req.body.Body.toLowerCase()).trim();
     var lbpost12 = message === "lbpost12";
     var csulb = message === "csulb";
+    var woodenmap17 = message === "woodenmap17" || message === "woodmap17";
+    var promoSMS = "";
     if (lbpost12 || csulb) {
         //Check if a user with that username already exists
         User.findOne({
@@ -141,8 +143,33 @@ router.post('/twilio', function(req, res) {
                                 msg: "Error saving user to DB!"
                             });
                         } else {
-                            var promoText = lbpost12 ? "As a thank you for reading The Post this year, enjoy $10 towards a purchase of $30 or more at MADE in Long Beach, with products from over 100 local makers. #shoplocal" : "A promotional giftcard for CSULB students like you to beta test The Local Giftcard!";
-                            var promoAmount = lbpost12 ? 1000 : 500;
+                            var promoText = "";
+                            var promoAmount = 0;
+                            var notes = "";
+                            var promoSender = "Localight";
+                            var promoPhone = "0000000000";
+                            if(lbpost12){
+                                promoText = "As a thank you for reading The Post this year, enjoy $10 towards a purchase of $30 or more at MADE in Long Beach, with products from over 100 local makers. #shoplocal";
+                                promoSMS = "\uD83C\uDF81 Enjoy this $10 giftcard towards your purchase of $30 or more at MADE in Long Beach: ";
+                                promoAmount = 1000;
+                                notes = "LBPOST12";
+                                promoSender = "Long Beach Post";
+                                promoPhone = "0000000001";
+                            } else if(csulb){
+                                promoText = "A promotional giftcard for CSULB students like you to beta test The Local Giftcard!";
+                                promoSMS = "Please enjoy this $5 giftcard for CSULB students like you, valid at MADE in Long Beach: ";
+                                promoAmount = 500;
+                                notes = "CSULB";
+                                promoSender = "The Local Giftcard";
+                                promoPhone = "0000000000";
+                            } else if(woodenmap17){
+                                promoText = "Our aplogizes for not having your wooden map available before the holidays. Please enjoy this $10 giftcard valid at MADE in Long Beach.";
+                                promoSMS = "Please enjoy this $10 giftcard as our apology, valid at MADE in Long Beach: ";
+                                promoAmount = 1000;
+                                notes = "WOODENMAP17";
+                                promoSender = "The Local Giftcard";
+                                promoPhone = "0000000000";
+                            }
                             //Assemble created information
                             var gcDetails = {};
                             gcDetails.toId = user._id;
@@ -151,16 +178,8 @@ router.post('/twilio', function(req, res) {
                             gcDetails.locationId = 10000;
                             gcDetails.message = promoText;
                             gcDetails.stripeCardToken = "None";
-                            gcDetails.notes = "";
-                            if(lbpost12){
-                                gcDetails.notes = "LBPOST12";
-                            }
-                            if(csulb){
-                                gcDetails.notes = "CSULB";
-                            }
+                            gcDetails.notes = notes;
 
-                            var promoSender = lbpost12 ? "Long Beach Post" : "Localight";
-                            var promoPhone = lbpost12 ? "0000000001" : "0000000000";
                             User.findOne({
                                     phone: promoPhone
                                 })
@@ -234,8 +253,7 @@ router.post('/twilio', function(req, res) {
                                         } else {
                                             shortURLService.create(process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token, function(url) {
                                                 //All good, give the user their card
-                                                var promoText = lbpost12 ? "\uD83C\uDF81 Enjoy this $10 giftcard towards your purchase of $30 or more at MADE in Long Beach: " : "Enjoy this $5 giftcard for CSULB students like you, valid at MADE in Long Beach: ";
-                                                res.send('<Response><Message>' + promoText + url + '</Message></Response>');
+                                                res.send('<Response><Message>' + promoSMS + url + '</Message></Response>');
                                             });
                                         }
                                     });
