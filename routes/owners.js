@@ -47,16 +47,14 @@ router.post('/join', function(req, res) {
                             msg: "Error saving owner to DB!"
                         });
                     } else {
-                        SessionService.generateSession(owner._id, "owner", function(err, token) {
-                            if (err) {
-                                res.json(err);
-                            } else {
-                                //All good, give the owner their token
-                                res.status(201).json({
-                                    token: token,
-                                    verified: owner.verified
-                                });
-                            }
+                        SessionService.generateSession(owner._id, "owner", function(token){
+                            //All good, give the owner their token
+                            res.status(201).json({
+                                token: token,
+                                verified: owner.verified
+                            });
+                        }, function(err){
+                            res.status(err.status).json(err);
                         });
                     }
                 });
@@ -93,17 +91,15 @@ router.post('/login', function(req, res) {
                 var hash = crypto.pbkdf2Sync(req.body.password, owner.salt, 10000, 512);
                 //Compare to stored hash
                 if (hash == owner.password) {
-                    SessionService.generateSession(owner._id, "owner", function(err, token) {
-                        if (err) {
-                            res.json(err);
-                        } else {
-                            //All good, give the owner their token
-                            res.status(200).json({
-                                token: token,
-                                verified: owner.verified,
-                                dob: owner.dob
-                            });
-                        }
+                    SessionService.generateSession(owner._id, "owner", function(token){
+                        //All good, give the owner their token
+                        res.status(200).json({
+                            token: token,
+                            verified: owner.verified,
+                            dob: owner.dob
+                        });
+                    }, function(err){
+                        res.status(err.status).json(err);
                     });
                 } else {
                     res.status(401).json({
@@ -116,7 +112,7 @@ router.post('/login', function(req, res) {
 
 /* Reset Password */
 router.post('/reset', function(req, res) {
-    //Logic goes here
+    //Future implementation
 });
 
 /* Get an Owner */
@@ -128,28 +124,26 @@ router.get('/', function(req, res) {
         });
     }
 
-    SessionService.validateSession(req.query.sessionToken, "owner", function(err, accountId) {
-        if (err) {
-            res.json(err);
-        } else {
-            Owner.findOne({
-                    _id: accountId
-                })
-                .select('_id name email code stripeCustomerId created updated verified dob')
-                .exec(function(err, owner) {
-                    if (err) {
-                        res.status(500).json({
-                            msg: "Couldn't search the database for owner!"
-                        });
-                    } else if (!owner) {
-                        res.status(404).json({
-                            msg: "Owner does not exist!"
-                        });
-                    } else {
-                        res.status(200).json(owner);
-                    }
-                });
-        }
+    SessionService.validateSession(req.query.sessionToken, "owner", function(accountId) {
+        Owner.findOne({
+                _id: accountId
+            })
+            .select('_id name email code stripeCustomerId created updated verified dob')
+            .exec(function(err, owner) {
+                if (err) {
+                    res.status(500).json({
+                        msg: "Couldn't search the database for owner!"
+                    });
+                } else if (!owner) {
+                    res.status(404).json({
+                        msg: "Owner does not exist!"
+                    });
+                } else {
+                    res.status(200).json(owner);
+                }
+            });
+    }, function(err){
+        res.status(err.status).json(err);
     });
 
 });
@@ -162,32 +156,30 @@ router.put('/', function(req, res) {
             msg: "You must provide all required fields!"
         });
     }
-    SessionService.validateSession(req.body.sessionToken, "owner", function(err, accountId) {
-        if (err) {
-            res.json(err);
-        } else {
-            var updatedOwner = {};
+    SessionService.validateSession(req.body.sessionToken, "owner", function(accountId){
+        var updatedOwner = {};
 
-            if (req.body.name && typeof req.body.name === 'string') updatedOwner.name = req.body.name;
-            if (req.body.email && typeof req.body.email === 'string') updatedOwner.email = req.body.email;
-            updatedOwner.updated = Date.now();
+        if (req.body.name && typeof req.body.name === 'string') updatedOwner.name = req.body.name;
+        if (req.body.email && typeof req.body.email === 'string') updatedOwner.email = req.body.email;
+        updatedOwner.updated = Date.now();
 
 
-            var setOwner = {
-                $set: updatedOwner
-            }
-
-            Owner.update({
-                    _id: accountId
-                }, setOwner)
-                .exec(function(err, owner) {
-                    if (err) {
-                        res.status(500).json(err);
-                    } else {
-                        res.status(200).send("OK");
-                    }
-                })
+        var setOwner = {
+            $set: updatedOwner
         }
+
+        Owner.update({
+                _id: accountId
+            }, setOwner)
+            .exec(function(err, owner) {
+                if (err) {
+                    res.status(500).json(err);
+                } else {
+                    res.status(200).send("OK");
+                }
+            })
+    }, function(err){
+        res.status(err.status).json(err);
     });
 });
 
@@ -199,30 +191,28 @@ router.put('/verify', function(req, res) {
             msg: "You must provide all required fields!"
         });
     }
-    SessionService.validateSession(req.body.sessionToken, "admin", function(err, accountId) {
-        if (err) {
-            res.json(err);
-        } else {
-            var updatedOwner = {};
+    SessionService.validateSession(req.body.sessionToken, "admin", function(accountId) {
+        var updatedOwner = {};
 
-            if (req.body.verified && typeof req.body.verified === 'string') updatedOwner.verified = req.body.verified;
-            updatedOwner.updated = Date.now();
+        if (req.body.verified && typeof req.body.verified === 'string') updatedOwner.verified = req.body.verified;
+        updatedOwner.updated = Date.now();
 
-            var setOwner = {
-                $set: updatedOwner
-            }
-
-            Owner.update({
-                    _id: req.body.ownerId
-                }, setOwner)
-                .exec(function(err, owner) {
-                    if (err) {
-                        res.status(500).json(err);
-                    } else {
-                        res.status(200).send("OK");
-                    }
-                })
+        var setOwner = {
+            $set: updatedOwner
         }
+
+        Owner.update({
+                _id: req.body.ownerId
+            }, setOwner)
+            .exec(function(err, owner) {
+                if (err) {
+                    res.status(500).json(err);
+                } else {
+                    res.status(200).send("OK");
+                }
+            })
+    }, function(err){
+        res.status(err.status).json(err);
     });
 });
 

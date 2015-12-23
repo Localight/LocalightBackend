@@ -52,15 +52,13 @@ router.post('/join', function(req, res) {
                                 msg: "Error saving admin to DB!"
                             });
                         } else {
-                            SessionService.generateSession(admin._id, "admin", function(err, token) {
-                                if (err) {
-                                    res.json(err);
-                                } else {
-                                    //All good, give the admin their token
-                                    res.status(201).json({
-                                        token: token
-                                    });
-                                }
+                            SessionService.generateSession(admin._id, "admin", function(token) {
+                                //All good, give the admin their token
+                                res.status(201).json({
+                                    token: token
+                                });
+                            }, function(err){
+                                res.status(err.status).json(err);
                             });
                         }
                     });
