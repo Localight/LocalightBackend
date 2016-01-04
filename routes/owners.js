@@ -197,6 +197,7 @@ router.put('/', function(req, res) {
 
         if (req.body.name && typeof req.body.name === 'string') updatedOwner.name = req.body.name;
         if (req.body.email && typeof req.body.email === 'string') updatedOwner.email = req.body.email;
+        if (req.body.dob && typeof req.body.dob === 'string') updatedOwner.dob = req.body.dob;
         if (req.body.verified && typeof req.body.verified === 'string' && session.type == "admin") updatedOwner.verified = req.body.verified;
         updatedOwner.updated = Date.now();
 
