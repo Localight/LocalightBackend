@@ -37,40 +37,38 @@ router.post('/', function(req, res) {
     }
 
     //Validate session
-    SessionService.validateSession(req.body.sessionToken, "user", function(err, accountId) {
-        if (err) {
-            res.json(err);
-        } else {
-            //Find a user with the phone requested. Get the id.
-            User.findOne({
-                    phone: req.body.phone
-                })
-                .select('_id')
-                .exec(function(err, user) {
-                    if (err) {
-                        return res.status(500).json({
-                            msg: "Couldn't search the database for user!"
-                        });
-                    } else if (!user) {
-                        var user = new User({
-                            name: req.body.toName,
-                            phone: req.body.phone
-                        }).save(function(err, user) {
-                            if (err) {
-                                console.log("Error saving user to DB!");
-                                res.status(500).json({
-                                    msg: "Error saving user to DB!"
-                                });
-                            } else {
-                                createGift(accountId, user._id, req);
-                            }
-                        });
-                    } else {
-                        createGift(accountId, user._id, req);
+    SessionService.validateSession(req.body.sessionToken, "user", function(accountId) {
+        //Find a user with the phone requested. Get the id.
+        User.findOne({
+                phone: req.body.phone
+            })
+            .select('_id')
+            .exec(function(err, user) {
+                if (err) {
+                    return res.status(500).json({
+                        msg: "Couldn't search the database for user!"
+                    });
+                } else if (!user) {
+                    var user = new User({
+                        name: req.body.toName,
+                        phone: req.body.phone
+                    }).save(function(err, user) {
+                        if (err) {
+                            console.log("Error saving user to DB!");
+                            res.status(500).json({
+                                msg: "Error saving user to DB!"
+                            });
+                        } else {
+                            createGift(accountId, user._id, req);
+                        }
+                    });
+                } else {
+                    createGift(accountId, user._id, req);
 
-                    }
-                });
-        }
+                }
+            });
+    }, function(err){
+        res.status(err.status).json(err);
     });
 
     function createGift(accountId, toId, req) {
@@ -185,24 +183,23 @@ router.post('/', function(req, res) {
                         ];
 
                         if (sent) {
-                            SessionService.generateSession(toId, "user", function(err, token) {
-                                if (err) {
-                                    console.log(err);
-                                } else {
-                                    shortURLService.create(process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token, function(url) {
-                                        client.messages.create({
-                                            body: messages[req.body.iconId] + url,
-                                            to: "+1" + req.body.phone,
-                                            from: config.twilio.number
-                                        }, function(err, message) {
-                                            if (err) {
-                                                console.log(err);
-                                            } else {
-                                                console.log(message.sid);
-                                            }
-                                        });
+                            SessionService.generateSession(toId, "user", function(token) {
+                                shortURLService.create(process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token, function(url) {
+                                    client.messages.create({
+                                        body: messages[req.body.iconId] + url,
+                                        to: "+1" + req.body.phone,
+                                        from: config.twilio.number
+                                    }, function(err, message) {
+                                        if (err) {
+                                            console.log(err);
+                                        } else {
+                                            console.log(message.sid);
+                                        }
                                     });
-                                }
+                                });
+                            }, function(err){
+                                console.log("Create giftcard twilio error: ");
+                                console.log(err);
                             });
                         } else {
                             console.log("Added giftcard to send queue");
@@ -224,51 +221,49 @@ router.get('/', function(req, res) {
     }
 
     //Validate session
-    SessionService.validateSession(req.query.sessionToken, "user", function(err, accountId) {
-        if (err) {
-            return res.status(err.status).send("Session Error");
-        } else {
-            Giftcard.find({
-                    toId: accountId
-                })
-                .sort('-created')
-                .lean()
-                .select('_id toId fromId amount origAmount iconId message location created thanked')
-                .populate('fromId', 'name')
-                .populate('toId', 'name')
-                .populate('location.subId', '_id name')
-                .populate('location.locationId', '_id name address1 address2 city state zipcode subs')
-                .exec(function(err, giftcards) {
-                    if (err) {
-                        return res.status(500).send("Error searching DB");
-                    } else {
-                        //Store the spent giftcards
-                        var spent = [];
-                        //Loop through giftcards
-                        for (var i = 0; i < giftcards.length; i++) {
-                            //Find any that are zero
-                            if (giftcards[i].amount == 0) {
-                                //Remove from giftcards and add to spent
-                                spent.push(giftcards.splice(i, 1)[0]);
-                                //If there are still giftcards left
-                                if (giftcards.length > 0) {
-                                    //Check to make sure that new giftcard at current position (from splice) is not zero
-                                    //And also that it exists
-                                    if (giftcards[i] && giftcards[i].amount == 0) {
-                                        //If it is, check the current position again.
-                                        i--;
-                                    }
+    SessionService.validateSession(req.query.sessionToken, "user", function(accountId) {
+        Giftcard.find({
+                toId: accountId
+            })
+            .sort('-created')
+            .lean()
+            .select('_id toId fromId amount origAmount iconId message location created thanked')
+            .populate('fromId', 'name')
+            .populate('toId', 'name')
+            .populate('location.subId', '_id name')
+            .populate('location.locationId', '_id name address1 address2 city state zipcode subs')
+            .exec(function(err, giftcards) {
+                if (err) {
+                    return res.status(500).send("Error searching DB");
+                } else {
+                    //Store the spent giftcards
+                    var spent = [];
+                    //Loop through giftcards
+                    for (var i = 0; i < giftcards.length; i++) {
+                        //Find any that are zero
+                        if (giftcards[i].amount == 0) {
+                            //Remove from giftcards and add to spent
+                            spent.push(giftcards.splice(i, 1)[0]);
+                            //If there are still giftcards left
+                            if (giftcards.length > 0) {
+                                //Check to make sure that new giftcard at current position (from splice) is not zero
+                                //And also that it exists
+                                if (giftcards[i] && giftcards[i].amount == 0) {
+                                    //If it is, check the current position again.
+                                    i--;
                                 }
                             }
                         }
-                        //Add all spent giftcards to end of giftcards array
-                        for (var j = 0; j < spent.length; j++) {
-                            giftcards.push(spent[j]);
-                        }
-                        res.status(200).json(giftcards);
                     }
-                });
-        }
+                    //Add all spent giftcards to end of giftcards array
+                    for (var j = 0; j < spent.length; j++) {
+                        giftcards.push(spent[j]);
+                    }
+                    res.status(200).json(giftcards);
+                }
+            });
+    }, function(err){
+        res.status(err.status).json("Session Error");
     });
 });
 
@@ -280,28 +275,26 @@ router.get('/given', function(req, res) {
     }
 
     //Validate session
-    SessionService.validateSession(req.query.sessionToken, "user", function(err, accountId) {
-        if (err) {
-            return res.status(err.status).send("Session Error");
-        } else {
-            Giftcard.find({
-                    fromId: accountId
-                })
-                .sort('-created')
-                .lean()
-                .select('_id toId fromId origAmount iconId message location created')
-                .populate('fromId', 'name')
-                .populate('toId', 'name')
-                .populate('location.subId', '_id name')
-                .populate('location.locationId', '_id name address1 address2 city state zipcode subs')
-                .exec(function(err, giftcards) {
-                    if (err) {
-                        return res.status(500).send("Error searching DB");
-                    } else {
-                        res.status(200).json(giftcards);
-                    }
-                });
-        }
+    SessionService.validateSession(req.query.sessionToken, "user", function(accountId) {
+        Giftcard.find({
+                fromId: accountId
+            })
+            .sort('-created')
+            .lean()
+            .select('_id toId fromId origAmount iconId message location created')
+            .populate('fromId', 'name')
+            .populate('toId', 'name')
+            .populate('location.subId', '_id name')
+            .populate('location.locationId', '_id name address1 address2 city state zipcode subs')
+            .exec(function(err, giftcards) {
+                if (err) {
+                    return res.status(500).send("Error searching DB");
+                } else {
+                    res.status(200).json(giftcards);
+                }
+            });
+    }, function(err){
+        res.status(err.status).json("Session Error");
     });
 });
 
@@ -314,35 +307,33 @@ router.get('/:id', function(req, res) {
         });
     }
 
-    SessionService.validateSession(req.query.sessionToken, "user", function(err, accountId) {
-        if (err) {
-            res.json(err);
-        } else {
-            Giftcard.findOne({
-                    toId: accountId,
-                    _id: req.params.id
-                })
-                //added the toId as we need the client to know the users name
-                .select('_id toId fromId amount origAmount iconId message location created thanked')
-                //use populate to also returns the users name in the giftcards object!
-                .populate('fromId', 'name') // populate the actual user and only return their name
-                .populate('toId', 'name') //populate the actual user and only return their name
-                .populate('location.subId', '_id name')
-                .populate('location.locationId', '_id name address1 address2 city state zipcode subs')
-                .exec(function(err, giftcard) {
-                    if (err) {
-                        res.status(500).json({
-                            msg: "Couldn't search the database for giftcard!"
-                        });
-                    } else if (!giftcard) {
-                        res.status(404).json({
-                            msg: "No giftard with that ID!"
-                        });
-                    } else {
-                        res.status(200).json(giftcard);
-                    }
-                });
-        }
+    SessionService.validateSession(req.query.sessionToken, "user", function(accountId) {
+        Giftcard.findOne({
+                toId: accountId,
+                _id: req.params.id
+            })
+            //added the toId as we need the client to know the users name
+            .select('_id toId fromId amount origAmount iconId message location created thanked')
+            //use populate to also returns the users name in the giftcards object!
+            .populate('fromId', 'name') // populate the actual user and only return their name
+            .populate('toId', 'name') //populate the actual user and only return their name
+            .populate('location.subId', '_id name')
+            .populate('location.locationId', '_id name address1 address2 city state zipcode subs')
+            .exec(function(err, giftcard) {
+                if (err) {
+                    res.status(500).json({
+                        msg: "Couldn't search the database for giftcard!"
+                    });
+                } else if (!giftcard) {
+                    res.status(404).json({
+                        msg: "No giftard with that ID!"
+                    });
+                } else {
+                    res.status(200).json(giftcard);
+                }
+            });
+    }, function(err){
+        res.status(err.status).json(err);
     });
 });
 
@@ -361,73 +352,71 @@ router.post('/later', function(req, res) {
         });
     }
 
-    SessionService.validateSession(req.body.sessionToken, "user", function(err, accountId) {
-        if (err) {
-            res.json(err);
-        } else {
-            User.findOne({
-                    _id: accountId
-                })
-                .select('name email phone created updated')
-                .exec(function(err, user) {
-                    if (err) {
-                        res.status(500).json({
-                            msg: "Couldn't search the database for user!"
-                        });
-                    } else if (!user) {
-                        res.status(404).json({
-                            msg: "User does not exist!"
-                        });
-                    } else {
-                        Giftcard.findOne({
-                            toId: accountId,
-                            _id: req.body.giftcardId
-                        }).exec(function(err, giftcard) {
-                            if (err) {
-                                res.status(500).json({
-                                    msg: "Couldn't search the database for giftcard!"
-                                });
-                            } else if (!giftcard) {
-                                res.status(404).json({
-                                    msg: "No giftard with that ID!"
-                                });
-                            } else {
-                                shortURLService.create(process.argv[2] + "/#/giftcards/" + req.body.giftcardId + "?token=" + req.body.sessionToken, function(url) {
-                                    var messagePlain = "Hello " + user.name + ", Here is a link for the giftcard you saved: " + url + " Thanks, The Localight Team";
-                                    var messageHTML = "Hello " + user.name + ",<br /><br />Here is a link for the giftcard you saved:<br /><a href='" + url + "'>" + url + "</a><br /><br />Thanks!<br />The Localight Team";
+    SessionService.validateSession(req.body.sessionToken, "user", function(accountId) {
+        User.findOne({
+                _id: accountId
+            })
+            .select('name email phone created updated')
+            .exec(function(err, user) {
+                if (err) {
+                    res.status(500).json({
+                        msg: "Couldn't search the database for user!"
+                    });
+                } else if (!user) {
+                    res.status(404).json({
+                        msg: "User does not exist!"
+                    });
+                } else {
+                    Giftcard.findOne({
+                        toId: accountId,
+                        _id: req.body.giftcardId
+                    }).exec(function(err, giftcard) {
+                        if (err) {
+                            res.status(500).json({
+                                msg: "Couldn't search the database for giftcard!"
+                            });
+                        } else if (!giftcard) {
+                            res.status(404).json({
+                                msg: "No giftard with that ID!"
+                            });
+                        } else {
+                            shortURLService.create(process.argv[2] + "/#/giftcards/" + req.body.giftcardId + "?token=" + req.body.sessionToken, function(url) {
+                                var messagePlain = "Hello " + user.name + ", Here is a link for the giftcard you saved: " + url + " Thanks, The Localight Team";
+                                var messageHTML = "Hello " + user.name + ",<br /><br />Here is a link for the giftcard you saved:<br /><a href='" + url + "'>" + url + "</a><br /><br />Thanks!<br />The Localight Team";
 
-                                    var mail = mailcomposer({
-                                        from: config.mailgun.alias,
+                                var mail = mailcomposer({
+                                    from: config.mailgun.alias,
+                                    to: req.body.email,
+                                    subject: 'Your Saved Giftcard Link for LBGift',
+                                    body: messagePlain,
+                                    html: messageHTML
+                                });
+
+                                mail.build(function(mailBuildError, message) {
+
+                                    var dataToSend = {
                                         to: req.body.email,
-                                        subject: 'Your Saved Giftcard Link for LBGift',
-                                        body: messagePlain,
-                                        html: messageHTML
-                                    });
+                                        message: message.toString('ascii')
+                                    };
 
-                                    mail.build(function(mailBuildError, message) {
-
-                                        var dataToSend = {
-                                            to: req.body.email,
-                                            message: message.toString('ascii')
-                                        };
-
-                                        mailgun.messages().sendMime(dataToSend, function (sendError, body) {
-                                            if (sendError) {
-                                                console.log(sendError);
-                                                return;
-                                            }
-                                        });
-                                    });
-
-                                    res.status(200).json({
-                                        msg: "Email was sent!"
+                                    mailgun.messages().sendMime(dataToSend, function (sendError, body) {
+                                        if (sendError) {
+                                            console.log(sendError);
+                                            return;
+                                        }
                                     });
                                 });
-                            }
-                        });
-                    }
-                });
-        }
+
+                                res.status(200).json({
+                                    msg: "Email was sent!"
+                                });
+                            });
+                        }
+                    });
+                }
+            });
+    }, function(err){
+        res.status(err.status).json(err);
     });
 });
 
