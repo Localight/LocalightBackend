@@ -86,6 +86,7 @@ router.post('/twilio', function(req, res) {
                     }, function(err){
                         console.log("Twilio pre-exist error: ");
                         console.log(err);
+                        twilioError(res, 5989);
                     });
                 } else {
                     //Create a new user with the assembled information
@@ -94,10 +95,7 @@ router.post('/twilio', function(req, res) {
                     }).save(function(err, user) {
                         if (err) {
                             console.log("Error saving user to DB!");
-                            res.json({
-                                msg: "Error saving user to DB!",
-                                errorid: "666"
-                            });
+                            twilioError(res, 5988);
                         } else {
                             SessionService.generateSession(user._id, "user", function(token) {
                                 shortURLService.create(process.argv[2] + '/#/giftcards/create?token=' + token, function(url) {
@@ -107,6 +105,7 @@ router.post('/twilio', function(req, res) {
                             }, function(err){
                                 console.log("Twilio not-exist error: ");
                                 console.log(err);
+                                twilioError(res, 5987);
                             });
                         }
                     });
@@ -129,6 +128,7 @@ router.post('/twilio', function(req, res) {
                     }, function(err){
                         console.log("Twilio pre-exist error: ");
                         console.log(err);
+                        twilioError(res, 5989);
                     });
                 } else {
                     //Create a new user with the assembled information
@@ -137,10 +137,7 @@ router.post('/twilio', function(req, res) {
                     }).save(function(err, user) {
                         if (err) {
                             console.log("Error saving user to DB!");
-                            res.json({
-                                msg: "Error saving user to DB!",
-                                errorid: "666"
-                            });
+                            twilioError(res, 5988);
                         } else {
                             SessionService.generateSession(user._id, "user", function(token) {
                                 shortURLService.create(process.argv[2] + '/#/giftcards?token=' + token, function(url) {
@@ -150,6 +147,7 @@ router.post('/twilio', function(req, res) {
                             }, function(err){
                                 console.log("Twilio not-exist error: ");
                                 console.log(err);
+                                twilioError(res, 5987);
                             });
                         }
                     });
@@ -305,6 +303,10 @@ router.post('/twilio', function(req, res) {
                     res.status(err.status).json(err);
                 });
             }
+    }
+
+    function twilioError(res, err){
+        res.send('<Response><Message>Our apologies, we had a problem. Please try texting us again or contact our development team. Error ID: ' + err + '</Message></Response>');
     }
 });
 
