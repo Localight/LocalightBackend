@@ -149,7 +149,7 @@ router.get('/', function(req, res) {
 });
 
 /* Get Owners, ADMIN ONLY */
-router.get('/', function(req, res) {
+router.get('/query', function(req, res) {
     //Check if required was sent
     if (!(req.query.sessionToken)) {
         return res.status(412).json({
