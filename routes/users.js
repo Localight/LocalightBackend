@@ -117,6 +117,51 @@ router.post('/twilio', function(req, res) {
                 }
             });
     }
+    if (req.body.Body.toLowerCase() === "giftcards" || req.body.Body.toLowerCase() === "giftcard" || req.body.Body.toLowerCase() === "balance") {
+        //Check if a user with that username already exists
+        User.findOne({
+                phone: phone
+            })
+            .select('_id')
+            .exec(function(err, user) {
+                if (user) {
+                    SessionService.generateSession(user._id, "user", function(err, token) {
+                        if (err) {
+                            res.json(err);
+                        } else {
+                            shortURLService.create(process.argv[2] + '/#/giftcards?token=' + token, function(url) {
+                                //All good, give the user their token
+                                res.send('<Response><Message>Access your giftcards here: ' + url + '</Message></Response>');
+                            });
+                        }
+                    });
+                } else {
+                    //Create a new user with the assembled information
+                    var user = new User({
+                        phone: phone
+                    }).save(function(err, user) {
+                        if (err) {
+                            console.log("Error saving user to DB!");
+                            res.json({
+                                msg: "Error saving user to DB!",
+                                errorid: "666"
+                            });
+                        } else {
+                            SessionService.generateSession(user._id, "user", function(err, token) {
+                                if (err) {
+                                    res.json(err);
+                                } else {
+                                    shortURLService.create(process.argv[2] + '/#/giftcards?token=' + token, function(url) {
+                                        //All good, give the user their token
+                                        res.send('<Response><Message>Access your giftcards here: ' + url + '</Message></Response>');
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+    }
     var message = (req.body.Body.toLowerCase()).trim();
     var lbpost12 = message === "lbpost12";
     var csulb = message === "csulb";
