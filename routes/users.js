@@ -121,15 +121,14 @@ router.post('/twilio', function(req, res) {
             .select('_id')
             .exec(function(err, user) {
                 if (user) {
-                    SessionService.generateSession(user._id, "user", function(err, token) {
-                        if (err) {
-                            res.json(err);
-                        } else {
-                            shortURLService.create(process.argv[2] + '/#/giftcards?token=' + token, function(url) {
-                                //All good, give the user their token
-                                res.send('<Response><Message>Access your giftcards here: ' + url + '</Message></Response>');
-                            });
-                        }
+                    SessionService.generateSession(user._id, "user", function(token) {
+                        shortURLService.create(process.argv[2] + '/#/giftcards?token=' + token, function(url) {
+                            //All good, give the user their token
+                            res.send('<Response><Message>Access your giftcards and balance here: ' + url + '</Message></Response>');
+                        });
+                    }, function(err){
+                        console.log("Twilio pre-exist error: ");
+                        console.log(err);
                     });
                 } else {
                     //Create a new user with the assembled information
@@ -143,15 +142,14 @@ router.post('/twilio', function(req, res) {
                                 errorid: "666"
                             });
                         } else {
-                            SessionService.generateSession(user._id, "user", function(err, token) {
-                                if (err) {
-                                    res.json(err);
-                                } else {
-                                    shortURLService.create(process.argv[2] + '/#/giftcards?token=' + token, function(url) {
-                                        //All good, give the user their token
-                                        res.send('<Response><Message>Access your giftcards here: ' + url + '</Message></Response>');
-                                    });
-                                }
+                            SessionService.generateSession(user._id, "user", function(token) {
+                                shortURLService.create(process.argv[2] + '/#/giftcards?token=' + token, function(url) {
+                                    //All good, give the user their token
+                                    res.send('<Response><Message>Access your giftcards and balance here: ' + url + '</Message></Response>');
+                                });
+                            }, function(err){
+                                console.log("Twilio not-exist error: ");
+                                console.log(err);
                             });
                         }
                     });
