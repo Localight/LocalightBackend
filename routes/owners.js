@@ -148,6 +148,42 @@ router.get('/', function(req, res) {
 
 });
 
+/* Get Owners, ADMIN ONLY */
+router.get('/', function(req, res) {
+    //Check if required was sent
+    if (!(req.query.sessionToken)) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+
+    SessionService.validateSession(req.query.sessionToken, "admin", function(accountId) {
+        var query = {}
+        if(req.query.unverified)
+            query = {
+                verified: false
+            }
+        Owner.find(query)
+            .select('_id name email code stripeCustomerId created updated verified dob')
+            .exec(function(err, owners) {
+                if (err) {
+                    res.status(500).json({
+                        msg: "Couldn't search the database for owners!"
+                    });
+                } else if (!owners) {
+                    res.status(404).json({
+                        msg: "No owners found!"
+                    });
+                } else {
+                    res.status(200).json(owners);
+                }
+            });
+    }, function(err){
+        res.status(err.status).json(err);
+    });
+
+});
+
 /* Update an Owner */
 router.put('/', function(req, res) {
     //Check if required was sent
