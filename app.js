@@ -38,6 +38,7 @@ if(process.argv[2]){
 //Routes
 var routes = require('./routes/index');
 var users = require('./routes/users');
+var twilio = require('./routes/twilio');
 var owners = require('./routes/owners');
 var admins = require('./routes/admins');
 var locations = require('./routes/locations');
@@ -68,6 +69,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/users', users);
+app.use('/twilio', twilio);
 app.use('/locations', locations);
 app.use('/owners', owners);
 app.use('/admins', admins);
