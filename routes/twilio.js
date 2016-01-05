@@ -12,7 +12,7 @@ var express = require('express'),
     Location = mongoose.model('Location'),
     User = mongoose.model('User');
 
-/* User Join Through Twilio */
+/* Twilio Actions */
 router.post('/', function(req, res) {
     //Check if required was sent
     if (!(req.body.Body &&
@@ -24,7 +24,8 @@ router.post('/', function(req, res) {
 
     //Trim phone number
     var phone = req.body.From.substring(2);
-    if (req.body.Body.toLowerCase() === "gift") {
+    var body = (req.body.Body.toLowerCase()).trim();
+    if (body === "gift") {
         //Check if a user with that username already exists
         User.findOne({
                 phone: phone
@@ -66,7 +67,7 @@ router.post('/', function(req, res) {
                 }
             });
     }
-    if (req.body.Body.toLowerCase() === "giftcards" || req.body.Body.toLowerCase() === "giftcard" || req.body.Body.toLowerCase() === "balance") {
+    if (body === "giftcards" || body === "giftcard" || body === "balance") {
         //Check if a user with that username already exists
         User.findOne({
                 phone: phone
@@ -108,10 +109,12 @@ router.post('/', function(req, res) {
                 }
             });
     }
-    var message = (req.body.Body.toLowerCase()).trim();
-    var lbpost12 = message === "lbpost12";
-    var csulb = message === "csulb";
-    var woodenmap17 = message === "woodenmap17" || message === "woodmap17";
+
+    //------ Promo Keywords ------
+
+    var lbpost12 = body === "lbpost12";
+    var csulb = body === "csulb";
+    var woodenmap17 = body === "woodenmap17" || body === "woodmap17";
     var promoSMS = "";
     if (lbpost12 || csulb || woodenmap17) {
         //Check if a user with that username already exists
