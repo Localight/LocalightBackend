@@ -1,2 +1,9 @@
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/localight');
+var config = require('../config/keys.json');
+
+var options = {
+    user: config.db.username,
+    pass: config.db.password
+}
+
+mongoose.connect('mongodb://localhost/localight', options);
