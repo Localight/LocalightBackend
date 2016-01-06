@@ -266,3 +266,5 @@ router.post('/', function(req, res) {
         res.send('<Response><Message>Our apologies, we had a problem. Please try texting us again or contact our development team. Error ID: ' + err + '</Message></Response>');
     }
 });
+
+module.exports = router;
