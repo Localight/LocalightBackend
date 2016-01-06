@@ -18,6 +18,7 @@ var payouts = require('./models/payouts');
 var owners = require('./models/owners');
 var admins = require('./models/admins');
 var sessions = require('./models/sessions');
+var promoCodes = require('./models/promoCodes');
 
 
 if (fs.existsSync("./config/keys.json")) {
