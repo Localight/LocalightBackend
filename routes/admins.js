@@ -219,4 +219,36 @@ router.get('/promocodes/:keyword', function(req, res){
     });
 });
 
+/* Delete a user */
+router.delete('promocodes/:keyword', function(req, res) {
+    //Check if required was sent
+    if (!(req.query.sessionToken)) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+
+    SessionService.validateSession(req.body.sessionToken, "admin", function(accountId) {
+        //Find transaction by id
+        PromoCode.findOneAndRemove({
+            keyword: req.params.keyword
+        })
+        .exec(function(err, promocode) {
+            if(err){
+                res.status(500).json({
+                    msg: "Problem querying promocodes"
+                });
+            } else if(!promocode){
+                res.status(404).send({
+                    msg: "Promocode with that keyword not found"
+                });
+            } else {
+                res.status(200).json(promocode);
+            }
+        });
+    }, function(err){
+        res.status(err.status).json(err);
+    });
+});
+
 module.exports = router;
