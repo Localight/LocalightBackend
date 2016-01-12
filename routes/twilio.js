@@ -34,78 +34,77 @@ router.post('/', function(req, res) {
                     //All good, give the user their token
                     res.send('<Response><Message>Send a new Localight giftcard here: ' + url + '</Message></Response>');
                 });
-            }
-            if (body === "giftcards" || body === "giftcard" || body === "balance") {
+            } else if (body === "giftcards" || body === "giftcard" || body === "balance") {
                 shortURLService.create(process.argv[2] + '/#/giftcards?token=' + token, function(url) {
                     //All good, give the user their token
                     res.send('<Response><Message>Access your giftcards and balance here: ' + url + '</Message></Response>');
                 });
-            }
-
-            //------ Promo Keywords ------
-            //Check if user has entered a promocode
-            PromoCode.findOne({
-                keyword: body
-            }).exec(function(err, promo){
-                if(err){
-                    twilioError(res, 4130);
-                } else if(!promo){
-                    //User has not entered a valid command or promocode
-                    twilioStandard(res);
-                } else {
-                    //Check if user has already used promocode
-                    if(getPromoUsed(user._id, promo.usedBy)){
-                        //User has used promocode previously
+            } else {
+                //------ Promo Keywords ------
+                //Check if user has entered a promocode
+                PromoCode.findOne({
+                    keyword: body
+                }).exec(function(err, promo){
+                    if(err){
+                        twilioError(res, 4130);
+                    } else if(!promo){
+                        //User has not entered a valid command or promocode
                         twilioStandard(res);
                     } else {
-                        //User permitted to use promocode!
-                        //Check/Generate the promotional sender
-                        checkUser(promo.from.phone, promo.from.name, null, function(promoSender){
-                            //Find the promotional location
-                            Location.findOne({
-                                    ownerCode: promo.locationCode
-                                })
-                                .select('_id')
-                                .exec(function(err, location) {
-                                    if (err) {
-                                        twilioError(res, 4410);
-                                    } else if (location) {
-                                        new Giftcard({
-                                            fromId: promoSender._id,
-                                            toId: user._id,
-                                            amount: promo.amount,
-                                            origAmount: promo.amount,
-                                            iconId: 9,
-                                            message: promo.message,
-                                            stripeOrderId: "",
-                                            location: {
-                                                locationId: location._id
-                                            },
-                                            created: Date.now(),
-                                            sendDate: Date.now(),
-                                            sent: true,
-                                            notes: promo.keyword
-                                        }).save(function(err, giftcard) {
-                                            if (err) {
-                                                twilioError(res, 3150);
-                                            } else {
-                                                shortURLService.create(process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token, function(url) {
-                                                    //All good, give the user their card
-                                                    twilioResponse(res, promo.sms + url);
-                                                });
-                                            }
-                                        });
-                                    } else {
-                                        console.log("Couldn't query the database for merchant location: " + promo.locationCode + "! Perhaps it doesn't exist?");
-                                        twilioError(res, 2550);
-                                    }
-                                });
-                        }, function(err){
-                            twilioError(res, 1551);
-                        });
+                        //Check if user has already used promocode
+                        if(getPromoUsed(user._id, promo.usedBy)){
+                            //User has used promocode previously
+                            twilioStandard(res);
+                        } else {
+                            //User permitted to use promocode!
+                            //Check/Generate the promotional sender
+                            checkUser(promo.from.phone, promo.from.name, null, function(promoSender){
+                                //Find the promotional location
+                                Location.findOne({
+                                        ownerCode: promo.locationCode
+                                    })
+                                    .select('_id')
+                                    .exec(function(err, location) {
+                                        if (err) {
+                                            twilioError(res, 4410);
+                                        } else if (location) {
+                                            new Giftcard({
+                                                fromId: promoSender._id,
+                                                toId: user._id,
+                                                amount: promo.amount,
+                                                origAmount: promo.amount,
+                                                iconId: 9,
+                                                message: promo.message,
+                                                stripeOrderId: "",
+                                                location: {
+                                                    locationId: location._id
+                                                },
+                                                created: Date.now(),
+                                                sendDate: Date.now(),
+                                                sent: true,
+                                                notes: promo.keyword
+                                            }).save(function(err, giftcard) {
+                                                if (err) {
+                                                    twilioError(res, 3150);
+                                                } else {
+                                                    shortURLService.create(process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token, function(url) {
+                                                        //All good, give the user their card
+                                                        twilioResponse(res, promo.sms + url);
+                                                    });
+                                                }
+                                            });
+                                        } else {
+                                            console.log("Couldn't query the database for merchant location: " + promo.locationCode + "! Perhaps it doesn't exist?");
+                                            twilioError(res, 2550);
+                                        }
+                                    });
+                            }, function(err){
+                                twilioError(res, 1551);
+                            });
+                        }
                     }
-                }
-            });
+                });
+            }
         }, function(err){
             console.log(err);
             twilioError(res, 5987);
