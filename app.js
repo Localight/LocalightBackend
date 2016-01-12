@@ -7,6 +7,13 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var fs = require('fs');
 
+if (fs.existsSync("./config/keys.json")) {
+    console.log("keys.json found");
+} else {
+    var content = fs.readFileSync('./config/keys-template.json');
+    fs.writeFileSync('./config/keys.json', content);
+}
+
 //Database
 var mongo = require('mongodb');
 var db = require('./models/db');
@@ -19,14 +26,6 @@ var owners = require('./models/owners');
 var admins = require('./models/admins');
 var sessions = require('./models/sessions');
 var promoCodes = require('./models/promoCodes');
-
-
-if (fs.existsSync("./config/keys.json")) {
-    console.log("keys.json found");
-} else {
-    var content = fs.readFileSync('./config/keys-template.json');
-    fs.writeFileSync('./config/keys.json', content);
-}
 
 if(process.argv[2]){
     if(process.argv[2].indexOf("http") <= -1 || process.argv[2].slice(-1) == "/"){
