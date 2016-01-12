@@ -28,58 +28,87 @@ router.post('/', function(req, res) {
     var body = (req.body.Body.toLowerCase()).trim();
 
     checkUser(phone, null, null, function(user){
-
-        if (body === "gift") {
-            SessionService.generateSession(user._id, "user", function(token) {
+        SessionService.generateSession(user._id, "user", function(token) {
+            if (body === "gift") {
                 shortURLService.create(process.argv[2] + '/#/giftcards/create?token=' + token, function(url) {
                     //All good, give the user their token
                     res.send('<Response><Message>Send a new Localight giftcard here: ' + url + '</Message></Response>');
                 });
-            }, function(err){
-                console.log("Twilio not-exist error: ");
-                console.log(err);
-                twilioError(res, 5987);
-            });
-        }
-        if (body === "giftcards" || body === "giftcard" || body === "balance") {
-            SessionService.generateSession(user._id, "user", function(token) {
+            }
+            if (body === "giftcards" || body === "giftcard" || body === "balance") {
                 shortURLService.create(process.argv[2] + '/#/giftcards?token=' + token, function(url) {
                     //All good, give the user their token
                     res.send('<Response><Message>Access your giftcards and balance here: ' + url + '</Message></Response>');
                 });
-            }, function(err){
-                console.log("Twilio pre-exist error: ");
-                console.log(err);
-                twilioError(res, 5989);
-            });
-        }
+            }
 
-        //------ Promo Keywords ------
-
-        var lbpost12 = body === "lbpost12";
-        var csulb = body === "csulb";
-        var woodenmap17 = body === "woodenmap17" || body === "woodmap17";
-        var promoSMS = "";
-
-
-        PromoCode.findOne({
-            keyword: body
-        }).exec(function(err, promo){
-            if(err){
-                twilioError(res, 4130);
-            } else if(!promo){
-                twilioStandard(res);
-            } else {
-                if(getPromoUsed(user._id, promo.usedBy)){
+            //------ Promo Keywords ------
+            //Check if user has entered a promocode
+            PromoCode.findOne({
+                keyword: body
+            }).exec(function(err, promo){
+                if(err){
+                    twilioError(res, 4130);
+                } else if(!promo){
+                    //User has not entered a valid command or promocode
                     twilioStandard(res);
                 } else {
-                    checkUser(promo.from.phone, promo.from.name, null, function(user){
-
-                    }, function(err){
-                        twilioError(res, 2141);
-                    });
+                    //Check if user has already used promocode
+                    if(getPromoUsed(user._id, promo.usedBy)){
+                        //User has used promocode previously
+                        twilioStandard(res);
+                    } else {
+                        //User permitted to use promocode!
+                        //Check/Generate the promotional sender
+                        checkUser(promo.from.phone, promo.from.name, null, function(promoSender){
+                            //Find the promotional location
+                            Location.findOne({
+                                    ownerCode: promo.locationCode
+                                })
+                                .select('_id')
+                                .exec(function(err, location) {
+                                    if (err) {
+                                        twilioError(res, 4410);
+                                    } else if (location) {
+                                        new Giftcard({
+                                            fromId: promoSender._id,
+                                            toId: user._id,
+                                            amount: promo.amount,
+                                            origAmount: promo.amount,
+                                            iconId: 9,
+                                            message: promo.message,
+                                            stripeOrderId: "",
+                                            location: {
+                                                locationId: location._id
+                                            },
+                                            created: Date.now(),
+                                            sendDate: Date.now(),
+                                            sent: true,
+                                            notes: promo.keyword
+                                        }).save(function(err, giftcard) {
+                                            if (err) {
+                                                twilioError(res, 3150);
+                                            } else {
+                                                shortURLService.create(process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token, function(url) {
+                                                    //All good, give the user their card
+                                                    twilioResponse(res, promo.sms + url);
+                                                });
+                                            }
+                                        });
+                                    } else {
+                                        console.log("Couldn't query the database for merchant location: " + promo.locationCode + "! Perhaps it doesn't exist?");
+                                        twilioError(res, 2550);
+                                    }
+                                });
+                        }, function(err){
+                            twilioError(res, 1551);
+                        });
+                    }
                 }
-            }
+            });
+        }, function(err){
+            console.log(err);
+            twilioError(res, 5987);
         });
     }, function(err){
         console.log(err);
@@ -123,94 +152,6 @@ router.post('/', function(req, res) {
                 }
             });
     }
-
-
-
-
-        var promoText = "";
-        var promoAmount = 0;
-        var notes = "";
-        var promoSender = "Localight";
-        var promoPhone = "0000000000";
-        if(lbpost12){
-            promoText = "As a thank you for reading The Post this year, enjoy $10 towards a purchase of $30 or more at MADE in Long Beach, with products from over 100 local makers. #shoplocal";
-            promoSMS = "\uD83C\uDF81 Enjoy this $10 giftcard towards your purchase of $30 or more at MADE in Long Beach: ";
-            promoAmount = 1000;
-            notes = "LBPOST12";
-            promoSender = "Long Beach Post";
-            promoPhone = "0000000001";
-        } else if(csulb){
-            promoText = "A promotional giftcard for CSULB students like you to beta test The Local Giftcard!";
-            promoSMS = "Please enjoy this $5 giftcard for CSULB students like you, valid at MADE in Long Beach: ";
-            promoAmount = 500;
-            notes = "CSULB";
-            promoSender = "The Local Giftcard";
-            promoPhone = "0000000000";
-        } else if(woodenmap17){
-            promoText = "Our aplogizes for not having your wooden map available before the holidays. Please enjoy this $10 giftcard valid at MADE in Long Beach.";
-            promoSMS = "Please enjoy this $10 giftcard as our apology, valid at MADE in Long Beach: ";
-            promoAmount = 1000;
-            notes = "WOODENMAP17";
-            promoSender = "The Local Giftcard";
-            promoPhone = "0000000000";
-        }
-        //Assemble created information
-        var gcDetails = {};
-        gcDetails.toId = user._id;
-        gcDetails.amount = promoAmount;
-        gcDetails.iconId = 9;
-        gcDetails.locationId = 10000;
-        gcDetails.message = promoText;
-        gcDetails.stripeCardToken = "None";
-        gcDetails.notes = notes;
-
-
-
-        function continuePromo(gcDetails, res){
-            SessionService.generateSession(gcDetails.toId, "user", function(token) {
-                Location.findOne({
-                        ownerCode: "10000"
-                    })
-                    .select('_id')
-                    .exec(function(err, location) {
-                        if (err) {
-                            twilioError(res, 4410);
-                        } else if (location) {
-                            new Giftcard({
-                                fromId: gcDetails.fromId,
-                                toId: gcDetails.toId,
-                                amount: gcDetails.amount,
-                                origAmount: gcDetails.amount,
-                                iconId: gcDetails.iconId,
-                                message: gcDetails.message,
-                                stripeOrderId: "",
-                                location: {
-                                    locationId: location._id
-                                },
-                                created: Date.now(),
-                                sendDate: Date.now(),
-                                sent: true,
-                                notes: gcDetails.notes
-                            }).save(function(err, giftcard) {
-                                if (err) {
-                                    twilioError(res, 3150);
-                                } else {
-                                    shortURLService.create(process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token, function(url) {
-                                        //All good, give the user their card
-                                        var promoText = lbpost12 ? "\uD83C\uDF81 Enjoy this $10 giftcard towards your purchase of $30 or more at MADE in Long Beach: " : "Enjoy this $5 giftcard for CSULB students like you, valid at MADE in Long Beach: ";
-                                        twilioResponse(res, promoText + url);
-                                    });
-                                }
-                            });
-                        } else {
-                            console.log("Couldn't query the database for MADE location 10000! Perhaps it doesn't exist?");
-                            twilioError(res, 2550);
-                        }
-                    });
-            }, function(err){
-                res.status(err.status).json(err);
-            });
-        }
 
     function twilioError(res, err){
         res.send('<Response><Message>Our apologies, we had a problem. Please try texting us again or contact our development team. Error ID: ' + err + '</Message></Response>');
