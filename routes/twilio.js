@@ -26,99 +26,42 @@ router.post('/', function(req, res) {
     //Trim phone number
     var phone = req.body.From.substring(2);
     var body = (req.body.Body.toLowerCase()).trim();
-    if (body === "gift") {
-        //Check if a user with that username already exists
-        User.findOne({
-                phone: phone
-            })
-            .select('_id')
-            .exec(function(err, user) {
-                if (user) {
-                    SessionService.generateSession(user._id, "user", function(token) {
-                        shortURLService.create(process.argv[2] + '/#/giftcards/create?token=' + token, function(url) {
-                            //All good, give the user their token
-                            res.send('<Response><Message>Send a new Localight giftcard here: ' + url + '</Message></Response>');
-                        });
-                    }, function(err){
-                        console.log("Twilio pre-exist error: ");
-                        console.log(err);
-                        twilioError(res, 5989);
-                    });
-                } else {
-                    //Create a new user with the assembled information
-                    var user = new User({
-                        phone: phone
-                    }).save(function(err, user) {
-                        if (err) {
-                            console.log("Error saving user to DB!");
-                            twilioError(res, 5988);
-                        } else {
-                            SessionService.generateSession(user._id, "user", function(token) {
-                                shortURLService.create(process.argv[2] + '/#/giftcards/create?token=' + token, function(url) {
-                                    //All good, give the user their token
-                                    res.send('<Response><Message>Send a new Localight giftcard here: ' + url + '</Message></Response>');
-                                });
-                            }, function(err){
-                                console.log("Twilio not-exist error: ");
-                                console.log(err);
-                                twilioError(res, 5987);
-                            });
-                        }
-                    });
-                }
-            });
-    }
-    if (body === "giftcards" || body === "giftcard" || body === "balance") {
-        //Check if a user with that username already exists
-        User.findOne({
-                phone: phone
-            })
-            .select('_id')
-            .exec(function(err, user) {
-                if (user) {
-                    SessionService.generateSession(user._id, "user", function(token) {
-                        shortURLService.create(process.argv[2] + '/#/giftcards?token=' + token, function(url) {
-                            //All good, give the user their token
-                            res.send('<Response><Message>Access your giftcards and balance here: ' + url + '</Message></Response>');
-                        });
-                    }, function(err){
-                        console.log("Twilio pre-exist error: ");
-                        console.log(err);
-                        twilioError(res, 5989);
-                    });
-                } else {
-                    //Create a new user with the assembled information
-                    var user = new User({
-                        phone: phone
-                    }).save(function(err, user) {
-                        if (err) {
-                            console.log("Error saving user to DB!");
-                            twilioError(res, 5988);
-                        } else {
-                            SessionService.generateSession(user._id, "user", function(token) {
-                                shortURLService.create(process.argv[2] + '/#/giftcards?token=' + token, function(url) {
-                                    //All good, give the user their token
-                                    res.send('<Response><Message>Access your giftcards and balance here: ' + url + '</Message></Response>');
-                                });
-                            }, function(err){
-                                console.log("Twilio not-exist error: ");
-                                console.log(err);
-                                twilioError(res, 5987);
-                            });
-                        }
-                    });
-                }
-            });
-    }
-
-    //------ Promo Keywords ------
-
-    var lbpost12 = body === "lbpost12";
-    var csulb = body === "csulb";
-    var woodenmap17 = body === "woodenmap17" || body === "woodmap17";
-    var promoSMS = "";
 
     checkUser(phone, null, null, function(user){
+
+        if (body === "gift") {
+            SessionService.generateSession(user._id, "user", function(token) {
+                shortURLService.create(process.argv[2] + '/#/giftcards/create?token=' + token, function(url) {
+                    //All good, give the user their token
+                    res.send('<Response><Message>Send a new Localight giftcard here: ' + url + '</Message></Response>');
+                });
+            }, function(err){
+                console.log("Twilio not-exist error: ");
+                console.log(err);
+                twilioError(res, 5987);
+            });
+        }
+        if (body === "giftcards" || body === "giftcard" || body === "balance") {
+            SessionService.generateSession(user._id, "user", function(token) {
+                shortURLService.create(process.argv[2] + '/#/giftcards?token=' + token, function(url) {
+                    //All good, give the user their token
+                    res.send('<Response><Message>Access your giftcards and balance here: ' + url + '</Message></Response>');
+                });
+            }, function(err){
+                console.log("Twilio pre-exist error: ");
+                console.log(err);
+                twilioError(res, 5989);
+            });
+        }
+
+        //------ Promo Keywords ------
+
+        var lbpost12 = body === "lbpost12";
+        var csulb = body === "csulb";
+        var woodenmap17 = body === "woodenmap17" || body === "woodmap17";
+        var promoSMS = "";
+
+
         PromoCode.findOne({
             keyword: body
         }).exec(function(err, promo){
@@ -131,7 +74,7 @@ router.post('/', function(req, res) {
                     twilioStandard(res);
                 } else {
                     checkUser(promo.from.phone, promo.from.name, null, function(user){
-                        
+
                     }, function(err){
                         twilioError(res, 2141);
                     });
