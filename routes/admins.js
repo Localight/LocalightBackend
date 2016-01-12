@@ -112,4 +112,51 @@ router.post('/login', function(req, res) {
         });
 });
 
+router.post('/promocode', function(req, res){
+    //Check if required was sent
+    if (!(req.body.sessionToken &&
+            req.body.amount &&
+            req.body.keyword &&
+            req.body.message &&
+            req.body.sms &&
+            req.body.fromName &&
+            req.body.fromPhone &&
+            req.body.locationCode)) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+
+    SessionService.validateSession(req.body.sessionToken, "admin", function(accountId) {
+        //Find transaction by id
+        PromoCode.findOne({
+            keyword: req.body.keyword
+        })
+        .exec(function(err, promocode) {
+            if(promocode){
+                res.status(409).send("Conflict");
+            } else {
+                new PromoCode({
+                    amount: req.body.amount,
+                    keyword: req.body.keyword,
+                    message: req.body.message,
+                    sms: req.body.sms,
+                    from: { name: req.body.fromName, phone: req.body.fromPhone },
+                    locationCode: req.body.locationCode
+                }).save(function(err, promoCode) {
+                    if (err) {
+                        res.status(500).json({
+                            msg: "Error saving promoCode!"
+                        });
+                    } else {
+                        res.status(201).send("Created");
+                    }
+                });
+            }
+        });
+    }, function(err){
+        res.status(err.status).json(err);
+    });
+});
+
 module.exports = router;
