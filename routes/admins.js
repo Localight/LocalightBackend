@@ -112,7 +112,7 @@ router.post('/login', function(req, res) {
         });
 });
 
-router.post('/promocode', function(req, res){
+router.post('/promocodes', function(req, res){
     //Check if required was sent
     if (!(req.body.sessionToken &&
             req.body.amount &&
@@ -159,7 +159,7 @@ router.post('/promocode', function(req, res){
     });
 });
 
-router.get('/promocode/:keyword', function(req, res){
+router.get('/promocodes/:keyword', function(req, res){
     //Check if required was sent
     if (!(req.query.sessionToken)) {
         return res.status(412).json({
