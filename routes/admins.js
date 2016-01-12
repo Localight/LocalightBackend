@@ -171,8 +171,14 @@ router.get('/promocodes', function(req, res){
         //Find transaction by id
         PromoCode.find()
         .exec(function(err, promocodes) {
-            if(!promocode){
-                res.status(404).send("Not found");
+            if(err){
+                res.status(500).json({
+                    msg: "Problem querying promocodes"
+                });
+            } else if(!promocode){
+                res.status(404).json({
+                    msg: "No promocodes found!"
+                });
             } else {
                 res.status(200).json(promocodes);
             }
@@ -196,8 +202,14 @@ router.get('/promocodes/:keyword', function(req, res){
             keyword: req.params.keyword
         })
         .exec(function(err, promocode) {
-            if(!promocode){
-                res.status(404).send("Not found");
+            if(err){
+                res.status(500).json({
+                    msg: "Problem querying promocodes"
+                });
+            } else if(!promocode){
+                res.status(404).send({
+                    msg: "Promocode with that keyword not found"
+                });
             } else {
                 res.status(200).json(promocode);
             }
