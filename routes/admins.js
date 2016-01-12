@@ -159,4 +159,29 @@ router.post('/promocode', function(req, res){
     });
 });
 
+router.get('/promocode/:keyword', function(req, res){
+    //Check if required was sent
+    if (!(req.query.sessionToken)) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+
+    SessionService.validateSession(req.body.sessionToken, "admin", function(accountId) {
+        //Find transaction by id
+        PromoCode.findOne({
+            keyword: req.params.keyword
+        })
+        .exec(function(err, promocode) {
+            if(!promocode){
+                res.status(404).send("Not found");
+            } else {
+                res.status(200).json(promocode);
+            }
+        });
+    }, function(err){
+        res.status(err.status).json(err);
+    });
+});
+
 module.exports = router;
