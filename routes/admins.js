@@ -4,7 +4,8 @@ var express = require('express'),
     crypto = require('crypto'),
     config = require('../config/keys.json'),
     SessionService = require('../services/sessions.js'),
-    Admin = mongoose.model('Admin');
+    Admin = mongoose.model('Admin'),
+    PromoCode = mongoose.model('PromoCode');
 
 /* Admin Join */
 router.post('/join', function(req, res) {
@@ -112,6 +113,151 @@ router.post('/login', function(req, res) {
                 }
             }
         });
+});
+
+router.post('/promocodes', function(req, res){
+    //Check if required was sent
+    if (!(req.body.sessionToken &&
+            req.body.amount &&
+            req.body.keyword &&
+            req.body.message &&
+            req.body.sms &&
+            req.body.fromName &&
+            req.body.fromPhone &&
+            req.body.locationCode)) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+
+    if(req.body.fromPhone.length != 10 || isNaN(req.body.fromPhone) || req.body.locationCode.length != 5 || req.body.amount > 50000 || req.body.amount < 1){
+        return res.status(412).json({
+            msg: "Some fields contained invalid data!"
+        });
+    }
+
+    SessionService.validateSession(req.body.sessionToken, "admin", function(accountId) {
+        //Find transaction by id
+        PromoCode.findOne({
+            keyword: req.body.keyword
+        })
+        .exec(function(err, promocode) {
+            if(promocode){
+                res.status(409).send("Conflict");
+            } else {
+                new PromoCode({
+                    amount: req.body.amount,
+                    keyword: req.body.keyword,
+                    message: req.body.message,
+                    sms: req.body.sms,
+                    from: { name: req.body.fromName, phone: req.body.fromPhone },
+                    locationCode: req.body.locationCode
+                }).save(function(err, promoCode) {
+                    if (err) {
+                        res.status(500).json({
+                            msg: "Error saving promoCode!"
+                        });
+                    } else {
+                        res.status(201).send("Created");
+                    }
+                });
+            }
+        });
+    }, function(err){
+        res.status(err.status).json(err);
+    });
+});
+
+router.get('/promocodes', function(req, res){
+    //Check if required was sent
+    if (!(req.query.sessionToken)) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+
+    SessionService.validateSession(req.query.sessionToken, "admin", function(accountId) {
+        //Find transaction by id
+        PromoCode.find()
+        .exec(function(err, promocodes) {
+            if(err){
+                res.status(500).json({
+                    msg: "Problem querying promocodes"
+                });
+            } else if(!promocodes){
+                res.status(404).json({
+                    msg: "No promocodes found!"
+                });
+            } else {
+                res.status(200).json(promocodes);
+            }
+        });
+    }, function(err){
+        res.status(err.status).json(err);
+    });
+});
+
+router.get('/promocodes/:keyword', function(req, res){
+    //Check if required was sent
+    if (!(req.query.sessionToken)) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+
+    SessionService.validateSession(req.query.sessionToken, "admin", function(accountId) {
+        //Find transaction by id
+        PromoCode.findOne({
+            keyword: req.params.keyword
+        })
+        .exec(function(err, promocode) {
+            if(err){
+                res.status(500).json({
+                    msg: "Problem querying promocodes"
+                });
+            } else if(!promocode){
+                res.status(404).send({
+                    msg: "Promocode with that keyword not found"
+                });
+            } else {
+                res.status(200).json(promocode);
+            }
+        });
+    }, function(err){
+        res.status(err.status).json(err);
+    });
+});
+
+/* Delete a user */
+router.delete('/promocodes/:keyword', function(req, res) {
+    //Check if required was sent
+    if (!(req.query.sessionToken)) {
+        return res.status(412).json({
+            msg: "You must provide all required fields!"
+        });
+    }
+
+    SessionService.validateSession(req.query.sessionToken, "admin", function(accountId) {
+        //Find transaction by id
+        PromoCode.findOneAndRemove({
+            keyword: req.params.keyword
+        })
+        .exec(function(err, promocode) {
+            if(err){
+                res.status(500).json({
+                    msg: "Problem querying promocodes"
+                });
+            } else if(!promocode){
+                res.status(404).send({
+                    msg: "Promocode with that keyword not found"
+                });
+            } else {
+                res.status(200).json(promocode);
+            }
+        });
+    }, function(err){
+        res.status(err.status).json(err);
+    });
 });
 
 module.exports = router;
