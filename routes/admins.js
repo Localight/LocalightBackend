@@ -174,7 +174,7 @@ router.get('/promocodes', function(req, res){
         });
     }
 
-    SessionService.validateSession(req.body.sessionToken, "admin", function(accountId) {
+    SessionService.validateSession(req.query.sessionToken, "admin", function(accountId) {
         //Find transaction by id
         PromoCode.find()
         .exec(function(err, promocodes) {
@@ -203,7 +203,7 @@ router.get('/promocodes/:keyword', function(req, res){
         });
     }
 
-    SessionService.validateSession(req.body.sessionToken, "admin", function(accountId) {
+    SessionService.validateSession(req.query.sessionToken, "admin", function(accountId) {
         //Find transaction by id
         PromoCode.findOne({
             keyword: req.params.keyword
@@ -235,7 +235,7 @@ router.delete('promocodes/:keyword', function(req, res) {
         });
     }
 
-    SessionService.validateSession(req.body.sessionToken, "admin", function(accountId) {
+    SessionService.validateSession(req.query.sessionToken, "admin", function(accountId) {
         //Find transaction by id
         PromoCode.findOneAndRemove({
             keyword: req.params.keyword
