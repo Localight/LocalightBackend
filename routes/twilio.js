@@ -58,8 +58,11 @@ router.post('/', function(req, res) {
                             twilioStandard(res);
                         } else {
                             //User permitted to use promocode! Mark for future
-                            PromoCode.findByIdAndUpdate(promo._id, { $push: { usedBy: user._id }}, function(err){
-                                console.log("Error saving promocode used!");
+                            console.log(user._id);
+                            PromoCode.findByIdAndUpdate(promo._id, { $push: { usedBy: user._id }}, {safe: true, upsert: false}, function(result){
+                                console.log("Success! " + result);
+                            }, function(err){
+                                console.log("Error saving promocode used! " + err);
                             });
                             //Check/Generate the promotional sender
                             checkUser(promo.from.phone, promo.from.name, null, function(promoSender){
@@ -119,8 +122,8 @@ router.post('/', function(req, res) {
     });
 
     function getPromoUsed(userId, usedBy){
-        for(usedById in usedBy){
-            if(usedById == userId){
+        for(var i=0;i<usedBy.length;i++){
+            if(usedBy[i] == userId){
                 return true;
             }
         }
