@@ -24,9 +24,10 @@ router.post('/join', function(req, res) {
             msg: "SK is incorrect!"
         });
     } else {
+        var email = (req.body.email.toLowerCase()).trim();
         //Check if an admin with that email already exists
         Admin.findOne({
-                email: req.body.email
+                email: email
             })
             .select('_id')
             .exec(function(err, admin) {
@@ -42,7 +43,7 @@ router.post('/join', function(req, res) {
                     //Create a new admin with the assembled information
                     new Admin({
                         name: req.body.name,
-                        email: req.body.email,
+                        email: email,
                         password: hash,
                         salt: salt
                     }).save(function(err, admin) {
@@ -76,9 +77,10 @@ router.post('/login', function(req, res) {
             msg: "You must provide all required fields!"
         });
     }
+    var email = (req.body.email.toLowerCase()).trim();
     //Find an admin with the email requested. Select salt and password
     Admin.findOne({
-            email: req.body.email
+            email: email
         })
         .select('password salt _id')
         .exec(function(err, admin) {
