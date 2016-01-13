@@ -182,7 +182,7 @@ router.get('/promocodes', function(req, res){
                 res.status(500).json({
                     msg: "Problem querying promocodes"
                 });
-            } else if(!promocode){
+            } else if(!promocodes){
                 res.status(404).json({
                     msg: "No promocodes found!"
                 });
