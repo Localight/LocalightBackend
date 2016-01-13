@@ -4,7 +4,8 @@ var express = require('express'),
     crypto = require('crypto'),
     config = require('../config/keys.json'),
     SessionService = require('../services/sessions.js'),
-    Admin = mongoose.model('Admin');
+    Admin = mongoose.model('Admin'),
+    PromoCode = mongoose.model('PromoCode');
 
 /* Admin Join */
 router.post('/join', function(req, res) {
@@ -127,7 +128,7 @@ router.post('/promocodes', function(req, res){
         });
     }
 
-    if(req.body.fromPhone.length != 10 || parseInt(req.body.fromPhone) != "NaN" || req.body.locationCode.length != 5 || req.body.amount > 50000 || req.body.amount < 1){
+    if(req.body.fromPhone.length != 10 || parseInt(req.body.fromPhone) == "NaN" || req.body.locationCode.length != 5 || req.body.amount > 50000 || req.body.amount < 1){
         return res.status(412).json({
             msg: "Some fields contained invalid data!"
         });
