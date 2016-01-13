@@ -11,7 +11,8 @@ var express = require('express'),
     Giftcard = mongoose.model('Giftcard'),
     PromoCode = mongoose.model('PromoCode'),
     Location = mongoose.model('Location'),
-    User = mongoose.model('User');
+    User = mongoose.model('User'),
+    PromoCode = mongoose.model('PromoCode');
 
 /* Twilio Actions */
 router.post('/', function(req, res) {
@@ -56,7 +57,10 @@ router.post('/', function(req, res) {
                             //User has used promocode previously
                             twilioStandard(res);
                         } else {
-                            //User permitted to use promocode!
+                            //User permitted to use promocode! Mark for future
+                            PromoCode.findByIdAndUpdate(promo._id, { $push: { usedBy: user._id }}, function(err){
+                                console.log("Error saving promocode used!");
+                            });
                             //Check/Generate the promotional sender
                             checkUser(promo.from.phone, promo.from.name, null, function(promoSender){
                                 //Find the promotional location
