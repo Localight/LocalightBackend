@@ -227,7 +227,7 @@ router.get('/promocodes/:keyword', function(req, res){
 });
 
 /* Delete a user */
-router.delete('promocodes/:keyword', function(req, res) {
+router.delete('/promocodes/:keyword', function(req, res) {
     //Check if required was sent
     if (!(req.query.sessionToken)) {
         return res.status(412).json({
