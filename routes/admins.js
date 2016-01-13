@@ -127,7 +127,7 @@ router.post('/promocodes', function(req, res){
         });
     }
 
-    if(req.body.fromPhone.length != 10 || typeof req.body.fromPhone != "number" || req.body.locationCode.length != 5 || req.body.amount > 50000 || req.body.amount < 1){
+    if(req.body.fromPhone.length != 10 || parseInt(req.body.fromPhone) != "NaN" || req.body.locationCode.length != 5 || req.body.amount > 50000 || req.body.amount < 1){
         return res.status(412).json({
             msg: "Some fields contained invalid data!"
         });
