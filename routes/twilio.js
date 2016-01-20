@@ -41,6 +41,8 @@ router.post('/', function(req, res) {
                     res.send('<Response><Message>Access your giftcards and balance here: ' + url + '</Message></Response>');
                 });
             } else {
+                body = body.replace(/\s/g, '');
+
                 //------ Promo Keywords ------
                 //Check if user has entered a promocode
                 PromoCode.findOne({
