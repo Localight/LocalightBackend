@@ -7,6 +7,13 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var fs = require('fs');
 
+if (fs.existsSync("./config/keys.json")) {
+    console.log("keys.json found");
+} else {
+    var content = fs.readFileSync('./config/keys-template.json');
+    fs.writeFileSync('./config/keys.json', content);
+}
+
 //Database
 var mongo = require('mongodb');
 var db = require('./models/db');
@@ -18,14 +25,7 @@ var payouts = require('./models/payouts');
 var owners = require('./models/owners');
 var admins = require('./models/admins');
 var sessions = require('./models/sessions');
-
-
-if (fs.existsSync("./config/keys.json")) {
-    console.log("keys.json found");
-} else {
-    var content = fs.readFileSync('./config/keys-template.json');
-    fs.writeFileSync('./config/keys.json', content);
-}
+var promoCodes = require('./models/promoCodes');
 
 if(process.argv[2]){
     if(process.argv[2].indexOf("http") <= -1 || process.argv[2].slice(-1) == "/"){
@@ -38,6 +38,7 @@ if(process.argv[2]){
 //Routes
 var routes = require('./routes/index');
 var users = require('./routes/users');
+var twilio = require('./routes/twilio');
 var owners = require('./routes/owners');
 var admins = require('./routes/admins');
 var locations = require('./routes/locations');
@@ -68,6 +69,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/users', users);
+app.use('/twilio', twilio);
 app.use('/locations', locations);
 app.use('/owners', owners);
 app.use('/admins', admins);
