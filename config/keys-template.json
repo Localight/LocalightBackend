@@ -25,5 +25,23 @@
     },
     "admin": {
         "sk": "test"
+    },
+    "environments": {
+        "local": {
+            "frontendURL": "http://127.0.0.1",
+            "twilioAuth": false
+        },
+        "dev": {
+            "frontendURL": "http://dev.localight.com",
+            "twilioAuth": false
+        },
+        "demo": {
+            "frontendURL": "http://dev.localight.com",
+            "twilioAuth": true
+        },
+        "production": {
+            "frontendURL": "https://localight.com",
+            "twilioAuth": true
+        }
     }
 }

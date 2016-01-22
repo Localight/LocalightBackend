@@ -27,12 +27,12 @@ var admins = require('./models/admins');
 var sessions = require('./models/sessions');
 var promoCodes = require('./models/promoCodes');
 
-if(process.argv[2]){
-    if(process.argv[2].indexOf("http") <= -1 || process.argv[2].slice(-1) == "/"){
-        throw new Error("You must pass a valid FRONTEND_BASE parameter!");
-    }
+//Config
+config = require('./config/keys.json');
+if(process.env.ENV && config.environments[process.env.ENV]){
+    console.log(process.env.ENV + " environment has been set.");
 } else {
-    throw new Error("You must pass a FRONTEND_BASE parameter!");
+    throw new Error("You must pass a valid ENV variable! Available: " + Object.keys(config.environments));
 }
 
 //Routes
