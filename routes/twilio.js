@@ -5,6 +5,7 @@ var express = require('express'),
     config = require('../config/keys.json'),
     SessionService = require('../services/sessions.js'),
     shortURLService = require('../services/shortURL.js'),
+    twilio = require('twilio'),
     client = require('twilio')(config.twilio.accountSid, config.twilio.authToken),
     mailgun = require('mailgun-js')({apiKey: config.mailgun.apiKey, domain: config.mailgun.domain}),
     mailcomposer = require('mailcomposer'),
@@ -15,7 +16,7 @@ var express = require('express'),
     PromoCode = mongoose.model('PromoCode');
 
 /* Twilio Actions */
-router.post('/', function(req, res) {
+router.post('/', twilio.webhook(config.twilio.authToken), function(req, res) {
     //Check if required was sent
     if (!(req.body.Body &&
             req.body.From)) {
