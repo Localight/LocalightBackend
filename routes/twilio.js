@@ -3,6 +3,7 @@ var express = require('express'),
     mongoose = require('mongoose'),
     crypto = require('crypto'),
     config = require('../config/keys.json'),
+    env = config.environments[process.env.ENV],
     SessionService = require('../services/sessions.js'),
     shortURLService = require('../services/shortURL.js'),
     twilio = require('twilio'),
@@ -16,7 +17,7 @@ var express = require('express'),
     PromoCode = mongoose.model('PromoCode');
 
 /* Twilio Actions */
-router.post('/', twilio.webhook(config.twilio.authToken), function(req, res) {
+router.post('/', twilio.webhook(config.twilio.authToken, {  validate: env.twilioAuth }), function(req, res) {
     //Check if required was sent
     if (!(req.body.Body &&
             req.body.From)) {
@@ -32,12 +33,12 @@ router.post('/', twilio.webhook(config.twilio.authToken), function(req, res) {
     checkUser(phone, null, null, function(user){
         SessionService.generateSession(user._id, "user", function(token) {
             if (body === "gift") {
-                shortURLService.create(process.argv[2] + '/#/giftcards/create?token=' + token, function(url) {
+                shortURLService.create(env.frontendURL + '/#/giftcards/create?token=' + token, function(url) {
                     //All good, give the user their token
                     res.send('<Response><Message>Send a new Localight giftcard here: ' + url + '</Message></Response>');
                 });
             } else if (body === "giftcards" || body === "giftcard" || body === "balance") {
-                shortURLService.create(process.argv[2] + '/#/giftcards?token=' + token, function(url) {
+                shortURLService.create(env.frontendURL + '/#/giftcards?token=' + token, function(url) {
                     //All good, give the user their token
                     res.send('<Response><Message>Access your giftcards and balance here: ' + url + '</Message></Response>');
                 });
@@ -97,7 +98,7 @@ router.post('/', twilio.webhook(config.twilio.authToken), function(req, res) {
                                                 if (err) {
                                                     twilioError(res, 3150);
                                                 } else {
-                                                    shortURLService.create(process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token, function(url) {
+                                                    shortURLService.create(env.frontendURL + "/#/giftcards/" + giftcard._id + "?token=" + token, function(url) {
                                                         //All good, give the user their card
                                                         twilioResponse(res, promo.sms + url);
                                                     });

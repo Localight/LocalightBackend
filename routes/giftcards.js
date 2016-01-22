@@ -3,6 +3,7 @@ var express = require('express'),
     mongoose = require('mongoose'),
     crypto = require('crypto'),
     config = require('../config/keys.json'),
+    env = config.environments[process.env.ENV],
     stripe = require("stripe")(config.stripe.secretKey),
     client = require('twilio')(config.twilio.accountSid, config.twilio.authToken),
     Giftcard = mongoose.model('Giftcard'),
@@ -184,7 +185,7 @@ router.post('/', function(req, res) {
 
                         if (sent) {
                             SessionService.generateSession(toId, "user", function(token) {
-                                shortURLService.create(process.argv[2] + "/#/giftcards/" + giftcard._id + "?token=" + token, function(url) {
+                                shortURLService.create(env.frontendURL + "/#/giftcards/" + giftcard._id + "?token=" + token, function(url) {
                                     client.messages.create({
                                         body: messages[req.body.iconId] + url,
                                         to: "+1" + req.body.phone,
@@ -380,7 +381,7 @@ router.post('/later', function(req, res) {
                                 msg: "No giftard with that ID!"
                             });
                         } else {
-                            shortURLService.create(process.argv[2] + "/#/giftcards/" + req.body.giftcardId + "?token=" + req.body.sessionToken, function(url) {
+                            shortURLService.create(env.frontendURL + "/#/giftcards/" + req.body.giftcardId + "?token=" + req.body.sessionToken, function(url) {
                                 var messagePlain = "Hello " + user.name + ", Here is a link for the giftcard you saved: " + url + " Thanks, The Localight Team";
                                 var messageHTML = "Hello " + user.name + ",<br /><br />Here is a link for the giftcard you saved:<br /><a href='" + url + "'>" + url + "</a><br /><br />Thanks!<br />The Localight Team";
 

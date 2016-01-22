@@ -3,6 +3,7 @@ var express = require('express'),
     mongoose = require('mongoose'),
     crypto = require('crypto'),
     config = require('../config/keys.json'),
+    env = config.environments[process.env.ENV],
     SessionService = require('../services/sessions.js'),
     shortURLService = require('../services/shortURL.js'),
     client = require('twilio')(config.twilio.accountSid, config.twilio.authToken),
@@ -209,7 +210,7 @@ router.post('/thanks', function(req, res) {
                                     });
                                 } else {
                                     SessionService.generateSession(accountId, "user", function(token) {
-                                        shortURLService.create(process.argv[2] + "/#/giftcards/create?token=" + token, function(url) {
+                                        shortURLService.create(env.frontendURL + "/#/giftcards/create?token=" + token, function(url) {
                                             //Send actual thankyou
                                             client.messages.create({
                                                 body: "A message from " + user.name + ": " + req.body.message,
